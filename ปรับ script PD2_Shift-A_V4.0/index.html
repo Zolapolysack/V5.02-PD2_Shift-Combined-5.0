@@ -1,0 +1,2900 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลรายงานแผนกผลิต 2 - กะ A </title>
+    <script src="https://cdn.tailwindcss.com/3.4.10"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Kanit', sans-serif;
+            font-feature-settings: "liga" 1, "kern" 1;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-size: 16px;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            font-weight: 400;
+            color: #f0f4f8; /* Light color for dark background */
+        }
+        
+        body {
+            background-color: #001827; /* deep navy-teal fallback */
+            background-image: linear-gradient(160deg, #000482d5 0%, #053f57 45%, #062c65 100%);
+            min-height: 100vh;
+            font-feature-settings: "liga" 1;
+            text-rendering: optimizeLegibility;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-glow, .button-glow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-glow:hover, .button-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-glow:hover::before {
+            left: 100%;
+        }
+        
+
+        
+        .btn-green { 
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border: 2px solid #15803d;
+        }
+        .btn-green:hover { 
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            box-shadow: 0 0 30px rgba(22, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+        }
+        
+        .btn-orange { 
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            border: 2px solid #c2410c;
+        }
+        .btn-orange:hover { 
+            background: linear-gradient(135deg, #c2410c, #ea580c);
+            box-shadow: 0 0 30px rgba(234, 88, 12, 0.6), 0 0 60px rgba(249, 115, 22, 0.3);
+            border-color: #f97316;
+        }
+        
+        .btn-blue { 
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border: 2px solid #1d4ed8;
+        }
+        .btn-blue:hover { 
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+        
+        .btn-red { 
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            border: 2px solid #b91c1c;
+        }
+        .btn-red:hover { 
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.6), 0 0 60px rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+        }
+        
+        .btn-purple { 
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            border: 2px solid #6d28d9;
+        }
+        .btn-purple:hover { 
+            background: linear-gradient(135deg, #6d28d9, #7c3aed);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.6), 0 0 60px rgba(139, 92, 246, 0.3);
+            border-color: #8b5cf6;
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            font-size: 15px !important;
+            font-weight: 400 !important;
+            color: #04121a !important; /* stronger, high-contrast text */
+            letter-spacing: 0.01em;
+            line-height: 1.4;
+            border-width: 1px;
+            background: #ffffff !important;
+            border-color: #d1d5db !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+            border-color: #3b82f6;
+            outline: none;
+            background: #ffffff !important;
+            color: #04121a !important;
+        }
+
+        .readonly-field {
+            background: #d1d5db !important;
+            color: #04121a !important; /* ensure readonly text is high contrast */
+            cursor: not-allowed;
+            font-weight: 300 !important;
+            font-size: 15px !important;
+            border-color: #9ca3af !important;
+            letter-spacing: 0.01em;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Placeholder color for clarity */
+        .input-field::placeholder { color: #6b7280; opacity: 1; }
+    /* Wage (Shift-A) numeric style */
+    .wage-a-input.valid { color: #0026ae !important; font-weight: 700 !important; }
+
+        /* Instant suggestion panel styling */
+        .instant-suggestions, .instant-suggest {
+            color: #04121a;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-shadow: 0 8px 20px rgba(2,6,23,0.12);
+            z-index: 10000;
+        }
+        .instant-suggestions div, .instant-suggest div { color: #04121a; }
+        .instant-suggestions div:hover, .instant-suggest div:hover { background: #eff6ff; }
+        
+        .data-set {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-step {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background: #16a34a;
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: #059669;
+            color: white;
+        }
+        
+        .notification {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .input-field {
+                font-size: 16px !important;
+            }
+            
+            .btn-glow, .button-glow {
+                min-height: 44px;
+            }
+        }
+    </style>
+    <!-- LEGACY / OLD MOBILE SUPPORT START -->
+    <style>
+        /* Fallback พื้นหลัง (ถ้า gradient ไม่ทำงานจะยังเห็นสีหลัก) */
+        body { background-color:#1e40af; }
+        /* เมื่อไม่รองรับ backdrop-filter ให้ใช้พื้นหลังขาวโปร่งหนาแทน เพื่อให้อ่านง่ายบน iOS <12 / Android เก่า */
+        .no-backdrop .glass,
+        .no-backdrop .glass-strong,
+        .no-backdrop .glass-light { 
+            backdrop-filter:none !important; 
+            -webkit-backdrop-filter:none !important; 
+            background:rgba(255,255,255,0.88) !important; 
+            border-color:rgba(0,0,0,0.08) !important;
+        }
+        /* ลดเอฟเฟกต์เงา/อนิเมชัน หากเครื่องเก่า (เราจะเติมคลาส reduced-effects จาก JS) */
+        .reduced-effects * { transition:none !important; animation:none !important; }
+        .reduced-effects .btn-glow:hover, .reduced-effects .button-glow:hover { transform:none !important; box-shadow:none !important; }
+    </style>
+    <script>
+        /* Feature / capability detection + polyfills loader สำหรับเบราว์เซอร์เก่า */
+        (function(){
+            var docEl = document.documentElement;
+            try {
+                if(!(window.CSS && CSS.supports && CSS.supports('backdrop-filter: blur(4px)'))){
+                    docEl.classList.add('no-backdrop');
+                }
+            } catch(e){ docEl.classList.add('no-backdrop'); }
+
+            // ประเมินประสิทธิภาพคร่าว ๆ (อุปกรณ์เก่า: หน่วยความจำต่ำ / CPU ช้า -> ปิดอนิเมชันหนัก ๆ)
+            if(navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4){
+                docEl.classList.add('reduced-effects');
+            }
+
+            // Polyfill: Promise
+            if(typeof Promise === 'undefined'){
+                var p = document.createElement('script');
+                p.src = 'https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js';
+                document.head.appendChild(p);
+            }
+            // Polyfill: fetch
+            if(typeof fetch === 'undefined'){
+                var f = document.createElement('script');
+                f.src = 'https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.20/dist/fetch.umd.min.js';
+                document.head.appendChild(f);
+            }
+            // Polyfill: IntersectionObserver (ใช้บางกรณีหากมีการเพิ่มภายหลัง)
+            if(!('IntersectionObserver' in window)){
+                var io = document.createElement('script');
+                io.src = 'https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.js';
+                document.head.appendChild(io);
+            }
+            // NodeList.forEach บน IE / เก่ามาก (กันไว้เผื่อเปิดผ่าน WebView เก่า)
+            if(window.NodeList && !NodeList.prototype.forEach){
+                NodeList.prototype.forEach = Array.prototype.forEach;
+            }
+            // classList บาง WebView เก่าขาด (ตรวจผิวเผิน)
+            if(!('classList' in document.createElement('_'))){
+                try { (document.createElement('script').src='https://unpkg.com/classlist-polyfill@1.2.0/src/index.js'); } catch(e){}
+            }
+        })();
+    </script>
+    <!-- LEGACY / OLD MOBILE SUPPORT END -->
+</head>
+<body class="min-h-screen">
+    <!-- Header Section -->
+    <div class="glass-strong rounded-lg mx-4 mt-4 p-6 mb-6">
+        <div class="text-center mb-4">
+            <h1 class="text-3xl font-medium text-gray-800 tracking-normal leading-relaxed">ระบบบันทึกข้อมูลรายงานแผนกผลิต 2</h1>
+            <div class="w-16 h-0.5 bg-gray-400 mx-auto mt-3"></div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="flex items-center justify-between bg-white bg-opacity-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="statusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle fill="url(#statusGrad)" cx="12" cy="12" r="10"/>
+                    <path stroke="white" stroke-width="2" d="m9 12 2 2 4-4"/>
+                </svg>
+                <span class="font-normal text-gray-700 text-base">สถานะ: พร้อมใช้งาน</span>
+            </div>
+            
+            <div class="flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="shiftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle fill="url(#shiftGrad)" cx="12" cy="12" r="5"/>
+                    <line stroke="white" stroke-width="2" x1="12" y1="1" x2="12" y2="3"/>
+                    <line stroke="white" stroke-width="2" x1="12" y1="21" x2="12" y2="23"/>
+                    <line stroke="white" stroke-width="2" x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line stroke="white" stroke-width="2" x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line stroke="white" stroke-width="2" x1="1" y1="12" x2="3" y2="12"/>
+                    <line stroke="white" stroke-width="2" x1="21" y1="12" x2="23" y2="12"/>
+                    <line stroke="white" stroke-width="2" x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line stroke="white" stroke-width="2" x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <span class="font-normal text-gray-700 text-base">สำหรับ กะ A (08:00-20:00 น.)</span>
+            </div>
+            
+            <div class="flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="timeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle fill="url(#timeGrad)" cx="12" cy="12" r="10"/>
+                    <polyline stroke="white" stroke-width="2" points="12,6 12,12 16,14"/>
+                </svg>
+                <span class="font-normal text-gray-700 text-base" id="currentTime"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="glass rounded-lg mx-4 mb-6 p-6">
+        <div class="flex justify-center">
+            <div class="flex items-center bg-white bg-opacity-50 rounded-lg px-4 py-2">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#dataGrad)" x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line stroke="white" stroke-width="2" x1="16" y1="2" x2="16" y2="6"/>
+                    <line stroke="white" stroke-width="2" x1="8" y1="2" x2="8" y2="6"/>
+                    <line stroke="white" stroke-width="2" x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span class="font-normal text-gray-700 text-base" style="color:#000000;">จำนวนชุดข้อมูล: <span id="dataSetCount" class="text-blue-600 font-medium" style="color:#ff0000;">1</span>/100</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Entry Container -->
+    <div id="dataContainer" class="mx-4 space-y-6">
+        <!-- Data sets will be generated here -->
+    </div>
+
+    <!-- Quick Actions Box -->
+    <div class="glass rounded-lg mx-4 my-6 p-6">
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                </svg>
+                เพิ่มชุดข้อมูลใหม่
+            </button>
+            
+            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+                คัดลอกโดยเพิ่มชุดข้อมูล
+            </button>
+            
+            <button onclick="clearLocalStorage()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                ล้างข้อมูลชั่วคราว
+            </button>
+
+            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 5V2L8 6l4 4V7c2.757 0 5 2.243 5 5a5 5 0 0 1-5 5c-2.05 0-3.813-1.232-4.58-3H5.35c.84 3.45 3.95 6 7.65 6 4.418 0 8-3.582 8-8s-3.582-8-8-8z"/>
+                </svg>
+                รีเซ็ตการบันทึกข้อมูล
+            </button>
+            
+            <button onclick="showSystemHealth()" class="btn-glow bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                ตรวจสอบระบบ
+            </button>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="glass rounded-lg mx-4 my-6 p-6">
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                </svg>
+                บันทึกชั่วคราว
+            </button>
+            
+            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                บันทึกข้อมูลทั้งหมด
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Machine Modal -->
+    <div id="machineModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="machineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5b21b6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#machineGrad)" x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line stroke="white" stroke-width="2" x1="8" y1="21" x2="16" y2="21"/>
+                        <line stroke="white" stroke-width="2" x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    เพิ่มเครื่องทอใหม่
+                </h3>
+                <button onclick="closeModal('machine')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newMachine" placeholder="เช่น CL96" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('machine')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('machine')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div id="employeeModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="employeeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#employeeGrad)" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    เพิ่มพนักงานใหม่
+                </h3>
+                <button onclick="closeModal('employee')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newEmployeeId" placeholder="รหัสพนักงาน เช่น ZP99999" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-3">
+            <input type="text" id="newEmployeeName" placeholder="ชื่อ-นามสกุล" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('employee')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('employee')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fabric Size Modal -->
+    <div id="fabricModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="fabricGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#b91c1c;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#fabricGrad)" x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <path stroke="white" stroke-width="2" d="m9 9 3 3-3 3m6-6h-6"/>
+                    </svg>
+                    เพิ่มขนาดหน้าผ้าใหม่
+                </h3>
+                <button onclick="closeModal('fabric')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newFabricSize" placeholder="เช่น 2025800SMN" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('fabric')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('fabric')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center">
+        <div class="glass-strong rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">กำลังบันทึกข้อมูล</h3>
+                <p class="text-gray-600 mb-4" id="loadingStatus">กำลังเตรียมข้อมูล...</p>
+                
+                <!-- Progress Steps -->
+                <div class="flex justify-between mb-4">
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step1">1</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step2">2</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step3">3</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step4">4</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step5">5</div>
+                </div>
+                
+                <div class="text-sm text-gray-500">
+                    <div>1. เตรียมข้อมูล</div>
+                    <div>2. ตรวจสอบข้อมูล</div>
+                    <div>3. เชื่อมต่อเซิร์ฟเวอร์</div>
+                    <div>4. ส่งข้อมูล</div>
+                    <div>5. ยืนยันการบันทึก</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Recovery Modal -->
+    <div id="recoveryModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="recoveryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#recoveryGrad)" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800">พบข้อมูลค้างส่ง</h3>
+            </div>
+            <p class="text-gray-600 mb-6">พบข้อมูลที่ยังไม่ได้ส่งจากครั้งก่อน คุณต้องการลองส่งใหม่หรือไม่?</p>
+            <div class="flex gap-3">
+                <button onclick="retryPendingSubmission()" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    ลองส่งใหม่
+                </button>
+                <button onclick="discardPendingSubmission()" class="btn-glow btn-red text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debug badge overlay (non-invasive) — disabled by default
+        var PD2_DEBUG_ON = false;
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            PD2_DEBUG_ON = (qs.has('pd2debug') || qs.get('debug') === '1' || localStorage.getItem('PD2_DEBUG') === '1');
+        } catch(_){}
+        function PD2DebugBadge(msg) {
+            if (!PD2_DEBUG_ON) return;
+            try {
+                let badge = document.getElementById('pd2-debug-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'pd2-debug-badge';
+                    Object.assign(badge.style, {
+                        position: 'fixed', top: '8px', right: '8px', zIndex: 99999,
+                        background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '12px',
+                        padding: '6px 10px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                        pointerEvents: 'none'
+                    });
+                    document.body.appendChild(badge);
+                }
+                badge.textContent = String(msg || '');
+                badge.style.display = 'block';
+                setTimeout(() => { if (badge) badge.style.display = 'none'; }, 2200);
+            } catch(_){}
+        }
+
+        // Master Data Arrays
+        const machines = [
+            "CL1","CL2","CL3","CL4","CL5","CL6","CL7","CL8","CL9","CL12","CL13","CL14",
+            "CL15","CL16","CL17","CL19","CL25","CL26","CL27","CL28","CL29","CL30","CL31",
+            "CL32","CL33","CL44","CL45","CL46","CL47","CL48","CL49","CL50","CL51","CL52",
+            "CL53","CL54","CL55","CL56","CL57","CL58","CL59","CL60","CL61","CL62","CL63",
+            "CL64","CL65","CL66","CL67","CL68","CL69","CL70","CL71","CL72","CL73","CL74",
+            "CL75","CL76","CL77","CL78","CL79","CL80","CL81","CL82","CL83","CL84","CL85",
+            "CL86","CL87","CL88","CL89","CL90","CL91","CL92","CL93","CL94","CL95",
+            "CL34","CL35","CL36"
+        ];
+
+        // Combined machine list (ตามที่ผู้ใช้ร้องขอ) — ไม่กระทบการทำงานเดิม
+        const combinedMachines = [
+            "CL1 ตัดม้วนที่ครั้ง 2", "CL2 ตัดม้วนที่ครั้ง 2", "CL3 ตัดม้วนที่ครั้ง 2", "CL4 ตัดม้วนที่ครั้ง 2",
+            "CL5 ตัดม้วนที่ครั้ง 2", "CL6 ตัดม้วนที่ครั้ง 2", "CL7 ตัดม้วนที่ครั้ง 2", "CL8 ตัดม้วนที่ครั้ง 2",
+            "CL9 ตัดม้วนที่ครั้ง 2", "CL12 ตัดม้วนที่ครั้ง 2", "CL13 ตัดม้วนที่ครั้ง 2", "CL14 ตัดม้วนที่ครั้ง 2",
+            "CL15 ตัดม้วนที่ครั้ง 2", "CL16 ตัดม้วนที่ครั้ง 2", "CL17 ตัดม้วนที่ครั้ง 2", "CL19 ตัดม้วนที่ครั้ง 2",
+            "CL25 ตัดม้วนที่ครั้ง 2", "CL26 ตัดม้วนที่ครั้ง 2", "CL27 ตัดม้วนที่ครั้ง 2", "CL28 ตัดม้วนที่ครั้ง 2",
+            "CL29 ตัดม้วนที่ครั้ง 2", "CL30 ตัดม้วนที่ครั้ง 2", "CL31 ตัดม้วนที่ครั้ง 2", "CL32 ตัดม้วนที่ครั้ง 2",
+            "CL33 ตัดม้วนที่ครั้ง 2", "CL44 ตัดม้วนที่ครั้ง 2", "CL45 ตัดม้วนที่ครั้ง 2", "CL46 ตัดม้วนที่ครั้ง 2",
+            "CL47 ตัดม้วนที่ครั้ง 2", "CL48 ตัดม้วนที่ครั้ง 2", "CL49 ตัดม้วนที่ครั้ง 2", "CL50 ตัดม้วนที่ครั้ง 2",
+            "CL51 ตัดม้วนที่ครั้ง 2", "CL52 ตัดม้วนที่ครั้ง 2", "CL53 ตัดม้วนที่ครั้ง 2", "CL54 ตัดม้วนที่ครั้ง 2",
+            "CL55 ตัดม้วนที่ครั้ง 2", "CL56 ตัดม้วนที่ครั้ง 2", "CL57 ตัดม้วนที่ครั้ง 2", "CL58 ตัดม้วนที่ครั้ง 2",
+            "CL59 ตัดม้วนที่ครั้ง 2", "CL60 ตัดม้วนที่ครั้ง 2", "CL61 ตัดม้วนที่ครั้ง 2", "CL62 ตัดม้วนที่ครั้ง 2",
+            "CL63 ตัดม้วนที่ครั้ง 2", "CL64 ตัดม้วนที่ครั้ง 2", "CL65 ตัดม้วนที่ครั้ง 2", "CL66 ตัดม้วนที่ครั้ง 2",
+            "CL67 ตัดม้วนที่ครั้ง 2", "CL68 ตัดม้วนที่ครั้ง 2", "CL69 ตัดม้วนที่ครั้ง 2", "CL70 ตัดม้วนที่ครั้ง 2",
+            "CL71 ตัดม้วนที่ครั้ง 2", "CL72 ตัดม้วนที่ครั้ง 2", "CL73 ตัดม้วนที่ครั้ง 2", "CL74 ตัดม้วนที่ครั้ง 2",
+            "CL75 ตัดม้วนที่ครั้ง 2", "CL76 ตัดม้วนที่ครั้ง 2", "CL77 ตัดม้วนที่ครั้ง 2", "CL78 ตัดม้วนที่ครั้ง 2",
+            "CL79 ตัดม้วนที่ครั้ง 2", "CL80 ตัดม้วนที่ครั้ง 2", "CL81 ตัดม้วนที่ครั้ง 2", "CL82 ตัดม้วนที่ครั้ง 2",
+            "CL83 ตัดม้วนที่ครั้ง 2", "CL84 ตัดม้วนที่ครั้ง 2", "CL85 ตัดม้วนที่ครั้ง 2", "CL86 ตัดม้วนที่ครั้ง 2",
+            "CL87 ตัดม้วนที่ครั้ง 2", "CL88 ตัดม้วนที่ครั้ง 2", "CL89 ตัดม้วนที่ครั้ง 2", "CL90 ตัดม้วนที่ครั้ง 2",
+            "CL91 ตัดม้วนที่ครั้ง 2", "CL92 ตัดม้วนที่ครั้ง 2", "CL93 ตัดม้วนที่ครั้ง 2", "CL94 ตัดม้วนที่ครั้ง 2",
+            "CL95 ตัดม้วนที่ครั้ง 2", "CL34 ตัดม้วนที่ครั้ง 2", "CL35 ตัดม้วนที่ครั้ง 2", "CL36 ตัดม้วนที่ครั้ง 2",
+            "CL1 ตัดม้วนที่ครั้ง 3", "CL2 ตัดม้วนที่ครั้ง 3", "CL3 ตัดม้วนที่ครั้ง 3", "CL4 ตัดม้วนที่ครั้ง 3",
+            "CL5 ตัดม้วนที่ครั้ง 3", "CL6 ตัดม้วนที่ครั้ง 3", "CL7 ตัดม้วนที่ครั้ง 3", "CL8 ตัดม้วนที่ครั้ง 3",
+            "CL9 ตัดม้วนที่ครั้ง 3", "CL12 ตัดม้วนที่ครั้ง 3", "CL13 ตัดม้วนที่ครั้ง 3", "CL14 ตัดม้วนที่ครั้ง 3",
+            "CL15 ตัดม้วนที่ครั้ง 3", "CL16 ตัดม้วนที่ครั้ง 3", "CL17 ตัดม้วนที่ครั้ง 3", "CL19 ตัดม้วนที่ครั้ง 3",
+            "CL25 ตัดม้วนที่ครั้ง 3", "CL26 ตัดม้วนที่ครั้ง 3", "CL27 ตัดม้วนที่ครั้ง 3", "CL28 ตัดม้วนที่ครั้ง 3",
+            "CL29 ตัดม้วนที่ครั้ง 3", "CL30 ตัดม้วนที่ครั้ง 3", "CL31 ตัดม้วนที่ครั้ง 3", "CL32 ตัดม้วนที่ครั้ง 3",
+            "CL33 ตัดม้วนที่ครั้ง 3", "CL44 ตัดม้วนที่ครั้ง 3", "CL45 ตัดม้วนที่ครั้ง 3", "CL46 ตัดม้วนที่ครั้ง 3",
+            "CL47 ตัดม้วนที่ครั้ง 3", "CL48 ตัดม้วนที่ครั้ง 3", "CL49 ตัดม้วนที่ครั้ง 3", "CL50 ตัดม้วนที่ครั้ง 3",
+            "CL51 ตัดม้วนที่ครั้ง 3", "CL52 ตัดม้วนที่ครั้ง 3", "CL53 ตัดม้วนที่ครั้ง 3", "CL54 ตัดม้วนที่ครั้ง 3",
+            "CL55 ตัดม้วนที่ครั้ง 3", "CL56 ตัดม้วนที่ครั้ง 3", "CL57 ตัดม้วนที่ครั้ง 3", "CL58 ตัดม้วนที่ครั้ง 3",
+            "CL59 ตัดม้วนที่ครั้ง 3", "CL60 ตัดม้วนที่ครั้ง 3", "CL61 ตัดม้วนที่ครั้ง 3", "CL62 ตัดม้วนที่ครั้ง 3",
+            "CL63 ตัดม้วนที่ครั้ง 3", "CL64 ตัดม้วนที่ครั้ง 3", "CL65 ตัดม้วนที่ครั้ง 3", "CL66 ตัดม้วนที่ครั้ง 3",
+            "CL67 ตัดม้วนที่ครั้ง 3", "CL68 ตัดม้วนที่ครั้ง 3", "CL69 ตัดม้วนที่ครั้ง 3", "CL70 ตัดม้วนที่ครั้ง 3",
+            "CL71 ตัดม้วนที่ครั้ง 3", "CL72 ตัดม้วนที่ครั้ง 3", "CL73 ตัดม้วนที่ครั้ง 3", "CL74 ตัดม้วนที่ครั้ง 3",
+            "CL75 ตัดม้วนที่ครั้ง 3", "CL76 ตัดม้วนที่ครั้ง 3", "CL77 ตัดม้วนที่ครั้ง 3", "CL78 ตัดม้วนที่ครั้ง 3",
+            "CL79 ตัดม้วนที่ครั้ง 3", "CL80 ตัดม้วนที่ครั้ง 3", "CL81 ตัดม้วนที่ครั้ง 3", "CL82 ตัดม้วนที่ครั้ง 3",
+            "CL83 ตัดม้วนที่ครั้ง 3", "CL84 ตัดม้วนที่ครั้ง 3", "CL85 ตัดม้วนที่ครั้ง 3", "CL86 ตัดม้วนที่ครั้ง 3",
+            "CL87 ตัดม้วนที่ครั้ง 3", "CL88 ตัดม้วนที่ครั้ง 3", "CL89 ตัดม้วนที่ครั้ง 3", "CL90 ตัดม้วนที่ครั้ง 3",
+            "CL91 ตัดม้วนที่ครั้ง 3", "CL92 ตัดม้วนที่ครั้ง 3", "CL93 ตัดม้วนที่ครั้ง 3", "CL94 ตัดม้วนที่ครั้ง 3",
+            "CL95 ตัดม้วนที่ครั้ง 3", "CL34 ตัดม้วนที่ครั้ง 3", "CL35 ตัดม้วนที่ครั้ง 3", "CL36 ตัดม้วนที่ครั้ง 3"
+        ];
+
+        // รวม combinedMachines เข้าไปใน machines โดยตรง
+        machines.push(...combinedMachines);
+        // เรียงลำดับตามลิสต์ที่กำหนด: กลุ่มปกติ -> "ครั้ง 2" -> "ครั้ง 3" และจัด CL34-36 ไว้ท้ายกลุ่ม
+        const preferredOrderBase = [
+            "CL1","CL2","CL3","CL4","CL5","CL6","CL7","CL8","CL9","CL12","CL13","CL14",
+            "CL15","CL16","CL17","CL19","CL25","CL26","CL27","CL28","CL29","CL30","CL31",
+            "CL32","CL33","CL44","CL45","CL46","CL47","CL48","CL49","CL50","CL51","CL52",
+            "CL53","CL54","CL55","CL56","CL57","CL58","CL59","CL60","CL61","CL62","CL63",
+            "CL64","CL65","CL66","CL67","CL68","CL69","CL70","CL71","CL72","CL73","CL74",
+            "CL75","CL76","CL77","CL78","CL79","CL80","CL81","CL82","CL83","CL84","CL85",
+            "CL86","CL87","CL88","CL89","CL90","CL91","CL92","CL93","CL94","CL95",
+            "CL34","CL35","CL36"
+        ];
+        const orderMap = new Map(preferredOrderBase.map((id, idx) => [parseInt(id.replace(/^CL/i, ''), 10), idx]));
+        const phaseRank = (s) => {
+            const m = s.match(/ครั้ง\s*(\d+)/);
+            const p = m ? parseInt(m[1], 10) : 0;
+            return p === 2 ? 1 : p === 3 ? 2 : 0; // 0 (ปกติ), 1 (ครั้ง 2), 2 (ครั้ง 3)
+        };
+        const machineComparator = (a, b) => {
+            const pa = phaseRank(a);
+            const pb = phaseRank(b);
+            if (pa !== pb) return pa - pb;
+            const nAraw = (a.match(/^CL(\d+)/i) || [])[1];
+            const nBraw = (b.match(/^CL(\d+)/i) || [])[1];
+            const idxA = nAraw ? (orderMap.get(parseInt(nAraw, 10)) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+            const idxB = nBraw ? (orderMap.get(parseInt(nBraw, 10)) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+            if (idxA !== idxB) return idxA - idxB;
+            return a.localeCompare(b, 'th');
+        };
+        machines.sort(machineComparator);
+
+        const employees = [
+            { "id": "ZP91042", "name": "นาย วัน ชัย" },
+            { "id": "ZP91385", "name": "นางสาว รัฐนันท์ นิธากรณ์" },
+            { "id": "ZP92285", "name": "นายตาลซิน ออง" },
+            { "id": "ZP91702", "name": "นาย พิว ไว จอ" },
+            { "id": "ZP92237", "name": "ซอ พู ยา ซา" },
+            { "id": "ZP92286", "name": "นางสาว ซิก เค่น" },
+            { "id": "ZP92250", "name": "ยุน วา ติ" },
+            { "id": "ZP91720", "name": "นางสาว จู จู ซาน" },
+            { "id": "ZP92187", "name": "ติน โม แท็ค" },
+            { "id": "ZP92282", "name": "ปาลามอน" },
+            { "id": "ZP91922", "name": "นาย เพีย โซ อู" },
+            { "id": "ZP92434", "name": "น.ส.ลำไย ใจชื่อ" },
+            { "id": "ZP92471", "name": "นางมอว มอว วิน" },
+            { "id": "ZP91512", "name": "นาง นัน มา เล ยี" },
+            { "id": "ZP92321", "name": "น.ส.มะซูซูเย" },
+            { "id": "ZP92491", "name": "นางมา ทาซิน มน" },
+            { "id": "ZP91680", "name": "นาง ติน ซุย" },
+            { "id": "ZP9499", "name": "นาง จำรัศ พุทธา" },
+            { "id": "ZP91569", "name": "นาย วัชชระ ชะฎาดำ" },
+            { "id": "ZP92350", "name": "นางสาว ซินมาลวิน" },
+            { "id": "ZP91719", "name": "นาย พี พิว ออง" },
+            { "id": "ZP9060", "name": "นางสาว อังคณา บุญธรรม" },
+            { "id": "ZP92495", "name": "นางพรสวรรค์" },
+            { "id": "ZP9174", "name": "นาง รัดดา ศรีทอง" },
+            { "id": "ZP92186", "name": "ซามินอู" },
+            { "id": "ZP92317", "name": "นาย ยาน ลิน ออง" },
+            { "id": "ZP92402", "name": "นาย ลา วิน" },
+            { "id": "ZP91718", "name": "นาย หม่อง ซอ" },
+            { "id": "ZP92425", "name": "น.ส.วิ" },
+            { "id": "ZP92318", "name": "น.ส.คินวิน" },
+            { "id": "ZP91617", "name": "นาง พิไลพรรณ เตโช" },
+            { "id": "ZP92481", "name": "นางสาว ติ่น ซา" },
+            { "id": "ZP92390", "name": "นางสาว เอ วิน" },
+            { "id": "ZP92107", "name": "นาง จี ปิยประภากุล" }
+        ];
+
+        const fabricSizes = [
+            "1425800",
+            "1725800",
+            "1825800SM",
+            "1921720",
+            "1925800",
+            "1925800SM",
+            "2021720UV",
+            "2021850UV",
+            "2025800",
+            "2025800SM",
+            "2025800SMN",
+            "2025850",
+            "2121670SM",
+            "2125650",
+            "2125800",
+            "2325650",
+            "2625650",
+            "262575051",
+            "2625800",
+            "2625850SM",
+            "2825850",
+            "scl052325650",
+            "test2025800",
+            "2321112512551"
+        ];
+
+        // API Configuration - ปรับปรุงให้รองรับการเปลี่ยนแปลง
+        const API_CONFIG = {
+            // Primary endpoint (updated 2025-08-13)
+            endpoint: 'https://script.google.com/macros/s/AKfycbzwXk9eEc2BXuYeQ-9Zdz6nR9gL-dzBIye4uzWRowL-cAppBfSAvexodfMESlfx2FC8/exec',
+            
+            // Backup endpoints (สำหรับกรณี primary ล้มเหลว)
+            backupEndpoints: [
+                'https://script.google.com/macros/s/BACKUP_URL_1/exec',
+                'https://script.google.com/macros/s/BACKUP_URL_2/exec'
+            ],
+            
+            sheetId: '1K9e_VNW34yF_nVFCXW3v6W8v7FAt33Gr9xnuwCHBadc',
+            folderId: '1O07zs3-Vm7W42DvkHg1RU6BKcw60zljV',
+            
+            // Timeout และ retry settings
+            timeout: 30000, // 30 วินาที
+            maxRetries: 5,
+            retryDelay: 2000, // 2 วินาที
+            
+            // Version tracking
+            apiVersion: '1.0',
+            lastUpdated: '2024-12-19'
+        };
+
+        // Global Variables
+        let dataSetCount = 1;
+    let autoSaveInterval;
+    let debounceTimer;
+    // Track the select that triggered ADD_NEW so only it gets the new selection
+    let addNewContext = null;
+        
+        // System Health Monitoring
+        const SYSTEM_HEALTH = {
+            lastSaveTime: null,
+            saveFailureCount: 0,
+            maxFailures: 10,
+            isOnline: navigator.onLine,
+            performanceMetrics: {
+                loadTime: 0,
+                saveTime: 0,
+                errorCount: 0
+            }
+        };
+        
+        // Error Logging System
+        const ERROR_LOG = {
+            maxEntries: 100,
+            entries: [],
+            
+            log: function(error, context = '') {
+                const entry = {
+                    timestamp: new Date().toISOString(),
+                    error: error.toString(),
+                    context: context,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+                
+                this.entries.unshift(entry);
+                if (this.entries.length > this.maxEntries) {
+                    this.entries.pop();
+                }
+                
+                // Save to localStorage for debugging
+                try {
+                    LS.set('errorLog', JSON.stringify(this.entries));
+                } catch (e) {
+                    console.warn('Cannot save error log to localStorage');
+                }
+                
+                console.error('System Error:', entry);
+            },
+            
+            getRecentErrors: function(hours = 24) {
+                const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+                return this.entries.filter(entry => new Date(entry.timestamp) > cutoff);
+            }
+        };
+
+        // Initialize System - ปรับปรุงให้แข็งแกร่งขึ้น
+        document.addEventListener('DOMContentLoaded', function() {
+            const startTime = performance.now();
+            
+            try {
+                console.log('🚀 ระบบบันทึกข้อมูลรายงานแผนกผลิต 2 เริ่มต้นแล้ว');
+                
+                // Initialize system health monitoring
+                initializeSystemHealth();
+                
+                // Setup error handling
+                setupGlobalErrorHandling();
+                
+                // Initialize UI components
+                updateCurrentTime();
+                setInterval(updateCurrentTime, 1000);
+                
+                // Create initial data sets with error handling
+                try {
+                    const container = document.getElementById('dataContainer');
+                    if (!container) {
+                        throw new Error('Data container not found');
+                    }
+                    
+                    for (let i = 1; i <= 1; i++) {
+                        const newDataSet = document.createElement('div');
+                        newDataSet.innerHTML = generateDataSet(i);
+                        const el = newDataSet.firstElementChild;
+                        if (el) {
+                            try {
+                                el.style.opacity = '0';
+                                el.style.transition = 'opacity 180ms ease-out';
+                                el.style.visibility = 'hidden';
+                                container.appendChild(el);
+                                console.log('PD2:A appended initial dataset', i, el);
+                                PD2DebugBadge('A: append init #' + i);
+                                requestAnimationFrame(() => {
+                                    try {
+                                        el.style.visibility = 'visible';
+                                        void el.offsetWidth;
+                                        el.style.opacity = '1';
+                                        el.scrollIntoView && el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        const prev = container.style.overflow; container.style.overflow = 'visible';
+                                        setTimeout(() => { container.style.overflow = prev || ''; }, 300);
+                                    } catch(_){ }
+                                    // Fallback after paint
+                                    setTimeout(() => {
+                                        try {
+                                            if (el.offsetHeight < 8 || getComputedStyle(el).opacity === '0') {
+                                                el.style.display = '';
+                                                el.style.visibility = 'visible';
+                                                el.style.opacity = '1';
+                                                PD2DebugBadge('A: force show init #' + i);
+                                            }
+                                        } catch(_){}
+                                    }, 300);
+                                });
+                            } catch (e) {
+                                container.appendChild(el);
+                                console.warn('PD2:A initial append fallback', e);
+                            }
+                        }
+                    }
+                    dataSetCount = 1;
+                    updateDataSetCount();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Initial data set creation');
+                    showNotification('เกิดข้อผิดพลาดในการสร้างฟอร์ม กรุณาโหลดหน้าใหม่', 'error');
+                }
+                
+                // Setup event listeners with error handling
+                setupEventListeners();
+                setupSelectHandlers();
+                try { window.PD2_WAGE_A && window.PD2_WAGE_A.bindWageAForAllSets(); } catch(_){}
+                setupNetworkMonitoring();
+                
+                // Check for pending submissions
+                checkForPendingSubmissions();
+                
+                // Setup auto-save with improved interval
+                setupAutoSave();
+                
+                // Load existing data if available
+                loadFromLocalStorage();
+                
+                // Performance tracking
+                const loadTime = performance.now() - startTime;
+                SYSTEM_HEALTH.performanceMetrics.loadTime = loadTime;
+                console.log(`⚡ ระบบโหลดเสร็จใน ${loadTime.toFixed(2)}ms`);
+                
+                // Show system ready notification
+                setTimeout(() => {
+                    showNotification('ระบบพร้อมใช้งาน', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'System initialization');
+                console.error('❌ เกิดข้อผิดพลาดในการเริ่มต้นระบบ:', error);
+                showNotification('เกิดข้อผิดพลาดในการเริ่มต้นระบบ กรุณาโหลดหน้าใหม่', 'error');
+            }
+        });
+
+        // System Health Functions
+        function initializeSystemHealth() {
+            // Check browser compatibility
+            if (!window.localStorage) {
+                showNotification('เบราว์เซอร์ไม่รองรับการบันทึกข้อมูล', 'warning');
+            }
+            
+            // Check available storage
+            try {
+                const testKey = 'storageTest';
+                localStorage.setItem(testKey, 'test');
+                localStorage.removeItem(testKey);
+            } catch (e) {
+                showNotification('พื้นที่จัดเก็บข้อมูลเต็ม กรุณาล้างข้อมูลเก่า', 'warning');
+            }
+            
+            SYSTEM_HEALTH.isOnline = navigator.onLine;
+        }
+        
+        function setupGlobalErrorHandling() {
+            // Handle uncaught errors
+            window.addEventListener('error', function(event) {
+                ERROR_LOG.log(event.error, `Global error: ${event.filename}:${event.lineno}`);
+                SYSTEM_HEALTH.performanceMetrics.errorCount++;
+            });
+            
+            // Handle unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(event) {
+                ERROR_LOG.log(event.reason, 'Unhandled promise rejection');
+                SYSTEM_HEALTH.performanceMetrics.errorCount++;
+            });
+        }
+        
+        function setupNetworkMonitoring() {
+            // Monitor online/offline status
+            window.addEventListener('online', function() {
+                SYSTEM_HEALTH.isOnline = true;
+                showNotification('เชื่อมต่ออินเทอร์เน็ตแล้ว', 'success');
+                
+                // Try to sync pending data
+                checkForPendingSubmissions();
+            });
+            
+            window.addEventListener('offline', function() {
+                SYSTEM_HEALTH.isOnline = false;
+                showNotification('ไม่มีการเชื่อมต่ออินเทอร์เน็ต ข้อมูลจะถูกบันทึกไว้ในเครื่อง', 'warning');
+            });
+        }
+        
+        function setupAutoSave() {
+            // Clear existing interval if any
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+            
+            // Auto-save every 3 minutes (reduced from 5 for better reliability)
+            autoSaveInterval = setInterval(() => {
+                try {
+                    saveToLocalStorage();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Auto-save failed');
+                }
+            }, 180000);
+            
+            // Also save before page unload
+            window.addEventListener('beforeunload', function(e) {
+                try {
+                    saveToLocalStorage();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Before unload save failed');
+                }
+            });
+        }
+
+        // Update current time display
+        function updateCurrentTime() {
+            try {
+                const now = new Date();
+                const timeString = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            } catch (error) {
+                ERROR_LOG.log(error, 'Update time failed');
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Prevent accidental page leave
+            window.addEventListener('beforeunload', function(e) {
+                const hasData = document.querySelectorAll('.data-set').length > 0;
+                if (hasData) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    saveToLocalStorage();
+                }
+            });
+
+            // Auto-save on input changes
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('.input-field')) {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(saveToLocalStorage, 2000);
+                }
+            });
+
+            // Realtime WAGE_A updates (delegated, once)
+            try {
+                if (!document.__PD2_WAGE_A_REALTIME) {
+                    const handler = (ev) => {
+                        const t = ev && ev.target;
+                        if (!t || !t.name) return;
+                        const name = String(t.name);
+                        // match fields that affect wage calc
+                        const match = /^(meterStartA_|meterEndA_|lengthA_|fabricSize_|fabricSizeManual_)/.test(name);
+                        if (!match) return;
+                        const m = name.match(/_(\d+)$/);
+                        const setNumber = m ? m[1] : null;
+                        if (!setNumber) return;
+                        try { window.PD2_WAGE_A && window.PD2_WAGE_A.updateWageAForSet(setNumber); } catch(_){}
+                    };
+                    document.addEventListener('input', handler, true);
+                    document.addEventListener('change', handler, true);
+                    document.__PD2_WAGE_A_REALTIME = true;
+                }
+            } catch(_){ }
+        }
+
+        // Generate Data Set HTML
+        function generateDataSet(setNumber) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            return `
+                <div class="data-set glass rounded-lg p-6 mb-6" data-set="${setNumber}">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-medium text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="setGrad${setNumber}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <rect fill="url(#setGrad${setNumber})" x="3" y="4" width="18" height="15" rx="2" ry="2"/>
+                                <polyline stroke="white" stroke-width="2" points="16,10 12,14 8,10"/>
+                            </svg>
+                            ชุดข้อมูลที่ ${setNumber}
+                        </h2>
+                        ${setNumber > 1 ? `
+                            <button onclick="removeDataSet(${setNumber})" class="btn-glow btn-red text-white px-3 py-2 rounded-lg font-normal text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                                ลบชุดข้อมูล
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- ข้อมูลพื้นฐาน -->
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="basicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle fill="url(#basicGrad)" cx="12" cy="12" r="10"/>
+                                    <path stroke="white" stroke-width="2" d="m9 12 2 2 4-4"/>
+                                </svg>
+                                ข้อมูลพื้นฐาน
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">วันที่</label>
+                                    <input type="date" name="date_${setNumber}" value="${today}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เครื่องทอ NO</label>
+                                    <select name="machine_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
+                                        <option value="">เลือกเครื่องทอ</option>
+                                        ${machines.map(machine => `<option value="${machine}">${machine}</option>`).join('')}
+                                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                                    </select>
+                                    <div class="mt-3">
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เครื่องทอ NO (กรอกเอง)</label>
+                                        <input type="text" name="machineManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์หมายเลขเครื่อง เช่น CL96">
+                                        <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ A</label>
+                                    <select name="employeeA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
+                                        <option value="">เลือกพนักงาน</option>
+                                        ${employees.map(emp => `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`).join('')}
+                                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                                    </select>
+                                    <div class="mt-3">
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ A (กรอกเอง)</label>
+                                        <input type="text" name="employeeAManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์รหัสหรือชื่อ">
+                                        <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ B</label>
+                                    <input type="text" name="employeeB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาดหน้าผ้า</label>
+                                    <select name="fabricSize_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
+                                        <option value="">เลือกขนาดหน้าผ้า</option>
+                                        ${fabricSizes.map(size => `<option value="${size}">${size}</option>`).join('')}
+                                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                                    </select>
+                                    <div class="mt-3">
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาดหน้าผ้า (กรอกเอง)</label>
+                                        <input type="text" name="fabricSizeManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์ขนาดหน้าผ้า">
+                                        <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ข้อมูลการผลิต -->
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="prodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <rect fill="url(#prodGrad)" x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                    <line stroke="white" stroke-width="2" x1="8" y1="21" x2="16" y2="21"/>
+                                    <line stroke="white" stroke-width="2" x1="12" y1="17" x2="12" y2="21"/>
+                                </svg>
+                                ข้อมูลการผลิต
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาด Lot.No</label>
+                                    <input type="text" name="lotNo_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="กรอกขนาด Lot.No">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เลขที่ใบสั่งผลิต</label>
+                                    <input type="text" name="orderNo_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="กรอกเลขที่ใบสั่งผลิต">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ยอดทอ กะ A</label>
+                                        <input type="number" name="productionA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 800">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ยอดทอ กะ B</label>
+                                        <input type="number" name="productionB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ความเร็วรอบ กะ A</label>
+                                        <input type="number" name="speedA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 120">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ความเร็วรอบ กะ B</label>
+                                        <input type="number" name="speedB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ประสิทธิภาพ กะ A%</label>
+                                        <input type="number" name="efficiencyA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 65" min="0" max="100">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ประสิทธิภาพ กะ B%</label>
+                                        <input type="number" name="efficiencyB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- เลขมิเตอร์และความยาว -->
+                    <div class="grid lg:grid-cols-2 gap-6 mt-6">
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="meterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle fill="url(#meterGrad)" cx="12" cy="12" r="10"/>
+                                    <polyline stroke="white" stroke-width="2" points="12,6 12,12 16,14"/>
+                                </svg>
+                                เลขมิเตอร์ประจำวัน
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A: เริ่มงาน</label>
+                                    <input type="number" name="meterStartA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A: เลิกงาน</label>
+                                    <input type="number" name="meterEndA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 1000">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B: เริ่มงาน</label>
+                                    <input type="number" name="meterStartB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B: เลิกงาน</label>
+                                    <input type="number" name="meterEndB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="lengthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+                                        </linearGradient>
+                                        <filter id="lengthGlow">
+                                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                            <feMerge> 
+                                                <feMergeNode in="coloredBlur"/>
+                                                <feMergeNode in="SourceGraphic"/>
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+                                    <circle fill="url(#lengthGrad)" cx="12" cy="12" r="10" filter="url(#lengthGlow)"/>
+                                    <path stroke="white" stroke-width="2" d="M8 8h8M8 12h8M8 16h8"/>
+                                    <circle fill="white" cx="6" cy="8" r="1"/>
+                                    <circle fill="white" cx="6" cy="12" r="1"/>
+                                    <circle fill="white" cx="6" cy="16" r="1"/>
+                                    <path stroke="white" stroke-width="1.5" d="M18 6v12"/>
+                                </svg>
+                                ความยาวตัดม้วน (เมตร)
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A</label>
+                                    <input type="number" name="lengthA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 2500" step="0.01">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B</label>
+                                    <input type="number" name="lengthB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly>
+                                </div>
+
+                                <!-- ค่าแรงพนักงาน (กะ A) -->
+                                <div>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ค่าแรงพนักงาน (กะ A)</label>
+                                    <input type="text" name="wageA_${setNumber}" class="input-field wage-a-input w-full p-3 border border-gray-300 rounded-lg" placeholder="ค่าแรงพนักงาน" inputmode="decimal" autocomplete="off" readonly>
+                                    <p class="text-xs text-red-500 mt-1 hidden" data-wageA-error="${setNumber}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            `;
+        }
+
+        // Add Data Set
+        function addDataSet() {
+            if (dataSetCount >= 100) {
+                showNotification('ไม่สามารถเพิ่มชุดข้อมูลได้ เนื่องจากถึงขีดจำกัด 100 ชุด', 'error');
+                return;
+            }
+            
+            dataSetCount++;
+            const container = document.getElementById('dataContainer');
+            const newDataSet = document.createElement('div');
+            newDataSet.innerHTML = generateDataSet(dataSetCount);
+            const newElement = newDataSet.firstElementChild;
+            if (newElement) {
+                try {
+                    newElement.style.opacity = '0';
+                    newElement.style.transition = 'opacity 180ms ease-out';
+                    newElement.style.visibility = 'hidden';
+                    container.appendChild(newElement);
+                    console.log('PD2:A appended new dataset', dataSetCount, newElement);
+                    PD2DebugBadge('A: append #' + dataSetCount);
+                    requestAnimationFrame(() => {
+                        try {
+                            newElement.style.visibility = 'visible'; void newElement.offsetWidth; newElement.style.opacity = '1';
+                            newElement.scrollIntoView && newElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            const prev = container.style.overflow; container.style.overflow = 'visible';
+                            setTimeout(() => { container.style.overflow = prev || ''; }, 300);
+                        } catch(_){ }
+                        setTimeout(() => {
+                            try {
+                                if (newElement.offsetHeight < 8 || getComputedStyle(newElement).opacity === '0') {
+                                    newElement.style.display = '';
+                                    newElement.style.visibility = 'visible';
+                                    newElement.style.opacity = '1';
+                                    PD2DebugBadge('A: force show #' + dataSetCount);
+                                }
+                            } catch(_){}
+                        }, 300);
+                    });
+                } catch (e) {
+                    container.appendChild(newElement);
+                    console.warn('PD2:A append new dataset fallback', e);
+                }
+            }
+
+            updateDataSetCount();
+
+            // Setup handlers after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                setupSelectHandlers();
+                try { window.PD2_WAGE_A && window.PD2_WAGE_A.bindWageAForAllSets(); } catch(_){}
+                showNotification(`เพิ่มชุดข้อมูลที่ ${dataSetCount} เรียบร้อยแล้ว`, 'green');
+
+                // Scroll to new data set
+                if (newElement && typeof newElement.scrollIntoView === 'function') newElement.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Copy and Add Data Set
+        function copyAndAddDataSet() {
+            if (dataSetCount >= 100) {
+                showNotification('ไม่สามารถเพิ่มชุดข้อมูลได้ เนื่องจากถึงขีดจำกัด 100 ชุด', 'error');
+                return;
+            }
+            
+            const lastDataSet = document.querySelector(`[data-set="${dataSetCount}"]`);
+            if (!lastDataSet) {
+                addDataSet();
+                return;
+            }
+            
+            // Get data from last set
+            const lastData = {};
+            const inputs = lastDataSet.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (!input.readOnly && !input.disabled && input.value) {
+                    const fieldName = input.name.replace(`_${dataSetCount}`, '');
+                    lastData[fieldName] = input.value;
+                }
+            });
+            
+            // Create new data set
+            dataSetCount++;
+            const container = document.getElementById('dataContainer');
+            const newDataSet = document.createElement('div');
+            newDataSet.innerHTML = generateDataSet(dataSetCount);
+            const newElement = newDataSet.firstElementChild;
+            if (newElement) {
+                try {
+                    newElement.style.opacity = '0';
+                    newElement.style.transition = 'opacity 180ms ease-out';
+                    newElement.style.visibility = 'hidden';
+                    container.appendChild(newElement);
+                    console.log('PD2:A appended copied dataset', dataSetCount, newElement);
+                    PD2DebugBadge('A: append copy #' + dataSetCount);
+                    requestAnimationFrame(() => {
+                        try {
+                            newElement.style.visibility = 'visible'; void newElement.offsetWidth; newElement.style.opacity = '1';
+                            newElement.scrollIntoView && newElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            const prev = container.style.overflow; container.style.overflow = 'visible';
+                            setTimeout(() => { container.style.overflow = prev || ''; }, 300);
+                        } catch(_){ }
+                        setTimeout(() => {
+                            try {
+                                if (newElement.offsetHeight < 8 || getComputedStyle(newElement).opacity === '0') {
+                                    newElement.style.display = '';
+                                    newElement.style.visibility = 'visible';
+                                    newElement.style.opacity = '1';
+                                    PD2DebugBadge('A: force show copy #' + dataSetCount);
+                                }
+                            } catch(_){}
+                        }, 300);
+                    });
+                } catch (e) {
+                    container.appendChild(newElement);
+                    console.warn('PD2:A append copied dataset fallback', e);
+                }
+            }
+
+            // Fill with copied data after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                const newInputs = newElement ? newElement.querySelectorAll('input, select') : [];
+                newInputs.forEach(input => {
+                    if (!input.readOnly && !input.disabled) {
+                        const fieldName = input.name.replace(`_${dataSetCount}`, '');
+                        if (lastData[fieldName]) {
+                            input.value = lastData[fieldName];
+                        }
+                    }
+                });
+                
+                // Setup handlers for the new data set
+                setupSelectHandlers();
+                try { window.PD2_WAGE_A && window.PD2_WAGE_A.bindWageAForAllSets(); } catch(_){}
+                
+                showNotification(`คัดลอกและเพิ่มชุดข้อมูลที่ ${dataSetCount} เรียบร้อยแล้ว`, 'blue');
+                
+                // Scroll to new data set
+                if (newElement && typeof newElement.scrollIntoView === 'function') newElement.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+            updateDataSetCount();
+        }
+
+        // Remove Data Set
+        function removeDataSet(setNumber) {
+            if (dataSetCount <= 1) {
+                showNotification('ไม่สามารถลบชุดข้อมูลสุดท้ายได้', 'error');
+                return;
+            }
+            
+            const dataSet = document.querySelector(`[data-set="${setNumber}"]`);
+            if (dataSet) {
+                dataSet.remove();
+                dataSetCount--;
+                updateDataSetCount();
+                showNotification(`ลบชุดข้อมูลที่ ${setNumber} เรียบร้อยแล้ว`, 'red');
+            }
+        }
+
+        // Update Data Set Count Display
+        function updateDataSetCount() {
+            document.getElementById('dataSetCount').textContent = dataSetCount;
+        }
+
+        // Setup Select Handlers
+    function setupSelectHandlers() {
+            document.querySelectorAll('select').forEach(select => {
+                select.addEventListener('change', function() {
+                    if (this.value === 'ADD_NEW') {
+                        const fieldType = this.name.includes('machine') ? 'machine' : 
+                                        this.name.includes('employee') ? 'employee' : 'fabric';
+                        addNewContext = { type: fieldType, selectName: this.name, setNumber: (this.name.split('_')[1]||'').trim(), selectEl: this };
+                        openModal(fieldType);
+                        this.value = ''; // Reset select
+                        return;
+                    }
+                });
+            });
+
+            // ซิงก์ฟิลด์กรอกเอง -> select เดิม (เลือกอัตโนมัติถ้าตรงรายการ)
+        document.querySelectorAll('input[name^="employeeAManual_"]').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    const setNumber = this.name.split('_')[1];
+            const sel = document.querySelector(`select[name="employeeA_${setNumber}"]`);
+                    const v = (this.value || '').trim();
+                    if (!sel) return;
+                    // ถ้าพิมพ์เป็นรหัสขึ้นต้น (เช่น ZP9...)
+                    const byId = employees.find(e => v.toUpperCase().startsWith(e.id.toUpperCase()));
+                    const byPair = employees.find(e => (e.id + ' - ' + e.name) === v);
+                    const match = byPair || byId;
+                    sel.value = match ? match.id : '';
+                });
+                // no show/hide toggling
+            });
+
+            // สำหรับเครื่องทอ NO (กรอกเอง) -> ซิงก์กลับไปที่ select หากตรงรายการ
+            document.querySelectorAll('input[name^="machineManual_"]').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    const setNumber = this.name.split('_')[1];
+                    const sel = document.querySelector(`select[name="machine_${setNumber}"]`);
+                    const v = (this.value || '').trim();
+                    if (!sel) return;
+                    const up = v.toUpperCase();
+                    const found = machines.find(m => m.toUpperCase() === up || m.toUpperCase().startsWith(up));
+                    sel.value = found ? found : '';
+                });
+            });
+
+        document.querySelectorAll('input[name^="fabricSizeManual_"]').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    const setNumber = this.name.split('_')[1];
+            const sel = document.querySelector(`select[name="fabricSize_${setNumber}"]`);
+                    const v = (this.value || '').trim();
+                    if (!sel) return;
+                    const found = fabricSizes.find(s => s.toUpperCase() === v.toUpperCase());
+                    sel.value = found ? found : '';
+                });
+                // no show/hide toggling
+            });
+            
+            // ติดตั้งระบบแนะนำแบบทันที (instant suggestions) ให้กับฟิลด์กรอกเอง
+            try {
+                // สำหรับพนักงาน (รูปแบบ: "ID - Name")
+                document.querySelectorAll('input[name^="employeeAManual_"]').forEach(inp => {
+                    attachInstantSuggestions(inp, () => employees.map(e => ({
+                        label: `${e.id} - ${e.name}`,
+                        value: `${e.id} - ${e.name}`,
+                        key: `${e.id} ${e.name}`.toLowerCase()
+                    })));
+                });
+                // สำหรับเครื่องทอ NO
+                document.querySelectorAll('input[name^="machineManual_"]').forEach(inp => {
+                    attachInstantSuggestions(inp, () => machines.map(m => ({
+                        label: m,
+                        value: m,
+                        key: m.toLowerCase()
+                    })));
+                });
+                // สำหรับขนาดหน้าผ้า
+                document.querySelectorAll('input[name^="fabricSizeManual_"]').forEach(inp => {
+                    attachInstantSuggestions(inp, () => fabricSizes.map(s => ({
+                        label: s,
+                        value: s,
+                        key: s.toLowerCase()
+                    })));
+                });
+            } catch(_) {}
+        }
+        // สร้างกล่องแนะนำแบบกำหนดเองให้แสดงทันทีเมื่อพิมพ์ (ไม่ต้องรอ datalist ของเบราว์เซอร์)
+        function attachInstantSuggestions(inputEl, optionsProvider) {
+            if (!inputEl || inputEl.dataset.suggestBound) return;
+            inputEl.dataset.suggestBound = '1';
+
+            const panel = document.createElement('div');
+            panel.className = 'instant-suggestions hidden';
+            Object.assign(panel.style, {
+                position: 'fixed',
+                zIndex: 9999,
+                background: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
+                maxHeight: '240px',
+                overflowY: 'auto',
+                minWidth: '200px',
+                fontSize: '14px'
+            });
+            document.body.appendChild(panel);
+
+            let items = [];
+            let highlightIndex = -1;
+            let visible = false;
+
+            function positionPanel() {
+                if (!visible) return;
+                const rect = inputEl.getBoundingClientRect();
+                panel.style.left = `${Math.round(rect.left)}px`;
+                panel.style.top = `${Math.round(rect.bottom + 4)}px`;
+                panel.style.width = `${Math.round(rect.width)}px`;
+            }
+
+            function showPanel() {
+                if (panel.classList.contains('hidden')) panel.classList.remove('hidden');
+                visible = true;
+                positionPanel();
+            }
+
+            function hidePanel() {
+                if (!panel.classList.contains('hidden')) panel.classList.add('hidden');
+                visible = false;
+                highlightIndex = -1;
+            }
+
+            function renderList(list) {
+                panel.innerHTML = '';
+                list.forEach((it, idx) => {
+                    const row = document.createElement('div');
+                    row.textContent = it.label;
+                    Object.assign(row.style, {
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        background: idx === highlightIndex ? '#eff6ff' : '#ffffff',
+                        color: '#111827'
+                    });
+                    row.addEventListener('mousemove', () => { highlightIndex = idx; renderList(list); });
+                    row.addEventListener('mousedown', (ev) => { ev.preventDefault(); });
+                    row.addEventListener('click', () => selectItem(it));
+                    panel.appendChild(row);
+                });
+            }
+
+            function updateList() {
+                const q = (inputEl.value || '').toLowerCase();
+                const all = (optionsProvider?.() || []);
+                const filtered = q ? all.filter(o => o.key.includes(q)) : [];
+                items = filtered.slice(0, 50);
+                if (items.length > 0 && document.activeElement === inputEl) {
+                    showPanel();
+                    renderList(items);
+                } else {
+                    hidePanel();
+                }
+            }
+
+            function selectItem(item) {
+                inputEl.value = item.value;
+                // กระตุ้น event 'input' เพื่อให้ logic ซิงก์เดิมทำงานต่อ
+                try { inputEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(_) {}
+                hidePanel();
+            }
+
+            function onKeyDown(e) {
+                if (!visible) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    highlightIndex = Math.min((highlightIndex < 0 ? 0 : highlightIndex + 1), items.length - 1);
+                    renderList(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    highlightIndex = Math.max((highlightIndex < 0 ? 0 : highlightIndex - 1), 0);
+                    renderList(items);
+                } else if (e.key === 'Enter') {
+                    if (highlightIndex >= 0 && items[highlightIndex]) {
+                        e.preventDefault();
+                        selectItem(items[highlightIndex]);
+                    }
+                } else if (e.key === 'Escape') {
+                    hidePanel();
+                }
+            }
+
+            inputEl.addEventListener('input', updateList);
+            inputEl.addEventListener('focus', updateList);
+            inputEl.addEventListener('blur', () => setTimeout(hidePanel, 120));
+            inputEl.addEventListener('keydown', onKeyDown);
+            window.addEventListener('scroll', positionPanel, true);
+            window.addEventListener('resize', positionPanel);
+        }
+        
+
+        // Modal Functions
+        function openModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            modal.classList.remove('hidden');
+            
+            // Clear previous inputs
+            if (type === 'employee') {
+                document.getElementById('newEmployeeId').value = '';
+                document.getElementById('newEmployeeName').value = '';
+            } else {
+                document.getElementById(`new${type.charAt(0).toUpperCase() + type.slice(1)}${type === 'fabric' ? 'Size' : ''}`).value = '';
+            }
+        }
+
+                // ===========================
+                // Wage (Shift-A) calculation
+                // ===========================
+                (function(){
+                        "use strict";
+
+                        function toNumberSafe(value) {
+                            if (value == null) return null;
+
+                            if (typeof value === "number") {
+                                return Number.isFinite(value) ? value : null;
+                            }
+
+                            if (typeof value === "string") {
+                                let s = value.trim();
+                                if (s === "") return null;
+
+                                // Convert Thai digits to Arabic
+                                s = s.replace(/[\u0E50-\u0E59]/g, (ch) => String(ch.charCodeAt(0) - 0x0E50));
+                                // remove commas and spaces
+                                s = s.replace(/[\,\s]/g, "");
+
+                                const n = Number(s);
+                                return Number.isFinite(n) ? n : null;
+                            }
+
+                            return null;
+                        }
+
+                        function extractSizeFromRow(row) {
+                            const v1 = toNumberSafe(row["ขนาดหน้าผ้า (กรอกเอง)"]);
+                            if (v1 != null) return v1;
+
+                            const v2 = toNumberSafe(row["ขนาดหน้าผ้า"]);
+                            if (v2 != null) return v2;
+
+                            return null;
+                        }
+
+                        function extractSizeFromCode(code) {
+                            if (!code) return null;
+                            code = String(code).toUpperCase();
+                            try {
+                                // Special-case: any SCL code (case-insensitive) -> take characters at positions 6 and 7 (1-based)
+                                if (code.includes("SCL")) {
+                                    const part = code.slice(5, 7);
+                                    const n = parseInt(part, 10);
+                                    return Number.isFinite(n) ? n : null;
+                                }
+
+                                if (code.startsWith("FCL")) {
+                                    return parseInt(code.slice(5, 7), 10);
+                                } else if (code.startsWith("TEST")) {
+                                    return parseInt(code.slice(4, 6), 10);
+                                } else {
+                                    return parseInt(code.slice(0, 2), 10);
+                                }
+                            } catch (e) {
+                                return null;
+                            }
+                        }
+
+                        function getSize(row) {
+                            const sizeNum = extractSizeFromRow(row);
+                            if (sizeNum != null && Number.isFinite(sizeNum)) return sizeNum;
+
+                            const codeFields = ["รหัสสินค้า", "รหัสผ้า", "โค้ด", "code", "Code", "ITEM CODE"];
+                            for (const k of codeFields) {
+                                if (k in row) {
+                                    const sz = extractSizeFromCode(row[k]);
+                                    if (Number.isFinite(sz)) return sz;
+                                }
+                            }
+
+                            return null;
+                        }
+
+                        function getRate(size) {
+                            if (!size) return 0;
+                            if (size >= 12 && size <= 17) return 0.13;
+                            if (size >= 18 && size <= 22) return 0.14;
+                            if (size >= 23 && size <= 25) return 0.15;
+                            if (size >= 26 && size <= 30) return 0.18;
+                            return 0;
+                        }
+
+                        function calcOutputA(row) {
+                            const start = toNumberSafe(row["เลขมิเตอร์ประจำวัน กะ A: เริ่มงาน"]);
+                            const end = toNumberSafe(row["เลขมิเตอร์ประจำวัน กะ A: เลิกงาน"]);
+                            const cutLen = toNumberSafe(row["ความยาวตัดม้วน (เมตร) กะ A"]);
+
+                            if (start == null || end == null) return null;
+
+                            if (start <= end) {
+                                return Math.max(0, end - start);
+                            }
+
+                            // reset case
+                            if (cutLen != null) {
+                                const diff = start - end;
+                                return Math.max(0, cutLen - diff);
+                            }
+
+                            return null;
+                        }
+
+                        function calculateWageA(row) {
+                            const size = getSize(row);
+                            const outputA = calcOutputA(row);
+                            if (outputA == null) return null;
+
+                            const rate = getRate(size);
+                            const unit = rate > 0 ? rate : (Number.isFinite(size) ? size : 0);
+
+                            const wage = outputA * unit;
+                            return Number(wage.toFixed(2));
+                        }
+
+                                    function buildRowForSet(setNumber) {
+                                        const qs = (sel) => document.querySelector(sel);
+                                        const fabSel = qs(`[name="fabricSize_${setNumber}"]`)?.value || "";
+                                        const fabManual = qs(`[name="fabricSizeManual_${setNumber}"]`)?.value || "";
+                                        const row = {
+                                            "ขนาดหน้าผ้า": "",
+                                            "ขนาดหน้าผ้า (กรอกเอง)": "",
+                                            "เลขมิเตอร์ประจำวัน กะ A: เริ่มงาน": qs(`[name="meterStartA_${setNumber}"]`)?.value || "",
+                                            "เลขมิเตอร์ประจำวัน กะ A: เลิกงาน": qs(`[name="meterEndA_${setNumber}"]`)?.value || "",
+                                            "ความยาวตัดม้วน (เมตร) กะ A": qs(`[name="lengthA_${setNumber}"]`)?.value || ""
+                                        };
+                                        // Determine size source
+                                        if (fabManual) {
+                                            const n = toNumberSafe(fabManual);
+                                            if (n != null && n <= 100) {
+                                                row["ขนาดหน้าผ้า (กรอกเอง)"] = String(n);
+                                            } else {
+                                                row["โค้ด"] = fabManual;
+                                            }
+                                        } else if (fabSel) {
+                                            row["โค้ด"] = fabSel;
+                                        }
+                                        return row;
+                                    }
+
+                        function showWageError(setNumber, msg) {
+                            try {
+                                const p = document.querySelector(`[data-wageA-error="${setNumber}"]`);
+                                if (!p) return;
+                                if (msg) {
+                                    p.textContent = msg;
+                                    p.classList.remove('hidden');
+                                } else {
+                                    p.textContent = '';
+                                    p.classList.add('hidden');
+                                }
+                            } catch(_) {}
+                        }
+
+                        function updateWageAForSet(setNumber) {
+                            try {
+                                const input = document.querySelector(`[name="wageA_${setNumber}"]`);
+                                if (!input) return;
+                                const row = buildRowForSet(setNumber);
+                                const val = calculateWageA(row);
+                                if (val == null) {
+                                    input.value = '';
+                                    input.classList.remove('valid');
+                                    showWageError(setNumber, '');
+                                } else {
+                                    input.value = Number(val).toFixed(2);
+                                    input.classList.add('valid');
+                                    showWageError(setNumber, '');
+                                }
+                            } catch (e) {
+                                console.warn('Wage update failed:', e);
+                            }
+                        }
+
+                        function bindWageAListenersForSet(setNumber) {
+                            const sel = (n) => document.querySelector(`[name="${n}_${setNumber}"]`);
+                            const fields = [
+                                'meterStartA', 'meterEndA', 'lengthA'
+                            ];
+                            fields.forEach(fn => {
+                                const el = sel(fn);
+                                if (el && !el.dataset.wageBound) {
+                                    el.dataset.wageBound = '1';
+                                    el.addEventListener('input', () => updateWageAForSet(setNumber));
+                                    el.addEventListener('change', () => updateWageAForSet(setNumber));
+                                }
+                            });
+                            // fabric size select + manual
+                            ['fabricSize', 'fabricSizeManual'].forEach(fn => {
+                                const el = sel(fn);
+                                if (el && !el.dataset.wageBound) {
+                                    el.dataset.wageBound = '1';
+                                    el.addEventListener('input', () => updateWageAForSet(setNumber));
+                                    el.addEventListener('change', () => updateWageAForSet(setNumber));
+                                }
+                            });
+
+                            // wageA is computed only; disable direct user edits (readonly input)
+                            // self-edit handlers intentionally removed to prevent user override
+
+                            // Initial compute
+                            updateWageAForSet(setNumber);
+                        }
+
+                        function bindWageAForAllSets() {
+                            document.querySelectorAll('.data-set').forEach(ds => {
+                                const setNumber = ds.getAttribute('data-set');
+                                if (setNumber) bindWageAListenersForSet(setNumber);
+                            });
+                        }
+
+                        // Expose minimal APIs to outer scope
+                        window.PD2_WAGE_A = {
+                            toNumberSafe,
+                            extractSizeFromRow,
+                            extractSizeFromCode,
+                            getSize,
+                            getRate,
+                            calcOutputA,
+                            calculateWageA,
+                            updateWageAForSet,
+                            bindWageAForAllSets
+                        };
+                })();
+
+        function closeModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            modal.classList.add('hidden');
+        }
+
+    function saveModalData(type) {
+            let newValue = '';
+            let isValid = false;
+            
+            if (type === 'employee') {
+                const id = document.getElementById('newEmployeeId').value.trim();
+                const name = document.getElementById('newEmployeeName').value.trim();
+                
+                if (id && name) {
+                    newValue = id;
+                    // de-duplicate by id
+                    if (!employees.some(e => e.id === id)) {
+                        employees.push({ id: id, name: name });
+                    }
+                    isValid = true;
+                }
+            } else if (type === 'machine') {
+                newValue = document.getElementById('newMachine').value.trim();
+                if (newValue) {
+                    if (!machines.includes(newValue)) {
+                        machines.push(newValue);
+                    }
+                    isValid = true;
+                }
+            } else if (type === 'fabric') {
+                newValue = document.getElementById('newFabricSize').value.trim();
+                if (newValue) {
+                    if (!fabricSizes.includes(newValue)) {
+                        fabricSizes.push(newValue);
+                    }
+                    isValid = true;
+                }
+            }
+            
+            if (isValid) {
+                // notify parent to share across iframes (session-only)
+                try {
+                    if (window.parent && window.parent !== window) {
+                        if (type === 'employee') {
+                            const emp = employees.find(e => e.id === newValue);
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'employee', data: { id: emp.id, name: emp.name } }, '*');
+                        } else if (type === 'machine') {
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'machine', data: { value: newValue } }, '*');
+                        } else if (type === 'fabric') {
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'fabric', data: { value: newValue } }, '*');
+                        }
+                    }
+                } catch(_) {}
+
+                // Only auto-select on the originating select
+                const originName = (addNewContext && addNewContext.type === type) ? addNewContext.selectName : null;
+                updateAllSelects(type, newValue, originName);
+                addNewContext = null;
+                closeModal(type);
+                showNotification(`เพิ่มข้อมูลใหม่เรียบร้อยแล้ว`, 'success');
+            } else {
+                showNotification('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+            }
+        }
+
+        // Update All Selects
+        function updateAllSelects(type, newValue, originSelectName) {
+            const selects = document.querySelectorAll(`select[name*="${type === 'employee' ? 'employee' : type === 'fabric' ? 'fabricSize' : 'machine'}"]`);
+            
+            selects.forEach(select => {
+                const isOrigin = (originSelectName && select.name === originSelectName);
+                const prevValue = select.value;
+                // Remove old ADD_NEW option
+                const addNewOption = select.querySelector('option[value="ADD_NEW"]');
+                if (addNewOption) {
+                    addNewOption.remove();
+                }
+                
+                // Add new option if missing
+                let exists = Array.from(select.options).some(o => o.value === newValue);
+                if (!exists) {
+                    const newOption = document.createElement('option');
+                    if (type === 'employee') {
+                        const emp = employees.find(e => e.id === newValue);
+                        newOption.value = newValue;
+                        newOption.textContent = emp ? `${emp.id} - ${emp.name}` : newValue;
+                    } else {
+                        newOption.value = newValue;
+                        newOption.textContent = newValue;
+                    }
+                    select.appendChild(newOption);
+                }
+                
+                // Re-add ADD_NEW option
+                const addNewOptionNew = document.createElement('option');
+                addNewOptionNew.value = 'ADD_NEW';
+                addNewOptionNew.textContent = 'คีย์ข้อมูลใหม่';
+                select.appendChild(addNewOptionNew);
+                
+                // Restore selection for others; select new only for origin
+                if (isOrigin) {
+                    select.value = newValue;
+                    if (type === 'fabric') {
+                        const setNumber = select.name.split('_')[1];
+                        const manual = document.querySelector(`[name="fabricSizeManual_${setNumber}"]`);
+                        if (manual) manual.value = newValue;
+                    }
+                } else {
+                    select.value = prevValue === 'ADD_NEW' ? '' : prevValue;
+                }
+            });
+
+            // อัปเดต datalist ของทุกชุดข้อมูลเพื่อให้คำแนะนำใหม่แสดงด้วย
+            refreshAllDatalists();
+        }
+
+        // Refresh All Selects
+        function refreshAllSelects() {
+            // Refresh machine selects
+            document.querySelectorAll('select[name*="machine"]').forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = `
+                    <option value="">เลือกเครื่องทอ</option>
+                    ${machines.map(machine => `<option value="${machine}">${machine}</option>`).join('')}
+                    <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                `;
+                select.value = currentValue;
+            });
+            
+            // Refresh employee selects
+            document.querySelectorAll('select[name*="employee"]').forEach(select => {
+                if (!select.name.includes('employeeB')) {
+                    const currentValue = select.value;
+                    select.innerHTML = `
+                        <option value="">เลือกพนักงาน</option>
+                        ${employees.map(emp => `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`).join('')}
+                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                    `;
+                    select.value = currentValue;
+                }
+            });
+            
+            // Refresh fabric selects
+            document.querySelectorAll('select[name*="fabricSize"]').forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = `
+                    <option value="">เลือกขนาดหน้าผ้า</option>
+                    ${fabricSizes.map(size => `<option value="${size}">${size}</option>`).join('')}
+                    <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                `;
+                select.value = currentValue;
+            });
+
+            // อัปเดต datalist คำแนะนำทั้งหมด
+            refreshAllDatalists();
+        }
+
+        // เติมรายการคำแนะนำใน datalist ทั้งหมดตาม master arrays ปัจจุบัน
+        function refreshAllDatalists() {
+            // พนักงาน
+            document.querySelectorAll('datalist[id^="employeeList_"]').forEach(dl => {
+                const html = employees.map(emp => `<option value="${emp.id} - ${emp.name}"></option>`).join('');
+                dl.innerHTML = html;
+            });
+            // ขนาดหน้าผ้า
+            document.querySelectorAll('datalist[id^="fabricSizeList_"]').forEach(dl => {
+                const html = fabricSizes.map(size => `<option value="${size}"></option>`).join('');
+                dl.innerHTML = html;
+            });
+        }
+
+        // Sync shared lists from parent (session-only)
+        function mergeSharedLists(shared) {
+            if (!shared) return;
+            // machines
+            (shared.machines||[]).forEach(m => { if (!machines.includes(m)) machines.push(m); });
+            // fabricSizes
+            (shared.fabricSizes||[]).forEach(f => { if (!fabricSizes.includes(f)) fabricSizes.push(f); });
+            // employees
+            (shared.employees||[]).forEach(emp => { if (!employees.some(e => e.id === emp.id)) employees.push(emp); });
+            // refresh UI
+            try { refreshAllSelects(); } catch(_) {}
+        }
+
+        // request sync on load
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'PD2_REQUEST_SYNC' }, '*');
+            }
+        } catch(_) {}
+
+        // listen for sync payloads
+        window.addEventListener('message', (ev) => {
+            const m = ev?.data;
+            if (m && m.type === 'PD2_SYNC_CUSTOM') {
+                mergeSharedLists(m.payload);
+            }
+        });
+
+        // Data Submission Functions
+        async function submitData() {
+            console.log('🚀 เริ่มต้นการส่งข้อมูล');
+            
+            const allData = collectAllData();
+            if (!allData || allData.length === 0) {
+                showNotification('ไม่พบข้อมูลที่จะส่ง', 'error');
+                return;
+            }
+            
+            // Save data for recovery before submission
+            saveDataForRecovery(allData);
+            
+            showLoading();
+            updateProgressStep(1);
+            updateLoadingStatus('กำลังเตรียมข้อมูล...');
+            
+            const payload = {
+                action: 'saveData',
+                data: {
+                    title: "รายงานแผนกผลิต 2 สำหรับ กะ A",
+                    timestamp: new Date().toISOString(),
+                    totalSets: allData.length,
+                    data: allData
+                },
+                sheetId: API_CONFIG.sheetId,
+                folderId: API_CONFIG.folderId,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                await submitWithRetry(payload, 3, 1);
+            } catch (error) {
+                console.error('❌ การส่งข้อมูลล้มเหลว:', error);
+                hideLoading();
+                showNotification('การส่งข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง', 'error');
+            }
+        }
+
+    // Small helpers to ensure UI can repaint between async steps
+    const __delay = (ms = 300) => new Promise(res => setTimeout(res, ms));
+    const __nextFrame = () => new Promise(res => requestAnimationFrame(() => res()));
+
+    async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false) {
+            console.log(`🔄 ความพยายามที่ ${currentAttempt}/${maxRetries}${useBackup ? ' (ใช้ backup)' : ''}`);
+            updateProgressStep(2);
+            updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
+            if (!SYSTEM_HEALTH.isOnline) throw new Error('ไม่มีการเชื่อมต่ออินเทอร์เน็ต');
+            await new Promise(r => setTimeout(r, 1000));
+            updateProgressStep(3);
+            updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
+            let endpoint = API_CONFIG.endpoint;
+            if (useBackup && API_CONFIG.backupEndpoints.length > 0) {
+                const backupIndex = (currentAttempt - 1) % API_CONFIG.backupEndpoints.length;
+                endpoint = API_CONFIG.backupEndpoints[backupIndex];
+                console.log(`🔄 ใช้ backup endpoint: ${endpoint}`);
+            }
+            try {
+                const submissionId = (self.crypto && crypto.randomUUID ? crypto.randomUUID() : 'sub-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                const payload = { ...data, submissionId, systemInfo: { userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: currentAttempt, endpoint } };
+        // แจ้งสถานะการส่งข้อมูลก่อนเริ่มส่ง เพื่อให้ผู้ใช้เห็น Step 4
+        updateProgressStep(4);
+        updateLoadingStatus('กำลังส่งข้อมูล...');
+        await __nextFrame();
+        // Simple request (หลบ preflight)
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: controller.signal, cache: 'no-store', keepalive: true });
+        clearTimeout(timeoutId);
+                let ok = response.ok; let txt=''; let json=null;
+                try { txt = await response.text(); if (txt) { try { json = JSON.parse(txt); } catch(_){} } } catch(_){}
+                const logicalSuccess = json && (json.success === true || json.status === 'ok');
+                if (!ok || !logicalSuccess) {
+                    const pending = { savedAt: new Date().toISOString(), submissionId, endpoint, httpStatus: response.status, ok, logicalSuccess, bodySample: (txt||'').slice(0,500), payload };
+                    LS.set('pendingSubmission', JSON.stringify(pending));
+                    throw new Error('การยืนยันผลล้มเหลว HTTP:' + response.status + ' successFlag:' + logicalSuccess);
+                }
+        updateProgressStep(5);
+        updateLoadingStatus('ยืนยันการบันทึก...');
+        await __delay(400);
+                LS.remove('pendingSubmission');
+                SYSTEM_HEALTH.saveFailureCount = 0; SYSTEM_HEALTH.lastSaveTime = new Date();
+                const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
+                hideLoading();
+                showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                console.log('✅ ส่งข้อมูลสำเร็จ', { submissionId, totalRows, response: json });
+            } catch (error) {
+                const isLikelyCors = (error instanceof TypeError) || /fetch|network|cors/i.test(error.message || '');
+                if (currentAttempt === 1 && isLikelyCors) {
+                    try {
+                        console.warn('⚠️ Simple POST ล้มเหลว อาจติด CORS -> ลอง JSONP');
+                        const jsonpResult = await jsonpFallback(data, endpoint);
+                        if (jsonpResult && jsonpResult.success) {
+                            const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
+                updateProgressStep(5);
+                updateLoadingStatus('ยืนยันการบันทึก...');
+                await __delay(400);
+                hideLoading();
+                showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                            SYSTEM_HEALTH.saveFailureCount = 0; LS.remove('pendingSubmission');
+                            return;
+                        }
+                    } catch (jsonpErr) { console.error('❌ JSONP fallback ล้มเหลว:', jsonpErr); }
+                }
+                console.error(`❌ ความพยายามที่ ${currentAttempt} ล้มเหลว:`, error);
+                ERROR_LOG.log(error, `Submit attempt ${currentAttempt}`); SYSTEM_HEALTH.saveFailureCount++;
+                if (currentAttempt < maxRetries) {
+                    updateLoadingStatus(`กำลังลองใหม่... (${currentAttempt + 1}/${maxRetries})`);
+                    const delay = API_CONFIG.retryDelay * Math.pow(2, currentAttempt - 1);
+                    await new Promise(r => setTimeout(r, delay));
+                    const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup);
+                } else {
+                    if (SYSTEM_HEALTH.saveFailureCount >= SYSTEM_HEALTH.maxFailures) showNotification('ระบบมีปัญหาการส่งข้อมูลซ้ำๆ กรุณาติดต่อผู้ดูแลระบบ', 'error');
+                    try { if (LS.get('pendingSubmission')) showNotification('ไม่สามารถยืนยันผล เซฟ pending รอส่งใหม่', 'warning'); } catch(_){}
+                    throw error;
+                }
+            }
+        }
+
+        // JSONP fallback helper
+        function jsonpFallback(originalPayload, endpoint) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!originalPayload || originalPayload.action !== 'saveData') return reject(new Error('JSONP รองรับเฉพาะ saveData'));
+                    const minimal = { action: 'saveData', data: originalPayload.data };
+                    const jsonStr = JSON.stringify(minimal);
+                    const encoded = encodeURIComponent(jsonStr);
+                    if (encoded.length > 7000) return reject(new Error('ข้อมูลยาวเกินไปสำหรับ JSONP'));
+                    const cbName = '__jsonpCB_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+                    const url = endpoint + '?action=saveData&data=' + encoded + '&callback=' + cbName;
+                    const script = document.createElement('script');
+                    let timeoutId;
+                    window[cbName] = function(resp){ clearTimeout(timeoutId); try { delete window[cbName]; } catch(_){} script.remove(); resolve(resp); };
+                    script.onerror = function(){ clearTimeout(timeoutId); try { delete window[cbName]; } catch(_){} script.remove(); reject(new Error('JSONP script load error')); };
+                    timeoutId = setTimeout(() => { try { delete window[cbName]; } catch(_){} script.remove(); reject(new Error('JSONP timeout')); }, 15000);
+                    script.src = url; document.head.appendChild(script);
+                } catch(err) { reject(err); }
+            });
+        }
+
+        // Collect All Data
+    function collectAllData() {
+            const allData = [];
+            const dataSets = document.querySelectorAll('.data-set');
+            
+            dataSets.forEach((dataSet, index) => {
+                const setNumber = (dataSet.getAttribute('data-set') || (index + 1)).toString();
+        // เลือกค่าจากเครื่องทอ: ให้ค่าที่กรอกเองมาก่อน
+        const machSelVal = dataSet.querySelector(`[name="machine_${setNumber}"]`)?.value || '';
+        const machManualVal = dataSet.querySelector(`[name="machineManual_${setNumber}"]`)?.value || '';
+        const machineValue = machManualVal ? machManualVal.trim() : machSelVal;
+                // ให้ความสำคัญกับค่าที่กรอกเอง หากมี ให้ใช้แทน select
+                const empSelVal = dataSet.querySelector(`[name="employeeA_${setNumber}"]`)?.value || '';
+                const empManualVal = dataSet.querySelector(`[name="employeeAManual_${setNumber}"]`)?.value || '';
+                // ปกติจะเก็บเป็น id; หากผู้ใช้กรอกเองแบบ "ID - ชื่อ" ให้แตกเอา id ด้านหน้า
+                let employeeAValue = empSelVal;
+                if (empManualVal) {
+                    const idFromManual = empManualVal.split(' - ')[0].trim();
+                    employeeAValue = idFromManual || empManualVal.trim();
+                }
+
+                const fabSelVal = dataSet.querySelector(`[name="fabricSize_${setNumber}"]`)?.value || '';
+                const fabManualVal = dataSet.querySelector(`[name="fabricSizeManual_${setNumber}"]`)?.value || '';
+                const fabricSizeValue = fabManualVal ? fabManualVal.trim() : fabSelVal;
+                const setData = {
+                    setNumber: Number(setNumber),
+                    date: dataSet.querySelector(`[name="date_${setNumber}"]`)?.value || '',
+                    machine: machineValue,
+                    employeeA: employeeAValue,
+                    fabricSize: fabricSizeValue,
+                    lotNo: dataSet.querySelector(`[name="lotNo_${setNumber}"]`)?.value || '',
+                    orderNo: dataSet.querySelector(`[name="orderNo_${setNumber}"]`)?.value || '',
+                    productionA: dataSet.querySelector(`[name="productionA_${setNumber}"]`)?.value || '',
+                    speedA: dataSet.querySelector(`[name="speedA_${setNumber}"]`)?.value || '',
+                    efficiencyA: dataSet.querySelector(`[name="efficiencyA_${setNumber}"]`)?.value || '',
+                    meterStartA: dataSet.querySelector(`[name="meterStartA_${setNumber}"]`)?.value || '',
+                    meterEndA: dataSet.querySelector(`[name="meterEndA_${setNumber}"]`)?.value || '',
+                    lengthA: dataSet.querySelector(`[name="lengthA_${setNumber}"]`)?.value || '',
+                    wageA: dataSet.querySelector(`[name="wageA_${setNumber}"]`)?.value || ''
+                };
+                
+                allData.push(setData);
+            });
+            
+            return allData;
+        }
+
+        // Storage namespace helper (safe for combined UI)
+        const SHIFT_ID = 'A';
+        const LS = {
+            _p: function(k){ return `PD2_SHIFT_${SHIFT_ID}_${k}`; },
+            get: function(k){ try { return localStorage.getItem(this._p(k)); } catch(e){ return null; } },
+            set: function(k,v){ try { localStorage.setItem(this._p(k), v); } catch(e){} },
+            remove: function(k){ try { localStorage.removeItem(this._p(k)); } catch(e){} }
+        };
+
+        // Listen for parent frame commands when embedded
+        try {
+            window.addEventListener('message', function(ev){
+                var msg = ev && ev.data;
+                if (!msg || msg.shift && msg.shift !== SHIFT_ID) return; // ignore others
+                if (msg && msg.cmd === 'save') { saveToLocalStorage(true); window.parent.postMessage({shift:SHIFT_ID, event:'saved'}, '*'); }
+                if (msg && msg.cmd === 'load') { loadFromLocalStorage(); window.parent.postMessage({shift:SHIFT_ID, event:'loaded'}, '*'); }
+                if (msg && msg.cmd === 'clear') { clearLocalStorage(); window.parent.postMessage({shift:SHIFT_ID, event:'cleared'}, '*'); }
+            }, false);
+        } catch(e){}
+
+        // Storage Functions - ปรับปรุงให้แข็งแกร่งขึ้น
+        function saveToLocalStorage() {
+            const saveStartTime = performance.now();
+            
+            try {
+                const allData = collectAllData();
+                
+                // Validate data before saving
+                if (!allData || allData.length === 0) {
+                    console.warn('⚠️ ไม่มีข้อมูลที่จะบันทึก');
+                    return;
+                }
+                
+                const storageData = {
+                    version: '2.0', // เพิ่ม version tracking
+                    timestamp: new Date().toISOString(),
+                    dataSetCount: dataSetCount,
+                    data: allData,
+                    // ไม่บันทึกรายการที่เพิ่มใหม่ เพื่อให้เป็นแบบชั่วคราวต่อ session เท่านั้น
+                    // custom lists removed by request
+                    systemHealth: {
+                        saveTime: saveStartTime,
+                        errorCount: SYSTEM_HEALTH.performanceMetrics.errorCount,
+                        lastSaveTime: SYSTEM_HEALTH.lastSaveTime
+                    }
+                };
+                
+                // Check storage size before saving
+                const dataSize = JSON.stringify(storageData).length;
+                const maxSize = 5 * 1024 * 1024; // 5MB limit
+                
+                if (dataSize > maxSize) {
+                    // Clean old data if size is too large
+                    cleanOldStorageData();
+                }
+                
+                // Create backup before overwriting (namespaced)
+                const existingData = LS.get('productionData');
+                if (existingData) {
+                    LS.set('productionDataBackup', existingData);
+                }
+                
+                LS.set('productionData', JSON.stringify(storageData));
+                
+                const saveTime = performance.now() - saveStartTime;
+                SYSTEM_HEALTH.performanceMetrics.saveTime = saveTime;
+                SYSTEM_HEALTH.lastSaveTime = new Date();
+                
+                console.log(`💾 บันทึกข้อมูลแล้ว (${saveTime.toFixed(2)}ms, ${(dataSize/1024).toFixed(2)}KB)`);
+                
+                // Only show notification if manually triggered
+                if (arguments.length > 0 && arguments[0] === true) {
+                    showNotification('บันทึกข้อมูลเรียบร้อยแล้ว', 'purple');
+                }
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'Save to localStorage failed');
+                console.error('❌ ไม่สามารถบันทึกข้อมูลได้:', error);
+                
+                // Try to recover from backup
+                if (error.name === 'QuotaExceededError') {
+                    showNotification('พื้นที่จัดเก็บข้อมูลเต็ม กำลังล้างข้อมูลเก่า...', 'warning');
+                    cleanOldStorageData();
+                    
+                    // Try saving again
+                    try {
+                        LS.set('productionData', JSON.stringify(storageData));
+                        showNotification('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                    } catch (retryError) {
+                        showNotification('ไม่สามารถบันทึกข้อมูลได้ กรุณาล้างข้อมูลเก่า', 'error');
+                    }
+                } else {
+                    showNotification('ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            }
+        }
+        
+        function cleanOldStorageData() {
+            try {
+                // Remove old error logs (namespaced)
+                const errorLog = LS.get('errorLog');
+                if (errorLog) {
+                    const logs = JSON.parse(errorLog);
+                    const recentLogs = logs.slice(0, 50); // Keep only 50 recent entries
+                    LS.set('errorLog', JSON.stringify(recentLogs));
+                }
+                
+                // Remove old backup data
+                LS.remove('productionDataBackup');
+                
+                // Remove other temporary data (global keys still checked)
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.startsWith('temp_') || key.startsWith('old_') || key.includes('_PD2_SHIFT_A_'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                console.log(`🧹 ล้างข้อมูลเก่าแล้ว (${keysToRemove.length} รายการ)`);
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'Clean old storage data failed');
+                console.error('❌ ไม่สามารถล้างข้อมูลเก่าได้:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const stored = LS.get('productionData');
+                if (!stored) {
+                    console.log('ℹ️ ไม่พบข้อมูลที่บันทึกไว้');
+                    return;
+                }
+                
+                const storageData = JSON.parse(stored);
+                
+                // ไม่กู้คืนรายการที่เพิ่มใหม่ เพื่อกันข้อมูลซ้อนทับและให้หายไปเมื่อรีเฟรช
+                
+                // Clear existing data sets
+                document.getElementById('dataContainer').innerHTML = '';
+                
+                // Restore data sets
+                dataSetCount = storageData.dataSetCount || 1;
+                for (let i = 1; i <= dataSetCount; i++) {
+                    const container = document.getElementById('dataContainer');
+                    const newDataSet = document.createElement('div');
+                    newDataSet.innerHTML = generateDataSet(i);
+                    const child = newDataSet.firstElementChild;
+                    if (child) {
+                        container.appendChild(child);
+                        // Force visible in case of mobile rendering quirks
+                        try {
+                            child.style.display = '';
+                            child.style.opacity = '';
+                            child.classList.remove('hidden','invisible');
+                            child.removeAttribute('hidden');
+                        } catch (_) {}
+                        // Ensure browser paints and animation runs: toggle class to re-trigger CSS
+                        requestAnimationFrame(() => {
+                            try {
+                                child.classList.remove('data-set');
+                                // force reflow
+                                void child.offsetWidth;
+                                child.classList.add('data-set');
+                                child.style.transform = 'none';
+                                child.style.opacity = '1';
+                                child.style.visibility = 'visible';
+                                child.style.zIndex = '10';
+                                // temporarily allow overflow to avoid clipping during initial paint
+                                try { const prev = container.style.overflow; container.style.overflow = 'visible'; setTimeout(() => { container.style.overflow = prev || ''; }, 300); } catch(_){}
+                            } catch(_){}
+                        });
+                    }
+                }
+                
+                // Fill data
+                if (storageData.data) {
+                    storageData.data.forEach((setData, index) => {
+                        const setNumber = index + 1;
+                        const dataSet = document.querySelector(`[data-set="${setNumber}"]`);
+                        if (dataSet) {
+                            Object.keys(setData).forEach(key => {
+                                if (key !== 'setNumber') {
+                                    const input = dataSet.querySelector(`[name="${key}_${setNumber}"]`);
+                                    if (input && !input.readOnly) {
+                                        input.value = setData[key];
+                                    }
+                                }
+                            });
+
+                            // หาก machine ไม่พบใน select ให้เติมลงฟิลด์กรอกเองแทน
+                            const machVal = setData.machine || '';
+                            if (machVal) {
+                                const machSel = dataSet.querySelector(`[name="machine_${setNumber}"]`);
+                                if (machSel) {
+                                    const exists = Array.from(machSel.options).some(o => o.value === machVal);
+                                    if (!exists) {
+                                        const machManual = dataSet.querySelector(`[name="machineManual_${setNumber}"]`);
+                                        if (machManual) {
+                                            machManual.value = machVal;
+                                            machSel.value = '';
+                                        }
+                                    }
+                                }
+                            }
+
+                            // หาก employeeA ไม่พบใน select ให้เติมลงฟิลด์กรอกเองแทน
+                            const empVal = setData.employeeA || '';
+                            if (empVal) {
+                                const empSel = dataSet.querySelector(`[name="employeeA_${setNumber}"]`);
+                                if (empSel) {
+                                    const optionFound = Array.from(empSel.options).some(o => o.value === empVal);
+                                    if (!optionFound) {
+                                        const empManual = dataSet.querySelector(`[name="employeeAManual_${setNumber}"]`);
+                                        if (empManual) {
+                                            // แปลงเป็นรูปแบบ "ID - ชื่อ" หากพบใน master list ด้วย id
+                                            const emp = employees.find(e => e.id === empVal);
+                                            empManual.value = emp ? `${emp.id} - ${emp.name}` : empVal;
+                                            empSel.value = '';
+                                        }
+                                    }
+                                }
+                            }
+
+                            // หาก fabricSize ไม่พบใน select ให้เติมลงฟิลด์กรอกเองแทน
+                            const fabVal = setData.fabricSize || '';
+                            if (fabVal) {
+                                const fabSel = dataSet.querySelector(`[name="fabricSize_${setNumber}"]`);
+                                if (fabSel) {
+                                    const optionFound = Array.from(fabSel.options).some(o => o.value === fabVal);
+                                    if (!optionFound) {
+                                        const fabManual = dataSet.querySelector(`[name="fabricSizeManual_${setNumber}"]`);
+                                        if (fabManual) {
+                                            fabManual.value = fabVal;
+                                            fabSel.value = '';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                updateDataSetCount();
+                setupSelectHandlers();
+                refreshAllSelects();
+                try { window.PD2_WAGE_A && window.PD2_WAGE_A.bindWageAForAllSets(); } catch(_){}
+                
+                console.log('📂 โหลดข้อมูลเรียบร้อยแล้ว');
+                showNotification('โหลดข้อมูลเรียบร้อยแล้ว', 'success');
+                
+            } catch (error) {
+                console.error('❌ ไม่สามารถโหลดข้อมูลได้:', error);
+                showNotification('ไม่สามารถโหลดข้อมูลได้', 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            try {
+                LS.remove('productionData');
+                LS.remove('pendingSubmission');
+                console.log('🗑️ ล้างข้อมูลแล้ว');
+                showNotification('ล้างข้อมูลเรียบร้อยแล้ว', 'red');
+            } catch (error) {
+                console.error('❌ ไม่สามารถล้างข้อมูลได้:', error);
+                showNotification('ไม่สามารถล้างข้อมูลได้', 'error');
+            }
+        }
+
+        // Reset all data sets to a single fresh set
+        function resetToSingleDataSet() {
+            try {
+                const ok = confirm('ยืนยันการล้างชุดข้อมูลทั้งหมดให้เหลือเพียง 1 ชุดข้อมูลหรือไม่?');
+                if (!ok) return;
+
+                // Clear stored data for this shift
+                LS.remove('productionData');
+                LS.remove('pendingSubmission');
+
+                // Rebuild DOM with only one fresh data set
+                const container = document.getElementById('dataContainer');
+                if (!container) throw new Error('ไม่พบ dataContainer');
+                container.innerHTML = '';
+                // Safer insertion: create wrapper, set innerHTML and append the child to avoid display/render quirks
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = generateDataSet(1);
+                const child = wrapper.firstElementChild;
+                if (child) container.appendChild(child);
+
+                // Reset counters and UI
+                dataSetCount = 1;
+                updateDataSetCount();
+                setupSelectHandlers();
+                refreshAllSelects();
+                try { window.PD2_WAGE_A && window.PD2_WAGE_A.bindWageAForAllSets(); } catch(_){}
+
+                // Persist the fresh state
+                saveToLocalStorage();
+
+                // UX
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showNotification('รีเซ็ตสำเร็จ เหลือ 1 ชุดข้อมูล', 'success');
+            } catch (error) {
+                console.error('❌ ไม่สามารถรีเซ็ตชุดข้อมูลได้:', error);
+                showNotification('ไม่สามารถรีเซ็ตชุดข้อมูลได้', 'error');
+            }
+        }
+
+        // Recovery System
+        function saveDataForRecovery(data) {
+            try {
+                const recoveryData = {
+                    timestamp: new Date().toISOString(),
+                    data: data
+                };
+                LS.set('pendingSubmission', JSON.stringify(recoveryData));
+                console.log('🔄 บันทึกข้อมูลสำหรับกู้คืน');
+            } catch (error) {
+                console.error('❌ ไม่สามารถบันทึกข้อมูลสำหรับกู้คืนได้:', error);
+            }
+        }
+
+        function checkForPendingSubmissions() {
+            try {
+                const pending = LS.get('pendingSubmission');
+                if (pending) {
+                    const recoveryData = JSON.parse(pending);
+                    const timestamp = new Date(recoveryData.timestamp);
+                    const now = new Date();
+                    const hoursDiff = (now - timestamp) / (1000 * 60 * 60);
+                    
+                    if (hoursDiff > 1) {
+                        // Auto cleanup old data
+                        LS.remove('pendingSubmission');
+                        console.log('🧹 ลบข้อมูลค้างส่งที่เก่าแล้ว');
+                    } else {
+                        // Show recovery modal
+                        document.getElementById('recoveryModal').classList.remove('hidden');
+                        console.log('🔄 พบข้อมูลค้างส่ง');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ ไม่สามารถตรวจสอบข้อมูลค้างส่งได้:', error);
+            }
+        }
+
+        function retryPendingSubmission() {
+            try {
+                const pending = LS.get('pendingSubmission');
+                if (pending) {
+                    const recoveryData = JSON.parse(pending);
+                    document.getElementById('recoveryModal').classList.add('hidden');
+                    
+                    const payload = {
+                        action: 'saveData',
+                        data: {
+                            title: "รายงานแผนกผลิต 2 สำหรับ กะ A (กู้คืน)",
+                            timestamp: recoveryData.timestamp,
+                            totalSets: recoveryData.data.length,
+                            data: recoveryData.data
+                        },
+                        sheetId: API_CONFIG.sheetId,
+                        folderId: API_CONFIG.folderId,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    showLoading();
+                    submitWithRetry(payload, 3, 1);
+                }
+            } catch (error) {
+                console.error('❌ ไม่สามารถลองส่งข้อมูลใหม่ได้:', error);
+                showNotification('ไม่สามารถลองส่งข้อมูลใหม่ได้', 'error');
+            }
+        }
+
+        function discardPendingSubmission() {
+            LS.remove('pendingSubmission');
+            document.getElementById('recoveryModal').classList.add('hidden');
+            showNotification('ยกเลิกข้อมูลค้างส่งแล้ว', 'success');
+        }
+
+        // UI Management Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            // Reset progress steps
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active', 'completed');
+            }
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function updateLoadingStatus(message) {
+            document.getElementById('loadingStatus').textContent = message;
+        }
+
+        function updateProgressStep(stepNumber) {
+            // Mark previous steps as completed
+            for (let i = 1; i < stepNumber; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active');
+                step.classList.add('completed');
+            }
+            
+            // Mark current step as active
+            const currentStep = document.getElementById(`step${stepNumber}`);
+            currentStep.classList.add('active');
+            currentStep.classList.remove('completed');
+        }
+
+                                // load shared PD2 notification module (safe JS loader)
+                                (function(){
+                                    if (window.PD2Notify) return;
+                                    try {
+                                        const s = document.createElement('script');
+                                        s.src = '../pd2-notify.js';
+                                        s.async = false;
+                                        s.addEventListener('error', () => { try { console.warn('pd2-notify failed to load'); } catch(_){} });
+                                        document.head.appendChild(s);
+                                    } catch(_){}
+                                })();
+
+        // System Health Check Function
+        function showSystemHealth() {
+            const healthData = {
+                online: SYSTEM_HEALTH.isOnline,
+                lastSave: SYSTEM_HEALTH.lastSaveTime,
+                saveFailures: SYSTEM_HEALTH.saveFailureCount,
+                loadTime: SYSTEM_HEALTH.performanceMetrics.loadTime,
+                saveTime: SYSTEM_HEALTH.performanceMetrics.saveTime,
+                errorCount: SYSTEM_HEALTH.performanceMetrics.errorCount,
+                recentErrors: ERROR_LOG.getRecentErrors(24),
+                storageUsed: getStorageUsage(),
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    cookieEnabled: navigator.cookieEnabled,
+                    onLine: navigator.onLine
+                }
+            };
+            
+            let healthStatus = '✅ ระบบทำงานปกติ';
+            let healthColor = 'success';
+            
+            if (!healthData.online) {
+                healthStatus = '⚠️ ไม่มีการเชื่อมต่ออินเทอร์เน็ต';
+                healthColor = 'warning';
+            } else if (healthData.saveFailures > 5) {
+                healthStatus = '❌ ระบบมีปัญหาการส่งข้อมูล';
+                healthColor = 'error';
+            } else if (healthData.errorCount > 10) {
+                healthStatus = '⚠️ พบข้อผิดพลาดหลายครั้ง';
+                healthColor = 'warning';
+            }
+            
+            const healthReport = `
+สถานะระบบ: ${healthStatus}
+
+📊 ข้อมูลประสิทธิภาพ:
+- เวลาโหลดระบบ: ${healthData.loadTime.toFixed(2)}ms
+- เวลาบันทึกข้อมูล: ${healthData.saveTime.toFixed(2)}ms
+- จำนวนข้อผิดพลาด: ${healthData.errorCount}
+- ความล้มเหลวในการส่ง: ${healthData.saveFailures}
+
+💾 การใช้พื้นที่จัดเก็บ:
+- ใช้แล้ว: ${(healthData.storageUsed.used/1024).toFixed(2)}KB
+- เหลือ: ${(healthData.storageUsed.remaining/1024).toFixed(2)}KB
+
+🌐 การเชื่อมต่อ:
+- สถานะ: ${healthData.online ? 'เชื่อมต่อ' : 'ไม่เชื่อมต่อ'}
+- บันทึกล่าสุด: ${healthData.lastSave ? new Date(healthData.lastSave).toLocaleString('th-TH') : 'ยังไม่เคย'}
+
+${healthData.recentErrors.length > 0 ? `\n⚠️ ข้อผิดพลาดล่าสุด (24 ชม.):\n${healthData.recentErrors.slice(0, 3).map(e => `- ${e.error.substring(0, 50)}...`).join('\n')}` : ''}
+            `;
+            
+            // Copy to clipboard for easy sharing
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(healthReport).then(() => {
+                    showNotification('คัดลอกรายงานสุขภาพระบบแล้ว', 'success');
+                });
+            }
+            
+            console.log('🏥 รายงานสุขภาพระบบ:', healthData);
+            alert(healthReport);
+            showNotification(healthStatus, healthColor);
+    }
+        
+        function getStorageUsage() {
+            try {
+                let used = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        used += localStorage[key].length + key.length;
+                    }
+                }
+                
+                // Estimate remaining space (5MB typical limit)
+                const estimated = 5 * 1024 * 1024;
+                return {
+                    used: used,
+                    remaining: Math.max(0, estimated - used)
+                };
+            } catch (error) {
+                return { used: 0, remaining: 0 };
+            }
+        }
+
+        // Note: First data set is already created in the main DOMContentLoaded event
+    </script>
+    <script>
+        // Notify parent when this module is visually ready to reduce parent-side perceived load time
+        try {
+            const notifyReady = () => {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'PD2_READY' }, '*');
+                    }
+                } catch(_){}
+            };
+            requestAnimationFrame(() => requestAnimationFrame(notifyReady));
+        } catch(_){}
+    </script>
+</body>
+</html>

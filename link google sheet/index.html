@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ระบบรายงาน</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Sarabun 400,700 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Theme variables and global font family */
+    :root{
+      --theme-900: #0f172a;
+      --theme-600: #2563eb;
+      --theme-400: #38bdf8;
+      --theme-200: #bae6fd; /* soft highlight (sky) */
+      --theme-glow: 0 2px 24px 0 rgba(56,189,248,0.18), 0 1px 8px 0 rgba(59,130,246,0.10);
+      --glass-fg: rgba(37, 99, 235, 0.14); /* blue glass */
+      --glass-border: rgba(56, 189, 248, 0.22); /* sky border */
+    }
+
+    body {
+      font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans Thai', sans-serif;
+      /* modern multi-layer gradient with subtle radial shine */
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(124,58,237,0.12), transparent 12%),
+        radial-gradient(600px 300px at 90% 80%, rgba(14,165,233,0.08), transparent 10%),
+        linear-gradient(135deg, var(--theme-900) 0%, var(--theme-600) 45%, var(--theme-400) 100%);
+      min-height: 100vh;
+      color: #e6eef8;
+    }
+
+    /* Subtle entrance for cards */
+    @keyframes popIn {
+      0% { transform: translateY(10px) scale(0.995); opacity: 0; }
+      60% { transform: translateY(-4px) scale(1.01); opacity: 0.85; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .card-animate { animation: popIn 420ms cubic-bezier(.2,.9,.3,1) both; }
+
+    /* Header emphasis: subtle lift and crisper rendering */
+    .header-title {
+      color: #ffffff;
+      font-weight: 800; /* slight extra weight */
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      /* subtle embossed lift and soft contrast for sharpness */
+      text-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 6px 14px rgba(2,6,23,0.38);
+      letter-spacing: 0.2px;
+    }
+
+    .header-subtitle {
+      color: #ffffff;
+      font-weight: 600;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 4px 10px rgba(2,6,23,0.28);
+      opacity: 0.98;
+    }
+
+    /* Glassy subtle surface used on header */
+    .glass {
+      background: linear-gradient(180deg, var(--glass-fg), rgba(255,255,255,0.03));
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+    }
+
+    /* full-bleed helper: extend element to viewport edges while preserving small side padding */
+    .full-bleed {
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      padding-left: 1rem; /* match page px-4 spacing */
+      padding-right: 1rem;
+    }
+
+  /* small badge vertical offset for header badge alignment */
+  .badge-offset { align-self: flex-start; margin-top: 4px; }
+
+    /* Decorative ring focus fallback */
+    .focus-ring:focus { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.12); }
+
+    /* Small icon circle - enhanced embossed appearance (visual only) */
+    .icon-circle {
+      width: 48px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      position: relative;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(2,6,23,0.45);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+      overflow: visible;
+      /* default neutral background when no color class is present */
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    }
+    /* Per-icon color variants (visual only) */
+    .icon-circle.icon-blue { background: linear-gradient(135deg, #5d00ff 0%, #5d00ff 100%); }
+    .icon-circle.icon-green { background: linear-gradient(135deg, #00ffaa 0%, #00ffa2 100%); }
+    .icon-circle.icon-amber { background: linear-gradient(135deg, #ffa200 0%, #ffa200 100%); }
+    .icon-circle.icon-sky { background: linear-gradient(135deg, #00d9ff 0%, #00d9ff 100%); }
+  .icon-circle.icon-purple { background: linear-gradient(135deg, #c60c0c 0%, #ec0c0c 100%); }
+    /* soft top highlight to increase embossed feel */
+    .icon-circle::before {
+      content: '';
+      position: absolute;
+      inset: 2px auto auto 2px;
+      right: 2px; bottom: auto;
+      height: 12px; width: calc(100% - 8px);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
+      transform: translateY(-6px) rotate(-6deg);
+      filter: blur(6px);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+  /* removed inner bottom shadow for cleaner embossed look */
+    .icon-circle svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
+    .icon-circle:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(2,6,23,0.5), inset 0 4px 10px rgba(255,255,255,0.06); }
+
+    /* Sparkle / button effects (theme-colored) */
+    .sparkle-btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+    .sparkle-btn { transition: transform 220ms cubic-bezier(.2,.9,.3,1), box-shadow 220ms ease, background-color 160ms ease; }
+    .sparkle-btn:focus { box-shadow: 0 10px 30px rgba(59,130,246,0.14); outline: none; }
+    .sparkle-btn::after {
+      content: '';
+      position: absolute;
+      width: 260%; height: 260%;
+      left: -80%; top: -80%;
+      /* blue / indigo themed sheen */
+      background: radial-gradient(circle at 30% 30%, rgba(99,102,241,0.95) 0%, rgba(59,130,246,0.75) 6%, rgba(79,70,229,0.28) 12%, transparent 32%);
+      transform: scale(0.6) translateY(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 340ms ease, transform 480ms cubic-bezier(.2,.9,.3,1);
+    }
+    .sparkle-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 36px rgba(59,130,246,0.10); }
+    .sparkle-btn.sparkle::after { opacity: 1; transform: scale(1) translateY(-10px); transition: opacity 260ms ease, transform 420ms cubic-bezier(.2,.9,.3,1); }
+    @keyframes tinyStars {
+      0% { transform: translateY(0) scale(0.6); opacity: 1 }
+      60% { transform: translateY(-8px) scale(1.05); opacity: 1 }
+      100% { transform: translateY(-18px) scale(0.9); opacity: 0 }
+    }
+    /* optional small sparkle dots (theme-colored) */
+    .sparkle-btn .dot { position:absolute; width:6px;height:6px;border-radius:6px;background:rgba(191,219,254,0.98); box-shadow:0 4px 14px rgba(59,130,246,0.28); opacity:0; pointer-events:none }
+    .sparkle-btn.sparkle .dot { opacity:1; animation: tinyStars 520ms ease-out forwards }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+  <!-- ======================== Header ======================== -->
+  <header class="py-12">
+    <div class="container mx-auto px-4">
+      <div class="full-bleed">
+        <div class="mx-auto max-w-4xl rounded-2xl p-10 md:p-12 glass shadow-lg">
+          <div class="flex items-center gap-4 md:gap-6">
+          <div class="icon-circle icon-blue shadow-md">
+            <!-- Logo / report icon -->
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-6a2 2 0 012-2h6" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 10v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h8" />
+            </svg>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <h1 class="text-2xl md:text-3xl font-bold text-white">ระบบบันทึกรายงานออนไลน์</h1>
+            <p class="mt-1 text-white">เลือกรายงานที่ต้องการเพื่อดำเนินการต่อ </p>
+          </div>
+          <div class="hidden md:flex items-center badge-offset">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-slate-50 text-slate-600 border">V1.0</span>
+          </div>
+        </div>
+        
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================== Main Content ======================== -->
+  <main class="pb-16">
+    <div class="container mx-auto px-4">
+  <section aria-label="ลิงก์รายงานสำคัญ" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <!-- Card: กะ A -->
+  <article class="bg-indigo-50 border border-indigo-100 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out card-animate h-full flex flex-col">
+          <div class="flex items-start gap-4">
+            <div class="icon-circle icon-green shadow-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-lg font-bold">บันทึกรายงานกะ A</h2>
+              <p class="mt-1 text-sm text-slate-500"><span class="whitespace-nowrap">Google Sheets — ใช้งาน แก้ไขได้</span></p>
+            </div>
+            <!-- label removed -->
+          </div>
+          <div class="h-3 md:h-6"></div>
+          <div class="mt-6 mt-auto flex items-center justify-between pl-12 md:pl-16 gap-3">
+            <a
+              href="https://docs.google.com/spreadsheets/d/1K9e_VNW34yF_nVFCXW3v6W8v7FAt33Gr9xnuwCHBadc/edit#gid=118527011"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="เปิดรายงานกะ A ในแท็บใหม่"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-ring sparkle-btn"
+            >
+              <span>เปิดรายงาน</span>
+              <!-- External link icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Card: กะ B -->
+  <article class="bg-emerald-50 border border-emerald-100 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out card-animate h-full flex flex-col">
+          <div class="flex items-start gap-4">
+            <div class="icon-circle icon-purple shadow-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-lg font-bold">บันทึกรายงานกะ B</h2>
+              <p class="mt-1 text-sm text-slate-500"><span class="whitespace-nowrap">Google Sheets — ใช้งาน แก้ไขได้</span></p>
+            </div>
+            <!-- label removed -->
+          </div>
+          <div class="h-3 md:h-6"></div>
+          <div class="mt-6 mt-auto flex items-center justify-between pl-12 md:pl-16 gap-3">
+            <a
+              href="https://docs.google.com/spreadsheets/d/1ZhDdKmzZSK0koExN2u_JsiF_SLAOanYyGtuewNAkFYU/edit#gid=371622632"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="เปิดรายงานกะ B ในแท็บใหม่"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-ring sparkle-btn"
+            >
+              <span>เปิดรายงาน</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Card: ตัดม้วนผ้า -->
+  <article class="bg-amber-50 border border-amber-100 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out card-animate h-full flex flex-col">
+          <div class="flex items-start gap-4">
+            <div class="icon-circle icon-amber shadow-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-lg font-bold">บันทึกรายงานตัดม้วนผ้า</h2>
+              <p class="mt-1 text-sm text-slate-500"><span class="whitespace-nowrap">Google Sheets — ใช้งาน แก้ไขได้</span></p>
+            </div>
+            <!-- label removed -->
+          </div>
+          <div class="h-3 md:h-6"></div>
+          <div class="mt-6 mt-auto flex items-center justify-between pl-12 md:pl-16 gap-3">
+            <a
+              href="https://docs.google.com/spreadsheets/d/1rx7Upb0wmWb1Tw2Wxdqgq0rpa1STy84rWetmAZdfkAA/edit#gid=1496029847"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="เปิดรายงานตัดม้วนผ้า ในแท็บใหม่"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-ring sparkle-btn"
+            >
+              <span>เปิดรายงาน</span>
+              <!-- External link icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Card: Colab ใบรายงานยาว -->
+  <article class="bg-sky-50 border border-sky-100 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out card-animate h-full flex flex-col">
+          <div class="flex items-start gap-4">
+            <div class="icon-circle icon-sky shadow-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-lg font-bold">โปรแกรมสร้างใบรายงาน (ใบยาว)</h2>
+              <p class="mt-1 text-sm text-slate-500"><span class="whitespace-nowrap">ใช้งานสคริปต์และดาวน์โหลด</span></p>
+            </div>
+            <!-- label removed -->
+          </div>
+          <div class="h-3 md:h-6"></div>
+          <div class="mt-6 mt-auto flex items-center justify-between pl-12 md:pl-16">
+            <a
+              href="https://colab.research.google.com/drive/1clqDwzxJXlwN37FHGp46odnSUNxPaCXW#scrollTo=iyxs7Aaimsy7"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="เปิดโปรแกรมสร้างใบรายงาน (ใบยาว) ในแท็บใหม่"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-ring sparkle-btn"
+            >
+              <span>เปิดรายงาน</span>
+              <!-- External link icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <!-- ======================== Footer ======================== -->
+  <footer class="py-8">
+    <div class="container mx-auto px-4 text-center text-sm text-white">
+      <p>&copy; Zola Polysack Co.,ltd</p>
+    </div>
+  </footer>
+  <script>
+    // Robust sparkle button interaction
+    (function(){
+      try {
+        // global safety handlers
+        window.addEventListener('error', function (ev) {
+          // log and allow default behaviour; helps debugging in environment
+          console.warn('Runtime error caught:', ev.message, ev.filename, ev.lineno);
+        });
+
+        // Click delegation: cheaper and resilient to DOM changes
+        function onDocClick(e){
+          try {
+            const btn = e.target.closest && e.target.closest('.sparkle-btn');
+            if (!btn) return;
+            if (!btn.isConnected) return; // guard against detached nodes
+
+            // restart sheen animation safely
+            btn.classList.remove('sparkle');
+            // force reflow to restart CSS animation
+            // use requestAnimationFrame for safety in some browsers
+            requestAnimationFrame(() => {
+              try { btn.classList.add('sparkle'); } catch(_){}
+            });
+
+            // cap total dots to avoid DOM bloat
+            const existing = btn.querySelectorAll('.dot').length || 0;
+            const toCreate = Math.max(0, 3 - existing);
+            for (let i = 0; i < toCreate; i++){
+              const d = document.createElement('span');
+              d.className = 'dot';
+              // randomized, but constrained positions
+              d.style.left = (20 + Math.random()*60) + '%';
+              d.style.top = (30 + Math.random()*40) + '%';
+              // don't overwrite CSS background so theme stays consistent
+              btn.appendChild(d);
+
+              // remove when animation ends or after a safety timeout
+              const removeFn = () => { try { d.remove(); } catch(_){} };
+              d.addEventListener('animationend', removeFn, { once: true });
+              setTimeout(removeFn, 900 + Math.random()*300);
+            }
+
+            // cleanup sparkle class after expected duration
+            setTimeout(()=>{ try { btn.classList.remove('sparkle'); } catch(_){} }, 900);
+
+          } catch (innerErr) {
+            console.warn('sparkle handler error', innerErr && innerErr.message);
+          }
+        }
+
+        document.addEventListener('click', onDocClick, { passive: true });
+
+        // remove listener on pagehide/unload to avoid leaks in some SPA containers
+        const cleanup = () => { try { document.removeEventListener('click', onDocClick); } catch(_){} };
+        window.addEventListener('pagehide', cleanup);
+        window.addEventListener('beforeunload', cleanup);
+
+      } catch (err) {
+        console.warn('Failed to initialize sparkle script:', err && err.message);
+      }
+    })();
+  </script>
+<script>
+  try {
+    const notifyReady = () => {
+      try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'PD2_READY' }, '*'); } catch(_){}
+    };
+    requestAnimationFrame(() => requestAnimationFrame(notifyReady));
+  } catch(_){}
+</script>
+</body>
+</html>

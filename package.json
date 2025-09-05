@@ -1,0 +1,23 @@
+{
+  "name": "pd2-shift-combined",
+  "version": "1.0.0",
+  "description": "Production Dept.2 unified shift console",
+  "main": "pd2-notify.js",
+  "scripts": {
+    "start": "live-server . --port=8080",
+    "watch-reload": "node ./dev/watch-and-reload.js",
+    "test": "echo \"No tests\" && exit 0"
+  },
+  "keywords": [
+    "pd2",
+    "shift",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "chokidar": "^3.5.3",
+    "ws": "^8.13.0"
+  }
+}

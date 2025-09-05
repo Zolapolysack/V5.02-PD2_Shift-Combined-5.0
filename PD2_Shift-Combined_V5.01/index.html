@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบบันทึกข้อมูลรายงานแผนกผลิต 2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Kanit', sans-serif; }
+    body { background: linear-gradient(135deg, #0ea5e9 0%, #7c3aed 100%); min-height: 100vh; }
+  .glass { background: rgba(255,255,255,0.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+    .tab-btn { transition: all .2s ease; }
+    .tab-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border-color:#16a34a; }
+    .tab-btn:not(.active) { background: rgba(255,255,255,0.9); color:#111827; border-color:#e5e7eb; }
+    .frame-wrap { height: calc(100vh - 112px); /* header(32)+box(80)≈112 */ }
+    @media (max-width: 768px) { .frame-wrap { height: calc(100vh - 140px); } }
+  .hero-blur { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    /* Pro look helpers */
+    .gradient-text { background: linear-gradient(90deg, #a7f3d0, #6ee7b7, #22d3ee, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sticky-card { position: sticky; top: 1rem; z-index: 50; }
+    .pill-group { background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.65); padding: .25rem; border-radius: .875rem; display: inline-flex; gap: .25rem; }
+    .pill-btn {
+      position: relative;
+      padding: .625rem 1.125rem; /* slightly taller */
+      border-radius: .85rem;
+      font-weight: 400; /* lighter as requested */
+      color:#0f172a;
+      transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+      will-change: transform, box-shadow;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .pill-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .pill-btn:active { transform: translateY(0); box-shadow: 0 3px 10px rgba(0,0,0,.1); }
+    .pill-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.7), 0 8px 20px rgba(0,0,0,.18); }
+    .pill-btn::after {
+      content: "";
+      position: absolute; inset: -1px;
+      background: radial-gradient(120px 60px at var(--x,10%) 50%, rgba(255,255,255,.35), transparent 60%);
+      opacity: 0; transition: opacity .25s ease;
+      pointer-events: none;
+    }
+    .pill-btn:hover::after { opacity: .6; }
+    .pill-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); color:#fff; box-shadow: 0 14px 30px rgba(34,197,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+  /* Make B active appear red to differentiate */
+  #btnB.pill-btn.active { background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 14px 30px rgba(244,63,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    .bg-grid {
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.12) 1px, transparent 0);
+      background-size: 22px 22px;
+    }
+    .spotlight { position: absolute; inset: 0; opacity: .8; mix-blend-mode: screen; }
+    .spotlight:before, .spotlight:after {
+      content: ""; position: absolute; border-radius: 9999px; filter: blur(60px);
+    }
+    .spotlight:before { width: 480px; height: 480px; left: -120px; top: -140px; background: radial-gradient(circle, rgba(34,211,238,.35), transparent 60%); }
+    .spotlight:after { width: 540px; height: 540px; right: -160px; bottom: -180px; background: radial-gradient(circle, rgba(167,139,250,.35), transparent 60%); }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Top Nav / Brand -->
+  <header class="mx-4 mt-4">
+    <div class="glass sticky-card rounded-xl p-3 flex items-center justify-between shadow-lg ring-1 ring-white/20">
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 shadow-inner"></div>
+          <!-- Brand image points to ../images.png (placed at workspace root) -->
+          <img id="brandImg" src="../images.png" alt="Brand" class="absolute inset-0 z-10 w-10 h-10 rounded-lg object-cover ring-1 ring-white/40" onerror="this.remove()" />
+        </div>
+        <div class="leading-tight">
+          <div class="text-white text-lg font-semibold">Production Dept. 2</div>
+          <div class="text-white/70 text-xs">Shift A+B Unified Console</div>
+        </div>
+      </div>
+      <nav class="hidden sm:flex items-center gap-3 text-sm">
+  <a href="#overview" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">ภาพรวม</a>
+  <a href="#shift" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">เลือกกะ</a>
+  <a href="#workbench" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">หน้าทำงาน</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden mt-4 mx-4 rounded-2xl min-h-[280px] md:min-h-[360px] flex items-center">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-400/30 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"></div>
+  <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/0 hero-blur"></div>
+    </div>
+    <div class="w-full glass rounded-2xl bg-grid relative">
+      <div class="spotlight" aria-hidden="true"></div>
+      <div class="px-6 py-8 md:px-10 md:py-12">
+        <div class="max-w-full text-left">
+          <h1 class="gradient-text whitespace-nowrap tracking-tight text-[clamp(1rem,4vw,2.6rem)] md:text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-tight">ระบบจัดการข้อมูลกะการผลิตกะ A และ B</h1>
+          <p class="text-white/85 mt-3 whitespace-nowrap text-[clamp(0.9rem,2.2vw,1.125rem)]">รวมการทำงานของทั้งสองกะไว้ในที่เดียว สลับกะได้ทันที บันทึกข้อมูล รองรับการใช้งานทั้งออนไลน์และออฟไลน์</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview / Features -->
+  <section id="overview" class="mx-4 mt-8">
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass rounded-xl p-6 text-center h-full">
+        <div class="text-white text-xl font-medium flex items-center justify-center gap-2">
+          <!-- Save (Floppy) -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 3h9l3 3v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="white" stroke-width="1.5"/>
+            <path d="M8 3h5v5H8z" stroke="white" stroke-width="1.5"/>
+            <path d="M8 21v-6h8v6" stroke="white" stroke-width="1.5"/>
+          </svg>
+          <span>บันทึกอัตโนมัติ</span>
+        </div>
+        <p class="text-white/85 text-base mt-2">เซฟข้อมูลอัตโนมัติระหว่างพิมพ์ ลดโอกาสข้อมูลสูญหาย</p>
+      </div>
+      <div class="glass rounded-xl p-6 text-center h-full">
+        <div class="text-white text-xl font-medium flex items-center justify-center gap-2">
+          <!-- Offline (Cloud with slash) -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 18H7a4 4 0 1 1 0-8c.4-2.9 2.9-5 6-5a6 6 0 0 1 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M3 3l18 18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>ใช้งานได้แม้ออฟไลน์</span>
+        </div>
+        <p class="text-white/85 text-base mt-2">รองรับการทำงานออฟไลน์ และซิงก์เมื่อกลับมาออนไลน์</p>
+      </div>
+      <div class="glass rounded-xl p-6 text-center h-full">
+        <div class="text-white text-xl font-medium flex items-center justify-center gap-2">
+          <!-- Recovery (Rotate arrows) -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M21 3v6h-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>กู้คืนฉุกเฉิน</span>
+        </div>
+        <p class="text-white/85 text-base mt-2">มีระบบกู้คืนรายการส่งค้าง พร้อมยืนยันก่อนทำรายการ</p>
+      </div>
+      <div class="glass rounded-xl p-6 text-center h-full">
+        <div class="text-white text-xl font-medium flex items-center justify-center gap-2">
+          <!-- Secure Sheets (Shield with check) -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3l7 3v6c0 5-3.3 9-7 9s-7-4-7-9V6l7-3z" stroke="white" stroke-width="1.5"/>
+            <path d="M9.5 12.5l2 2 3-3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>ส่งขึ้นชีตอย่างปลอดภัย</span>
+        </div>
+        <p class="text-white/85 text-base mt-2">ผสานกับ Google Sheets ผ่าน API และสำรองข้อมูล</p>
+      </div>
+    </div>
+
+    
+  </section>
+
+  <!-- Shift Selector -->
+  <section id="shift" class="mx-4 mt-6">
+    <div class="glass rounded-2xl p-5 ring-1 ring-white/15">
+      <div class="flex flex-col gap-4">
+        <div class="text-center">
+          <div class="text-white/90 text-xl md:text-2xl font-medium">เลือกกะสำหรับใช้งาน</div>
+          <div class="text-sm md:text-base text-white/70">สามารถสลับได้ ข้อมูลจะยังอยู่ตามกะที่เลือก</div>
+        </div>
+        <div class="flex justify-center">
+          <div class="pill-group shadow-md w-full md:w-[560px] lg:w-[640px]">
+            <button id="btnA" class="pill-btn active text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ A</button>
+            <button id="btnB" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ B</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <!-- Workbench / Iframe -->
+  <section id="workbench" class="mx-4 mt-4 mb-6">
+    <div class="glass rounded-2xl p-2 ring-1 ring-white/10">
+      <div class="frame-wrap rounded-xl overflow-hidden bg-white/90 shadow-lg ring-1 ring-black/5">
+        <!-- Note: This file is placed as a sibling folder of A/B. Adjust relative paths if moved. -->
+  <iframe id="shiftFrame" title="Shift Frame" src="/PD2_Shift-A_V4.0/index.html" class="w-full h-full border-0" loading="eager"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mx-4 mb-6 mt-10">
+    <div class="glass rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm">
+      <div class="text-white/70">© 2025 Production Dept. 2 • Unified Shift Console v4.1</div>
+      <div class="text-white/60">รองรับการใช้งานบนอุปกรณ์พกพา และเบราว์เซอร์หลัก</div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-4 right-4 z-[100] px-4 py-2 rounded-lg glass text-white/95 text-sm shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+    
+  </div>
+
+  <script>
+    (function(){
+      const btnA = document.getElementById('btnA');
+      const btnB = document.getElementById('btnB');
+      const frame = document.getElementById('shiftFrame');
+  // Hero buttons removed per request
+      const toast = document.getElementById('toast');
+      
+
+      function showToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        toast.classList.add('opacity-100');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+          toast.classList.remove('opacity-100');
+        }, 1800);
+      }
+
+      function setActive(btnActive, btnInactive) {
+        btnActive.classList.add('active');
+        btnActive.setAttribute('aria-pressed', 'true');
+        btnInactive.classList.remove('active');
+        btnInactive.setAttribute('aria-pressed', 'false');
+      }
+
+  btnA.addEventListener('click', () => {
+        if (!btnA.classList.contains('active')) {
+          frame.src = '/PD2_Shift-A_V4.0/index.html';
+          setActive(btnA, btnB);
+        }
+        document.getElementById('workbench')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('สลับไปยังกะ A แล้ว');
+      });
+
+      btnB.addEventListener('click', () => {
+        if (!btnB.classList.contains('active')) {
+          frame.src = '/PD2_Shift-B_V4.0/index.html';
+          setActive(btnB, btnA);
+        }
+        document.getElementById('workbench')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('สลับไปยังกะ B แล้ว');
+      });
+
+      // CTA buttons on overview cards
+  // (no hero CTA handlers)
+
+      // Deep-link support: .../index.html#shift=B -> open B initially
+      const hash = (location.hash || '').toLowerCase();
+      if (hash.includes('shift=b')) {
+  frame.src = '/PD2_Shift-B_V4.0/index.html';
+        setActive(btnB, btnA);
+  showToast('เปิดเริ่มต้นที่กะ B');
+      }
+      
+        // Fancy shine effect: track mouse to set --x hotspot for pills
+        const pills = [btnA, btnB].filter(Boolean);
+        pills.forEach(btn => {
+          btn.addEventListener('pointermove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100; // percent across
+            btn.style.setProperty('--x', x + '%');
+          });
+          btn.addEventListener('pointerleave', () => btn.style.removeProperty('--x'));
+        });
+
+        
+    })();
+  </script>
+</body>
+</html>

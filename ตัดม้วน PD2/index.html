@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลตัดม้วนผ้าแผนกผลิต 2</title>
+    <script src="https://cdn.tailwindcss.com/3.4.10"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root{
+            --ais-green: #00b140; /* primary AIS-like green (assumption) */
+            --ais-green-dark: #008f2a;
+            --ais-accent: #9beab0;
+            --ais-info: #00a3a3;
+            --card-bg: rgba(255,255,255,0.95);
+            --muted: #6b7280;
+        }
+
+        * {
+            font-family: 'Kanit', sans-serif;
+            font-feature-settings: "liga" 1, "kern" 1;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-size: 16px; /* Increased from 15px */
+            line-height: 1.6; /* Increased for better readability */
+            letter-spacing: 0.01em;
+            font-weight: 400; /* Increased from 300 */
+            min-height: 100vh;
+            /* Modern multi-stop green gradient with subtle teal & lime accents */
+            background:linear-gradient(135deg, #101010 0%, #333333 100%);
+            /* Fallback for older browsers */
+            background-color: #0b7a4a;
+            color: #f0f4f8; /* Brighter, high-contrast text color */
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Card surfaces updated to AIS theme */
+        .glass {
+            /* Purple / violet calm surface */
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(28,10,40,0.16) 100%);
+            background-color: rgba(48,18,72,0.52); /* fallback */
+            -webkit-backdrop-filter: blur(6px) saturate(1.05);
+            backdrop-filter: blur(6px) saturate(1.05);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-left-color: rgba(124,58,237,0.12);  /* subtle purple edge */
+            border-top-color: rgba(124,58,237,0.07);
+            box-shadow: 0 10px 30px rgba(20,8,36,0.42), inset 0 1px 0 rgba(255,255,255,0.02);
+            border-radius: 12px;
+            transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms ease, background 180ms ease;
+        }
+
+        .glass:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(18,6,40,0.52), 0 0 22px rgba(124,58,237,0.10);
+            background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(40,14,60,0.22) 100%);
+            outline: 1px solid rgba(124,58,237,0.06);
+        }
+
+        .glass-strong {
+            background: var(--card-bg);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(3,50,26,0.06);
+        }
+
+        /* Header hero styling */
+        .header-hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
+            box-shadow: 0 10px 30px rgba(3,50,26,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+            border-radius: 12px;
+        }
+
+        /* Decorative floating bubbles inside header */
+        .header-bubbles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .header-bubbles .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.85);
+            border-radius: 50%;
+            filter: blur(0.6px);
+            opacity: 0.9;
+            transform: translateY(20px) scale(0.8);
+            animation: floatUp 6s linear infinite;
+        }
+
+        .header-bubbles .bubble.small { width:8px;height:8px;opacity:0.7; }
+        .header-bubbles .bubble.medium { width:14px;height:14px;opacity:0.85; }
+        .header-bubbles .bubble.large { width:26px;height:26px;opacity:0.95; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(20px) scale(0.8); opacity:0.6; }
+            50% { opacity:0.95; }
+            100% { transform: translateY(-38px) scale(1); opacity:0.0; }
+        }
+
+        .header-hero h1 { 
+            text-shadow: 0 6px 18px rgba(3,50,26,0.12), 0 1px 0 rgba(255,255,255,0.6);
+            color: #08321a;
+            font-weight: 600;
+        }
+
+        .glass-light {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* Modern vibrant button system */
+        .btn-glow, .button-glow {
+            transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms ease, filter 160ms ease;
+            position: relative;
+            overflow: hidden;
+            will-change: transform, box-shadow, filter;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem; /* consistent padding */
+            min-width: 160px; /* consistent width baseline */
+            height: 44px;
+            border-radius: 10px; /* modern rounded */
+            color: white;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+            box-shadow: 0 6px 18px rgba(6,12,34,0.12);
+            border: none;
+            cursor: pointer;
+            margin: 6px; /* consistent spacing around buttons */
+        }
+
+        .btn-glow:hover, .button-glow:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.08);
+            box-shadow: 0 12px 30px rgba(6,12,34,0.18);
+        }
+
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            transition: opacity 200ms ease;
+            opacity: 0;
+        }
+
+        .btn-glow:active, .button-glow:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 10px rgba(6,12,34,0.08);
+            transition: transform 120ms cubic-bezier(.2,.9,.2,1), box-shadow 120ms ease;
+        }
+
+        /* Primary AIS button (replaces btn-green look) */
+        /* Primary AIS button */
+        .btn-green {
+            background: linear-gradient(135deg, #007a2f 0%, #00b140 100%);
+        }
+
+        .btn-green:hover { background: linear-gradient(135deg, #008f2a 0%, #31c77b 100%); }
+
+        /* Info */
+        .btn-ais-info {
+            background: linear-gradient(135deg, #007b7b 0%, #22c7c7 100%);
+        }
+        .btn-ais-info:hover { background: linear-gradient(135deg, #006868 0%, #2bd1d1 100%); }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #c84b00 0%, #ff8a00 100%);
+        }
+        .btn-orange:hover { background: linear-gradient(135deg, #d55a00 0%, #ff9a2b 100%); }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #0b6b86 0%, #35c0e0 100%);
+        }
+        .btn-blue:hover { background: linear-gradient(135deg, #09607a 0%, #5fd3ee 100%); }
+
+        .btn-red {
+            background: linear-gradient(135deg, #c21b1b 0%, #ff5a5a 100%);
+        }
+        .btn-red:hover { background: linear-gradient(135deg, #a51616 0%, #ff6e6e 100%); }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #4b2bd6 0%, #9b6bff 100%);
+        }
+        .btn-purple:hover { background: linear-gradient(135deg, #3d21c8 0%, #ad87ff 100%); }
+
+        /* Ensure all buttons share white text and subtle text shadow */
+        .btn-glow, .button-glow, .btn-green, .btn-ais-info, .btn-orange, .btn-blue, .btn-red, .btn-purple {
+            color: #ffffff;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+        }
+
+        /* Standardized input appearance for aligned form fields */
+        .input-field {
+            transition: all 0.18s ease;
+            font-size: 15px !important;
+            font-weight: 400 !important;
+            color: #04121a !important; /* stronger, high-contrast text */
+            letter-spacing: 0.01em;
+            line-height: 1.4;
+            padding: 0.6rem 0.75rem;
+            background: #ffffff !important;
+            border: 1px solid rgba(255,255,255,0.9) !important; /* thin white border */
+            border-radius: 6px; /* small rounded corners */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+            height: 44px; /* consistent height */
+            min-height: 44px;
+            width: 100%; /* consistent width within its column */
+            box-sizing: border-box;
+        }
+
+        /* Hover shows a clearer white border */
+        .input-field:hover {
+            border-color: rgba(255,255,255,1) !important;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+            color: #04121a !important;
+        }
+
+        /* Keep focus visual (green) but preserve consistent sizing */
+        .input-field:focus {
+            box-shadow: 0 0 0 4px rgba(0,177,64,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            border-color: var(--ais-green-dark) !important;
+            outline: none;
+            background: #fff !important;
+            color: #04121a !important;
+        }
+
+        .readonly-field {
+            background: #f3f7f3 !important;
+            color: #04121a !important;
+            cursor: not-allowed;
+            font-weight: 300 !important;
+            font-size: 15px !important;
+            border: 1px solid rgba(255,255,255,0.9) !important;
+            border-radius: 6px;
+            letter-spacing: 0.01em;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+            height: 44px;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .input-field::placeholder { color: #6b7280; opacity: 1; }
+        .instant-suggestions, .instant-suggest { color: #04121a; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; box-shadow: 0 8px 20px rgba(2,6,23,0.12); }
+        .instant-suggestions div, .instant-suggest div { color: #04121a; }
+        .instant-suggestions div:hover, .instant-suggest div:hover { background: #eff6ff; }
+
+        /* Layout: two-column aligned grid for left/right fields inside each data set */
+        .data-set .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 20px; /* row-gap / column-gap */
+            align-items: start; /* align items vertically */
+        }
+
+        /* Each labeled field stacks label + input with consistent spacing */
+        .data-set .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px; /* consistent spacing between label and input */
+            justify-content: flex-start;
+        }
+
+        .data-set .field label {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #ffffff; /* bright white */
+            text-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 2px 6px rgba(0,0,0,0.35);
+            font-weight: 600;
+        }
+
+        /* Ensure inputs in both columns align to the same baseline/height */
+        .data-set .form-grid .field .input-field,
+        .data-set .form-grid .field .readonly-field {
+            width: 100%;
+            height: 44px;
+            min-height: 44px;
+        }
+
+        /* Text alignment inside inputs */
+        .input-field, select.input-field {
+            text-align: left;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        /* Responsive: single column on narrow screens */
+        @media (max-width: 768px) {
+            .data-set .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .data-set { animation: slideIn 0.45s ease-out; }
+
+    /* Notification theme to match AIS colors */
+    .notify-ais-success { background: linear-gradient(90deg, var(--ais-green), var(--ais-accent)); color: #fff; }
+    .notify-ais-error { background: linear-gradient(90deg, #ef4444, #dc2626); color: #fff; }
+    .notify-ais-info { background: linear-gradient(90deg, var(--ais-info), #4ad6d6); color: #fff; }
+    .notify-ais-warning { background: linear-gradient(90deg, #f59e0b, #f97316); color: #fff; }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-step {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background: #16a34a;
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: #059669;
+            color: white;
+        }
+        
+        .notification {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .input-field {
+                font-size: 16px !important;
+            }
+            
+            .btn-glow, .button-glow {
+                min-height: 44px;
+            }
+        }
+    </style>
+    <!-- LEGACY / OLD MOBILE SUPPORT START -->
+    <style>
+        /* Fallback พื้นหลัง (ถ้า gradient ไม่ทำงานจะยังเห็นสีหลัก) */
+        body { background-color:#1e40af; }
+        /* เมื่อไม่รองรับ backdrop-filter ให้ใช้พื้นหลังขาวโปร่งหนาแทน เพื่อให้อ่านง่ายบน iOS <12 / Android เก่า */
+        .no-backdrop .glass,
+        .no-backdrop .glass-strong,
+        .no-backdrop .glass-light { 
+            backdrop-filter:none !important; 
+            -webkit-backdrop-filter:none !important; 
+            -moz-backdrop-filter:none !important;
+            background:rgba(255,255,255,0.88) !important; 
+            border-color:rgba(0,0,0,0.08) !important;
+        }
+        /* ลดเอฟเฟกต์เงา/อนิเมชัน หากเครื่องเก่า (เราจะเติมคลาส reduced-effects จาก JS) */
+        .reduced-effects * { transition:none !important; animation:none !important; }
+        .reduced-effects .btn-glow:hover, .reduced-effects .button-glow:hover { transform:none !important; box-shadow:none !important; }
+    </style>
+    <script>
+        /* Feature / capability detection + polyfills loader สำหรับเบราว์เซอร์เก่า */
+        (function(){
+            var docEl = document.documentElement;
+            try {
+                if(!(window.CSS && CSS.supports && CSS.supports('backdrop-filter: blur(4px)'))){
+                    docEl.classList.add('no-backdrop');
+                }
+            } catch(e){ docEl.classList.add('no-backdrop'); }
+
+            // ประเมินประสิทธิภาพคร่าว ๆ (อุปกรณ์เก่า: หน่วยความจำต่ำ / CPU ช้า -> ปิดอนิเมชันหนัก ๆ)
+            if(navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4){
+                docEl.classList.add('reduced-effects');
+            }
+
+            // Polyfill: Promise
+            if(typeof Promise === 'undefined'){
+                var p = document.createElement('script');
+                p.src = 'https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js';
+                document.head.appendChild(p);
+            }
+            // Polyfill: fetch
+            if(typeof fetch === 'undefined'){
+                var f = document.createElement('script');
+                f.src = 'https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.20/dist/fetch.umd.min.js';
+                document.head.appendChild(f);
+            }
+            // Polyfill: IntersectionObserver (ใช้บางกรณีหากมีการเพิ่มภายหลัง)
+            if(!('IntersectionObserver' in window)){
+                var io = document.createElement('script');
+                io.src = 'https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.js';
+                document.head.appendChild(io);
+            }
+            // NodeList.forEach บน IE / เก่ามาก (กันไว้เผื่อเปิดผ่าน WebView เก่า)
+            if(window.NodeList && !NodeList.prototype.forEach){
+                NodeList.prototype.forEach = Array.prototype.forEach;
+            }
+            // classList บาง WebView เก่าขาด (ตรวจผิวเผิน)
+            if(!('classList' in document.createElement('_'))){
+                try { (document.createElement('script').src='https://unpkg.com/classlist-polyfill@1.2.0/src/index.js'); } catch(e){}
+            }
+        })();
+    </script>
+    <!-- LEGACY / OLD MOBILE SUPPORT END -->
+</head>
+<body class="min-h-screen">
+    <!-- Header Section (cleaned) -->
+    <div class="glass-strong header-hero mx-4 mt-4 p-6 mb-6">
+        <!-- Decorative bubbles layer -->
+        <div class="header-bubbles" aria-hidden="true">
+            <div class="bubble small" style="left:8%; bottom:12%; animation-duration:6s; animation-delay:0s;"></div>
+            <div class="bubble medium" style="left:22%; bottom:6%; animation-duration:5.5s; animation-delay:0.6s;"></div>
+            <div class="bubble small" style="left:40%; bottom:14%; animation-duration:7s; animation-delay:0.9s;"></div>
+            <div class="bubble large" style="left:60%; bottom:8%; animation-duration:6.5s; animation-delay:0.3s;"></div>
+            <div class="bubble medium" style="left:78%; bottom:16%; animation-duration:5.8s; animation-delay:0.7s;"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;min-height:72px;position:relative;z-index:2;">
+            <h1 class="text-3xl md:text-4xl font-medium tracking-normal m-0" style="line-height:1.1; color:#000000;">ระบบบันทึกข้อมูลตัดม้วนผ้าแผนกผลิต 2</h1>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="glass rounded-lg mx-4 mb-6 p-6">
+        <div class="flex justify-center">
+            <div class="flex items-center bg-white bg-opacity-50 rounded-lg px-4 py-2">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#dataGrad)" x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line stroke="white" stroke-width="2" x1="16" y1="2" x2="16" y2="6"/>
+                    <line stroke="white" stroke-width="2" x1="8" y1="2" x2="8" y2="6"/>
+                    <line stroke="white" stroke-width="2" x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span class="font-normal text-gray-900 text-base" style="color:#000000;">จำนวนชุดข้อมูล: <span id="dataSetCount" class="text-blue-600 font-medium" style="color:#ff0000;">1</span>/<span class="text-gray-900" style="color:#000000;">100</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Entry Container -->
+    <div id="dataContainer" class="mx-4 space-y-6">
+        <!-- Data sets will be generated here -->
+    </div>
+
+    <!-- Quick Actions Box -->
+    <div class="glass rounded-lg mx-4 my-6 p-6">
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-plus-circle w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                เพิ่มชุดข้อมูลใหม่
+            </button>
+            
+            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-files w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                คัดลอกโดยเพิ่มชุดข้อมูล
+            </button>
+            
+            <button onclick="clearLocalStorage()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-trash w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                ล้างข้อมูลชั่วคราว
+            </button>
+            
+            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-arrow-repeat w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                รีเซ็ตการบันทึกข้อมูล
+            </button>
+            
+            <button onclick="showSystemHealth()" class="btn-glow btn-ais-info px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-heart-pulse w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                ตรวจสอบระบบ
+            </button>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="glass rounded-lg mx-4 my-6 p-6">
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-save w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                บันทึกชั่วคราว
+            </button>
+            
+            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+                <i class="bi bi-check2-circle w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                บันทึกข้อมูลทั้งหมด
+            </button>
+        </div>
+    </div>
+
+    <!-- Usage instructions removed per user request -->
+
+    <!-- Modals -->
+    <!-- Machine Modal -->
+    <div id="machineModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="machineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#machineGrad)" x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line stroke="white" stroke-width="2" x1="8" y1="21" x2="16" y2="21"/>
+                        <line stroke="white" stroke-width="2" x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    เพิ่มเครื่องทอใหม่
+                </h3>
+                <button onclick="closeModal('machine')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newMachine" placeholder="เช่น CL96" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('machine')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('machine')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div id="employeeModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="employeeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#employeeGrad)" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    เพิ่มพนักงานใหม่
+                </h3>
+                <button onclick="closeModal('employee')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newEmployeeId" placeholder="รหัสพนักงาน เช่น ZP99999" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-3">
+            <input type="text" id="newEmployeeName" placeholder="ชื่อ-นามสกุล" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('employee')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('employee')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fabric Size Modal -->
+    <div id="fabricModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="fabricGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#fabricGrad)" x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <path stroke="white" stroke-width="2" d="m9 9 3 3-3 3m6-6h-6"/>
+                    </svg>
+                    เพิ่มขนาดหน้าผ้าใหม่
+                </h3>
+                <button onclick="closeModal('fabric')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="newFabricSize" placeholder="เช่น 2025800SMN" class="input-field w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <div class="flex gap-3">
+                <button onclick="saveModalData('fabric')" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    บันทึก
+                </button>
+                <button onclick="closeModal('fabric')" class="btn-glow bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center">
+        <div class="glass-strong rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">กำลังบันทึกข้อมูล</h3>
+                <p class="text-gray-600 mb-4" id="loadingStatus">กำลังเตรียมข้อมูล...</p>
+                
+                <!-- Progress Steps -->
+                <div class="flex justify-between mb-4">
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step1">1</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step2">2</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step3">3</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step4">4</div>
+                    <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step5">5</div>
+                </div>
+                
+                <div class="text-sm text-gray-500">
+                    <div>1. เตรียมข้อมูล</div>
+                    <div>2. ตรวจสอบข้อมูล</div>
+                    <div>3. เชื่อมต่อเซิร์ฟเวอร์</div>
+                    <div>4. ส่งข้อมูล</div>
+                    <div>5. ยืนยันการบันทึก</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Recovery Modal -->
+    <div id="recoveryModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="recoveryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#recoveryGrad)" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800">พบข้อมูลค้างส่ง</h3>
+            </div>
+            <p class="text-gray-600 mb-6">พบข้อมูลที่ยังไม่ได้ส่งจากครั้งก่อน คุณต้องการลองส่งใหม่หรือไม่?</p>
+            <div class="flex gap-3">
+                <button onclick="retryPendingSubmission()" class="btn-glow btn-green text-white px-6 py-2 rounded-lg font-semibold flex-1">
+                    ลองส่งใหม่
+                </button>
+                <button onclick="discardPendingSubmission()" class="btn-glow btn-red text-white px-6 py-2 rounded-lg font-semibold">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debug badge overlay (non-invasive) — disabled by default
+        var PD2_DEBUG_ON = false;
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            PD2_DEBUG_ON = (qs.has('pd2debug') || qs.get('debug') === '1' || localStorage.getItem('PD2_DEBUG') === '1');
+        } catch(_){}
+        function PD2DebugBadge(msg) {
+            if (!PD2_DEBUG_ON) return;
+            try {
+                let badge = document.getElementById('pd2-debug-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'pd2-debug-badge';
+                    Object.assign(badge.style, {
+                        position: 'fixed', top: '8px', right: '8px', zIndex: 99999,
+                        background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '12px',
+                        padding: '6px 10px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                        pointerEvents: 'none'
+                    });
+                    document.body.appendChild(badge);
+                }
+                badge.textContent = String(msg || '');
+                badge.style.display = 'block';
+                setTimeout(() => { if (badge) badge.style.display = 'none'; }, 2200);
+            } catch(_){}
+        }
+
+        // Master Data Arrays
+        const machines = [
+            "CL1","CL2","CL3","CL4","CL5","CL6","CL7","CL8","CL9","CL12","CL13","CL14",
+            "CL15","CL16","CL17","CL19","CL25","CL26","CL27","CL28","CL29","CL30","CL31",
+            "CL32","CL33","CL44","CL45","CL46","CL47","CL48","CL49","CL50","CL51","CL52",
+            "CL53","CL54","CL55","CL56","CL57","CL58","CL59","CL60","CL61","CL62","CL63",
+            "CL64","CL65","CL66","CL67","CL68","CL69","CL70","CL71","CL72","CL73","CL74",
+            "CL75","CL76","CL77","CL78","CL79","CL80","CL81","CL82","CL83","CL84","CL85",
+            "CL86","CL87","CL88","CL89","CL90","CL91","CL92","CL93","CL94","CL95",
+            "CL34","CL35","CL36"
+        ];
+
+        // Combined machine list (เพิ่มตามคำขอ) และรวมเข้ากับ machines
+        const combinedMachines = [
+            "CL1 ตัดม้วนที่ครั้ง 2", "CL2 ตัดม้วนที่ครั้ง 2", "CL3 ตัดม้วนที่ครั้ง 2", "CL4 ตัดม้วนที่ครั้ง 2",
+            "CL5 ตัดม้วนที่ครั้ง 2", "CL6 ตัดม้วนที่ครั้ง 2", "CL7 ตัดม้วนที่ครั้ง 2", "CL8 ตัดม้วนที่ครั้ง 2",
+            "CL9 ตัดม้วนที่ครั้ง 2", "CL12 ตัดม้วนที่ครั้ง 2", "CL13 ตัดม้วนที่ครั้ง 2", "CL14 ตัดม้วนที่ครั้ง 2",
+            "CL15 ตัดม้วนที่ครั้ง 2", "CL16 ตัดม้วนที่ครั้ง 2", "CL17 ตัดม้วนที่ครั้ง 2", "CL19 ตัดม้วนที่ครั้ง 2",
+            "CL25 ตัดม้วนที่ครั้ง 2", "CL26 ตัดม้วนที่ครั้ง 2", "CL27 ตัดม้วนที่ครั้ง 2", "CL28 ตัดม้วนที่ครั้ง 2",
+            "CL29 ตัดม้วนที่ครั้ง 2", "CL30 ตัดม้วนที่ครั้ง 2", "CL31 ตัดม้วนที่ครั้ง 2", "CL32 ตัดม้วนที่ครั้ง 2",
+            "CL33 ตัดม้วนที่ครั้ง 2", "CL44 ตัดม้วนที่ครั้ง 2", "CL45 ตัดม้วนที่ครั้ง 2", "CL46 ตัดม้วนที่ครั้ง 2",
+            "CL47 ตัดม้วนที่ครั้ง 2", "CL48 ตัดม้วนที่ครั้ง 2", "CL49 ตัดม้วนที่ครั้ง 2", "CL50 ตัดม้วนที่ครั้ง 2",
+            "CL51 ตัดม้วนที่ครั้ง 2", "CL52 ตัดม้วนที่ครั้ง 2", "CL53 ตัดม้วนที่ครั้ง 2", "CL54 ตัดม้วนที่ครั้ง 2",
+            "CL55 ตัดม้วนที่ครั้ง 2", "CL56 ตัดม้วนที่ครั้ง 2", "CL57 ตัดม้วนที่ครั้ง 2", "CL58 ตัดม้วนที่ครั้ง 2",
+            "CL59 ตัดม้วนที่ครั้ง 2", "CL60 ตัดม้วนที่ครั้ง 2", "CL61 ตัดม้วนที่ครั้ง 2", "CL62 ตัดม้วนที่ครั้ง 2",
+            "CL63 ตัดม้วนที่ครั้ง 2", "CL64 ตัดม้วนที่ครั้ง 2", "CL65 ตัดม้วนที่ครั้ง 2", "CL66 ตัดม้วนที่ครั้ง 2",
+            "CL67 ตัดม้วนที่ครั้ง 2", "CL68 ตัดม้วนที่ครั้ง 2", "CL69 ตัดม้วนที่ครั้ง 2", "CL70 ตัดม้วนที่ครั้ง 2",
+            "CL71 ตัดม้วนที่ครั้ง 2", "CL72 ตัดม้วนที่ครั้ง 2", "CL73 ตัดม้วนที่ครั้ง 2", "CL74 ตัดม้วนที่ครั้ง 2",
+            "CL75 ตัดม้วนที่ครั้ง 2", "CL76 ตัดม้วนที่ครั้ง 2", "CL77 ตัดม้วนที่ครั้ง 2", "CL78 ตัดม้วนที่ครั้ง 2",
+            "CL79 ตัดม้วนที่ครั้ง 2", "CL80 ตัดม้วนที่ครั้ง 2", "CL81 ตัดม้วนที่ครั้ง 2", "CL82 ตัดม้วนที่ครั้ง 2",
+            "CL83 ตัดม้วนที่ครั้ง 2", "CL84 ตัดม้วนที่ครั้ง 2", "CL85 ตัดม้วนที่ครั้ง 2", "CL86 ตัดม้วนที่ครั้ง 2",
+            "CL87 ตัดม้วนที่ครั้ง 2", "CL88 ตัดม้วนที่ครั้ง 2", "CL89 ตัดม้วนที่ครั้ง 2", "CL90 ตัดม้วนที่ครั้ง 2",
+            "CL91 ตัดม้วนที่ครั้ง 2", "CL92 ตัดม้วนที่ครั้ง 2", "CL93 ตัดม้วนที่ครั้ง 2", "CL94 ตัดม้วนที่ครั้ง 2",
+            "CL95 ตัดม้วนที่ครั้ง 2", "CL34 ตัดม้วนที่ครั้ง 2", "CL35 ตัดม้วนที่ครั้ง 2", "CL36 ตัดม้วนที่ครั้ง 2",
+            "CL1 ตัดม้วนที่ครั้ง 3", "CL2 ตัดม้วนที่ครั้ง 3", "CL3 ตัดม้วนที่ครั้ง 3", "CL4 ตัดม้วนที่ครั้ง 3",
+            "CL5 ตัดม้วนที่ครั้ง 3", "CL6 ตัดม้วนที่ครั้ง 3", "CL7 ตัดม้วนที่ครั้ง 3", "CL8 ตัดม้วนที่ครั้ง 3",
+            "CL9 ตัดม้วนที่ครั้ง 3", "CL12 ตัดม้วนที่ครั้ง 3", "CL13 ตัดม้วนที่ครั้ง 3", "CL14 ตัดม้วนที่ครั้ง 3",
+            "CL15 ตัดม้วนที่ครั้ง 3", "CL16 ตัดม้วนที่ครั้ง 3", "CL17 ตัดม้วนที่ครั้ง 3", "CL19 ตัดม้วนที่ครั้ง 3",
+            "CL25 ตัดม้วนที่ครั้ง 3", "CL26 ตัดม้วนที่ครั้ง 3", "CL27 ตัดม้วนที่ครั้ง 3", "CL28 ตัดม้วนที่ครั้ง 3",
+            "CL29 ตัดม้วนที่ครั้ง 3", "CL30 ตัดม้วนที่ครั้ง 3", "CL31 ตัดม้วนที่ครั้ง 3", "CL32 ตัดม้วนที่ครั้ง 3",
+            "CL33 ตัดม้วนที่ครั้ง 3", "CL44 ตัดม้วนที่ครั้ง 3", "CL45 ตัดม้วนที่ครั้ง 3", "CL46 ตัดม้วนที่ครั้ง 3",
+            "CL47 ตัดม้วนที่ครั้ง 3", "CL48 ตัดม้วนที่ครั้ง 3", "CL49 ตัดม้วนที่ครั้ง 3", "CL50 ตัดม้วนที่ครั้ง 3",
+            "CL51 ตัดม้วนที่ครั้ง 3", "CL52 ตัดม้วนที่ครั้ง 3", "CL53 ตัดม้วนที่ครั้ง 3", "CL54 ตัดม้วนที่ครั้ง 3",
+            "CL55 ตัดม้วนที่ครั้ง 3", "CL56 ตัดม้วนที่ครั้ง 3", "CL57 ตัดม้วนที่ครั้ง 3", "CL58 ตัดม้วนที่ครั้ง 3",
+            "CL59 ตัดม้วนที่ครั้ง 3", "CL60 ตัดม้วนที่ครั้ง 3", "CL61 ตัดม้วนที่ครั้ง 3", "CL62 ตัดม้วนที่ครั้ง 3",
+            "CL63 ตัดม้วนที่ครั้ง 3", "CL64 ตัดม้วนที่ครั้ง 3", "CL65 ตัดม้วนที่ครั้ง 3", "CL66 ตัดม้วนที่ครั้ง 3",
+            "CL67 ตัดม้วนที่ครั้ง 3", "CL68 ตัดม้วนที่ครั้ง 3", "CL69 ตัดม้วนที่ครั้ง 3", "CL70 ตัดม้วนที่ครั้ง 3",
+            "CL71 ตัดม้วนที่ครั้ง 3", "CL72 ตัดม้วนที่ครั้ง 3", "CL73 ตัดม้วนที่ครั้ง 3", "CL74 ตัดม้วนที่ครั้ง 3",
+            "CL75 ตัดม้วนที่ครั้ง 3", "CL76 ตัดม้วนที่ครั้ง 3", "CL77 ตัดม้วนที่ครั้ง 3", "CL78 ตัดม้วนที่ครั้ง 3",
+            "CL79 ตัดม้วนที่ครั้ง 3", "CL80 ตัดม้วนที่ครั้ง 3", "CL81 ตัดม้วนที่ครั้ง 3", "CL82 ตัดม้วนที่ครั้ง 3",
+            "CL83 ตัดม้วนที่ครั้ง 3", "CL84 ตัดม้วนที่ครั้ง 3", "CL85 ตัดม้วนที่ครั้ง 3", "CL86 ตัดม้วนที่ครั้ง 3",
+            "CL87 ตัดม้วนที่ครั้ง 3", "CL88 ตัดม้วนที่ครั้ง 3", "CL89 ตัดม้วนที่ครั้ง 3", "CL90 ตัดม้วนที่ครั้ง 3",
+            "CL91 ตัดม้วนที่ครั้ง 3", "CL92 ตัดม้วนที่ครั้ง 3", "CL93 ตัดม้วนที่ครั้ง 3", "CL94 ตัดม้วนที่ครั้ง 3",
+            "CL95 ตัดม้วนที่ครั้ง 3", "CL34 ตัดม้วนที่ครั้ง 3", "CL35 ตัดม้วนที่ครั้ง 3", "CL36 ตัดม้วนที่ครั้ง 3"
+        ];
+
+        machines.push(...combinedMachines);
+        const preferredOrderBase = [
+            "CL1","CL2","CL3","CL4","CL5","CL6","CL7","CL8","CL9","CL12","CL13","CL14",
+            "CL15","CL16","CL17","CL19","CL25","CL26","CL27","CL28","CL29","CL30","CL31",
+            "CL32","CL33","CL44","CL45","CL46","CL47","CL48","CL49","CL50","CL51","CL52",
+            "CL53","CL54","CL55","CL56","CL57","CL58","CL59","CL60","CL61","CL62","CL63",
+            "CL64","CL65","CL66","CL67","CL68","CL69","CL70","CL71","CL72","CL73","CL74",
+            "CL75","CL76","CL77","CL78","CL79","CL80","CL81","CL82","CL83","CL84","CL85",
+            "CL86","CL87","CL88","CL89","CL90","CL91","CL92","CL93","CL94","CL95",
+            "CL34","CL35","CL36"
+        ];
+        const orderMap = new Map(preferredOrderBase.map((id, idx) => [parseInt(id.replace(/^CL/i, ''), 10), idx]));
+        const phaseRank = (s) => {
+            const m = s.match(/ครั้ง\s*(\d+)/);
+            const p = m ? parseInt(m[1], 10) : 0;
+            return p === 2 ? 1 : p === 3 ? 2 : 0;
+        };
+        const machineComparator = (a, b) => {
+            const pa = phaseRank(a);
+            const pb = phaseRank(b);
+            if (pa !== pb) return pa - pb;
+            const nAraw = (a.match(/^CL(\d+)/i) || [])[1];
+            const nBraw = (b.match(/^CL(\d+)/i) || [])[1];
+            const idxA = nAraw ? (orderMap.get(parseInt(nAraw, 10)) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+            const idxB = nBraw ? (orderMap.get(parseInt(nBraw, 10)) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+            if (idxA !== idxB) return idxA - idxB;
+            return a.localeCompare(b, 'th');
+        };
+        machines.sort(machineComparator);
+
+        const employees = [
+            { "id": "ZP91042", "name": "นาย วัน ชัย" },
+            { "id": "ZP91385", "name": "นางสาว รัฐนันท์ นิธากรณ์" },
+            { "id": "ZP92285", "name": "นายตาลซิน ออง" },
+            { "id": "ZP91702", "name": "นาย พิว ไว จอ" },
+            { "id": "ZP92237", "name": "ซอ พู ยา ซา" },
+            { "id": "ZP92286", "name": "นางสาว ซิก เค่น" },
+            { "id": "ZP92250", "name": "ยุน วา ติ" },
+            { "id": "ZP91720", "name": "นางสาว จู จู ซาน" },
+            { "id": "ZP92187", "name": "ติน โม แท็ค" },
+            { "id": "ZP92282", "name": "ปาลามอน" },
+            { "id": "ZP91922", "name": "นาย เพีย โซ อู" },
+            { "id": "ZP92434", "name": "น.ส.ลำไย ใจชื่อ" },
+            { "id": "ZP92471", "name": "นางมอว มอว วิน" },
+            { "id": "ZP91512", "name": "นาง นัน มา เล ยี" },
+            { "id": "ZP92321", "name": "น.ส.มะซูซูเย" },
+            { "id": "ZP92491", "name": "นางมา ทาซิน มน" },
+            { "id": "ZP91680", "name": "นาง ติน ซุย" },
+            { "id": "ZP9499", "name": "นาง จำรัศ พุทธา" },
+            { "id": "ZP91569", "name": "นาย วัชชระ ชะฎาดำ" },
+            { "id": "ZP92350", "name": "นางสาว ซินมาลวิน" },
+            { "id": "ZP91719", "name": "นาย พี พิว ออง" },
+            { "id": "ZP9060", "name": "นางสาว อังคณา บุญธรรม" },
+            { "id": "ZP92495", "name": "นางพรสวรรค์" },
+            { "id": "ZP9174", "name": "นาง รัดดา ศรีทอง" },
+            { "id": "ZP92186", "name": "ซามินอู" },
+            { "id": "ZP92317", "name": "นาย ยาน ลิน ออง" },
+            { "id": "ZP92402", "name": "นาย ลา วิน" },
+            { "id": "ZP91718", "name": "นาย หม่อง ซอ" },
+            { "id": "ZP92425", "name": "น.ส.วิ" },
+            { "id": "ZP92318", "name": "น.ส.คินวิน" },
+            { "id": "ZP91617", "name": "นาง พิไลพรรณ เตโช" },
+            { "id": "ZP92481", "name": "นางสาว ติ่น ซา" },
+            { "id": "ZP92390", "name": "นางสาว เอ วิน" },
+            { "id": "ZP92107", "name": "นาง จี ปิยประภากุล" }
+        ];
+
+        const fabricSizes  = [
+            "1425800",
+            "1725800",
+            "1825800SM",
+            "1921720",
+            "1925800",
+            "1925800SM",
+            "2021720UV",
+            "2021850UV",
+            "2025800",
+            "2025800SM",
+            "2025800SMN",
+            "2025850",
+            "2121670SM",
+            "2125650",
+            "2125800",
+            "2325650",
+            "2625650",
+            "262575051",
+            "2625800",
+            "2625850SM",
+            "2825850",
+            "scl052325650",
+            "test2025800",
+            "2321112512551",
+            "2321112512551"
+        ];
+
+        // API Configuration - ปรับปรุงให้รองรับการเปลี่ยนแปลง
+        const API_CONFIG = {
+            // Primary endpoint (updated 2025-08-16)
+            endpoint: 'https://script.google.com/macros/s/AKfycbzA2gzgLmT5sGuFra-rilh2qeoQDseYasEpNrbUhEK0h9tBkMfQRS4jccL6BgEa5ZiDlg/exec',
+            
+            // Backup endpoints (สำหรับกรณี primary ล้มเหลว)
+            backupEndpoints: [
+                'https://script.google.com/macros/s/BACKUP_URL_1/exec',
+                'https://script.google.com/macros/s/BACKUP_URL_2/exec'
+            ],
+            
+            sheetId: '1rx7Upb0wmWb1Tw2Wxdqgq0rpa1STy84rWetmAZdfkAA',
+            folderId: '1uomWJJjxHMvNWwZRB2S9NVqRqadVDBBZ',
+            
+            // Timeout และ retry settings
+            timeout: 30000, // 30 วินาที
+            maxRetries: 5,
+            retryDelay: 2000, // 2 วินาที
+            
+            // Version tracking
+            apiVersion: '1.0',
+            lastUpdated: '2024-12-19'
+        };
+
+        // Global Variables
+    let dataSetCount = 1;
+    let autoSaveInterval;
+    let debounceTimer;
+    // Track the select that triggered ADD_NEW so only it gets the new selection
+    let addNewContext = null;
+    // Lightweight storage helper (pass-through) for consistency with other modules
+    const LS = {
+        get: function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+        set: function(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+        remove: function(k){ try { localStorage.removeItem(k); } catch(e){} }
+    };
+        
+        // System Health Monitoring
+        const SYSTEM_HEALTH = {
+            lastSaveTime: null,
+            saveFailureCount: 0,
+            maxFailures: 10,
+            isOnline: navigator.onLine,
+            performanceMetrics: {
+                loadTime: 0,
+                saveTime: 0,
+                errorCount: 0
+            }
+        };
+        
+        // Error Logging System
+        const ERROR_LOG = {
+            maxEntries: 100,
+            entries: [],
+            
+            log: function(error, context = '') {
+                const entry = {
+                    timestamp: new Date().toISOString(),
+                    error: error.toString(),
+                    context: context,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+                
+                this.entries.unshift(entry);
+                if (this.entries.length > this.maxEntries) {
+                    this.entries.pop();
+                }
+                
+                // Save to localStorage for debugging
+                try {
+                    localStorage.setItem('errorLog', JSON.stringify(this.entries));
+                } catch (e) {
+                    console.warn('Cannot save error log to localStorage');
+                }
+                
+                console.error('System Error:', entry);
+            },
+            
+            getRecentErrors: function(hours = 24) {
+                const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+                return this.entries.filter(entry => new Date(entry.timestamp) > cutoff);
+            }
+        };
+
+        // Initialize System - ปรับปรุงให้แข็งแกร่งขึ้น
+        document.addEventListener('DOMContentLoaded', function() {
+            const startTime = performance.now();
+            
+            try {
+                console.log('🚀 ระบบบันทึกข้อมูลตัดม้วนผ้าแผนกผลิต 2 เริ่มต้นแล้ว');
+                
+                // Initialize system health monitoring
+                initializeSystemHealth();
+                
+                // Setup error handling
+                setupGlobalErrorHandling();
+                
+                // Initialize UI components
+                // show static timestamp per user request
+                try {
+                    const timeEl = document.getElementById('currentTime');
+                    if (timeEl) timeEl.textContent = '15/08/2568 13:38:45';
+                } catch(e){}
+                // live clock disabled: updateCurrentTime();
+                // setInterval(updateCurrentTime, 1000);
+                
+                // Create initial data sets with error handling
+                try {
+                    const container = document.getElementById('dataContainer');
+                    if (!container) {
+                        throw new Error('Data container not found');
+                    }
+                    
+                    for (let i = 1; i <= 1; i++) {
+                        const newDataSet = document.createElement('div');
+                        newDataSet.innerHTML = generateDataSet(i);
+                        const el = newDataSet.firstElementChild;
+                        if (el) {
+                            try {
+                                // Start hidden and force a paint to avoid mobile WebView clipping issues
+                                el.style.opacity = '0';
+                                el.style.transition = 'opacity 180ms ease-out';
+                                el.style.visibility = 'hidden';
+                                container.appendChild(el);
+                                console.log('PD2: appended initial dataset', i, el);
+                                PD2DebugBadge('CR: append init #' + i);
+                                requestAnimationFrame(() => {
+                                    try {
+                                        el.style.visibility = 'visible';
+                                        void el.offsetWidth; // force reflow
+                                        el.style.opacity = '1';
+                                        el.scrollIntoView && el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        const prevOverflow = container.style.overflow;
+                                        container.style.overflow = 'visible';
+                                        setTimeout(() => { container.style.overflow = prevOverflow || ''; }, 300);
+                                    } catch (_) {}
+                                    setTimeout(() => {
+                                        try {
+                                            if (el.offsetHeight < 8 || getComputedStyle(el).opacity === '0') {
+                                                el.style.display = '';
+                                                el.style.visibility = 'visible';
+                                                el.style.opacity = '1';
+                                                PD2DebugBadge('CR: force show init #' + i);
+                                            }
+                                        } catch(_){}
+                                    }, 300);
+                                });
+                            } catch (e) {
+                                // Fallback to simple append
+                                container.appendChild(el);
+                                console.warn('PD2: append initial dataset fallback', e);
+                            }
+                        }
+                    }
+                    dataSetCount = 1;
+                    updateDataSetCount();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Initial data set creation');
+                    showNotification('เกิดข้อผิดพลาดในการสร้างฟอร์ม กรุณาโหลดหน้าใหม่', 'error');
+                }
+                
+                // Setup event listeners with error handling
+                setupEventListeners();
+                setupSelectHandlers();
+                setupNetworkMonitoring();
+                
+                // Check for pending submissions
+                checkForPendingSubmissions();
+                
+                // Setup auto-save with improved interval
+                setupAutoSave();
+                
+                // Load existing data if available
+                loadFromLocalStorage();
+                
+                // Performance tracking
+                const loadTime = performance.now() - startTime;
+                SYSTEM_HEALTH.performanceMetrics.loadTime = loadTime;
+                console.log(`⚡ ระบบโหลดเสร็จใน ${loadTime.toFixed(2)}ms`);
+                
+                // Show system ready notification
+                setTimeout(() => {
+                    showNotification('ระบบพร้อมใช้งาน', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'System initialization');
+                console.error('❌ เกิดข้อผิดพลาดในการเริ่มต้นระบบ:', error);
+                showNotification('เกิดข้อผิดพลาดในการเริ่มต้นระบบ กรุณาโหลดหน้าใหม่', 'error');
+            }
+        });
+
+        // System Health Functions
+        function initializeSystemHealth() {
+            // Check browser compatibility
+            if (!window.localStorage) {
+                showNotification('เบราว์เซอร์ไม่รองรับการบันทึกข้อมูล', 'warning');
+            }
+            
+            // Check available storage
+            try {
+                const testKey = 'storageTest';
+                localStorage.setItem(testKey, 'test');
+                localStorage.removeItem(testKey);
+            } catch (e) {
+                showNotification('พื้นที่จัดเก็บข้อมูลเต็ม กรุณาล้างข้อมูลเก่า', 'warning');
+            }
+            
+            SYSTEM_HEALTH.isOnline = navigator.onLine;
+        }
+        
+        function setupGlobalErrorHandling() {
+            // Handle uncaught errors
+            window.addEventListener('error', function(event) {
+                ERROR_LOG.log(event.error, `Global error: ${event.filename}:${event.lineno}`);
+                SYSTEM_HEALTH.performanceMetrics.errorCount++;
+            });
+            
+            // Handle unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(event) {
+                ERROR_LOG.log(event.reason, 'Unhandled promise rejection');
+                SYSTEM_HEALTH.performanceMetrics.errorCount++;
+            });
+        }
+        
+        function setupNetworkMonitoring() {
+            // Monitor online/offline status
+            window.addEventListener('online', function() {
+                SYSTEM_HEALTH.isOnline = true;
+                showNotification('เชื่อมต่ออินเทอร์เน็ตแล้ว', 'success');
+                
+                // Try to sync pending data
+                checkForPendingSubmissions();
+            });
+            
+            window.addEventListener('offline', function() {
+                SYSTEM_HEALTH.isOnline = false;
+                showNotification('ไม่มีการเชื่อมต่ออินเทอร์เน็ต ข้อมูลจะถูกบันทึกไว้ในเครื่อง', 'warning');
+            });
+        }
+        
+        function setupAutoSave() {
+            // Clear existing interval if any
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+            
+            // Auto-save every 3 minutes (reduced from 5 for better reliability)
+            autoSaveInterval = setInterval(() => {
+                try {
+                    saveToLocalStorage();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Auto-save failed');
+                }
+            }, 180000);
+            
+            // Also save before page unload
+            window.addEventListener('beforeunload', function(e) {
+                try {
+                    saveToLocalStorage();
+                } catch (error) {
+                    ERROR_LOG.log(error, 'Before unload save failed');
+                }
+            });
+        }
+
+        // Update current time display
+        function updateCurrentTime() {
+            try {
+                const now = new Date();
+                const timeString = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            } catch (error) {
+                ERROR_LOG.log(error, 'Update time failed');
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Prevent accidental page leave
+            window.addEventListener('beforeunload', function(e) {
+                const hasData = document.querySelectorAll('.data-set').length > 0;
+                if (hasData) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    saveToLocalStorage();
+                }
+            });
+
+            // Auto-save on input changes
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('.input-field')) {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(saveToLocalStorage, 2000);
+                }
+            });
+        }
+
+        // Generate Data Set HTML
+        function generateDataSet(setNumber) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            return `
+                <div class="data-set glass rounded-lg p-6 mb-6" data-set="${setNumber}">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-medium text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="setGrad${setNumber}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <rect fill="url(#setGrad${setNumber})" x="3" y="4" width="18" height="15" rx="2" ry="2"/>
+                                <polyline stroke="white" stroke-width="2" points="16,10 12,14 8,10"/>
+                            </svg>
+                            ชุดข้อมูลที่ ${setNumber}
+                        </h2>
+                        ${setNumber > 1 ? `
+                            <button onclick="removeDataSet(${setNumber})" class="btn-glow btn-red text-white px-3 py-2 rounded-lg font-normal text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                                ลบชุดข้อมูล
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="grid lg:grid-cols-3 gap-6 items-start">
+                        <!-- Left column: ข้อมูลพื้นฐาน -->
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="basicGrad${setNumber}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle fill="url(#basicGrad${setNumber})" cx="12" cy="12" r="10"/>
+                                    <path stroke="white" stroke-width="2" d="m9 12 2 2 4-4"/>
+                                </svg>
+                                ข้อมูลพื้นฐาน
+                            </h3>
+
+                            <div class="left-rows" style="display:grid;grid-template-rows:auto auto auto;gap:16px;">
+                                <div class="field">
+                                    <label for="date_${setNumber}">วันที่</label>
+                                    <input type="date" id="date_${setNumber}" name="date_${setNumber}" value="${today}" class="input-field">
+                                </div>
+
+                                <div class="field">
+                                    <label for="machine_${setNumber}">เครื่องทอ NO</label>
+                                    <select id="machine_${setNumber}" name="machine_${setNumber}" class="input-field">
+                                        <option value="">เลือกเครื่องทอ</option>
+                                        ${machines.map(machine => `<option value="${machine}">${machine}</option>`).join('')}
+                                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                                    </select>
+                                    <div class="mt-3">
+                                        <label for="machineManual_${setNumber}">เครื่องทอ NO (กรอกเอง)</label>
+                                        <input type="text" id="machineManual_${setNumber}" name="machineManual_${setNumber}" class="input-field" placeholder="พิมพ์หมายเลขเครื่อง เช่น CL96" autocomplete="off">
+                                        <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label for="fabricSize_${setNumber}">ขนาดหน้าผ้า</label>
+                                    <select id="fabricSize_${setNumber}" name="fabricSize_${setNumber}" class="input-field">
+                                        <option value="">เลือกขนาดหน้าผ้า</option>
+                                        ${fabricSizes.map(size => `<option value="${size}">${size}</option>`).join('')}
+                                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="fabricSizeManual_${setNumber}">ขนาดหน้าผ้า (กรอกเอง)</label>
+                                    <input type="text" id="fabricSizeManual_${setNumber}" name="fabricSizeManual_${setNumber}" class="input-field" placeholder="พิมพ์เพื่อค้นหา/กรอกขนาดหน้าผ้า" autocomplete="off">
+                                </div>
+
+                                <!-- lotNo moved to its own card (ข้อมูล Lot.No) per UI requirement -->
+                            </div>
+                        </div>
+
+                        <!-- Right column: ความยาวตัดม้วน -->
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="lengthGrad${setNumber}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#00b140;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#00a3a3;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle fill="url(#lengthGrad${setNumber})" cx="12" cy="12" r="10"/>
+                                    <path stroke="white" stroke-width="2" d="M8 8h8M8 12h8M8 16h8"/>
+                                </svg>
+                                ความยาวตัดม้วน (เมตร)
+                            </h3>
+
+                            <div class="right-rows" style="display:grid;grid-template-rows:auto auto auto;gap:16px;">
+                                <div class="field">
+                                    <label for="lengthA_${setNumber}">กะ A</label>
+                                    <input type="number" id="lengthA_${setNumber}" name="lengthA_${setNumber}" class="input-field" placeholder="เช่น 2500" step="0.01">
+                                </div>
+
+                                <div class="field">
+                                    <label for="lengthB_${setNumber}">กะ B</label>
+                                    <input type="number" id="lengthB_${setNumber}" name="lengthB_${setNumber}" class="input-field" placeholder="เช่น 2000" step="0.01">
+                                </div>
+
+                                <div class="field">
+                                    <label>&nbsp;</label>
+                                    <div style="height:44px">&nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Third column: ข้อมูล Lot.No (moved) -->
+                        <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
+                            <h3 class="text-lg font-normal text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="lotGrad${setNumber}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#5b21b6;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle fill="url(#lotGrad${setNumber})" cx="12" cy="12" r="10"/>
+                                    <path stroke="white" stroke-width="2" d="M7 12h10M7 8h10M7 16h10"/>
+                                </svg>
+                                ข้อมูล Lot.No
+                            </h3>
+
+                            <div class="lot-rows" style="display:grid;grid-template-rows:auto;gap:16px;">
+                                <div class="field">
+                                    <label for="lotNo_${setNumber}">ขนาด Lot.No</label>
+                                    <input type="text" id="lotNo_${setNumber}" name="lotNo_${setNumber}" class="input-field" placeholder="กรอกเลขที่ Lot.No">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        // Add Data Set
+        function addDataSet() {
+            if (dataSetCount >= 100) {
+                showNotification('ไม่สามารถเพิ่มชุดข้อมูลได้ เนื่องจากถึงขีดจำกัด 100 ชุด', 'error');
+                return;
+            }
+            
+            dataSetCount++;
+            const container = document.getElementById('dataContainer');
+            const newDataSet = document.createElement('div');
+            newDataSet.innerHTML = generateDataSet(dataSetCount);
+            const newElement = newDataSet.firstElementChild;
+            if (newElement) {
+                // safer append with paint forcing
+                try {
+                    newElement.style.opacity = '0';
+                    newElement.style.transition = 'opacity 180ms ease-out';
+                    newElement.style.visibility = 'hidden';
+                    container.appendChild(newElement);
+                    console.log('PD2: appended new dataset', dataSetCount, newElement);
+                    PD2DebugBadge('CR: append #' + dataSetCount);
+                    requestAnimationFrame(() => {
+                        try {
+                            newElement.style.visibility = 'visible';
+                            void newElement.offsetWidth;
+                            newElement.style.opacity = '1';
+                            newElement.scrollIntoView && newElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            const prevOverflow = container.style.overflow;
+                            container.style.overflow = 'visible';
+                            setTimeout(() => { container.style.overflow = prevOverflow || ''; }, 300);
+                        } catch(_){ }
+                        setTimeout(() => {
+                            try {
+                                if (newElement.offsetHeight < 8 || getComputedStyle(newElement).opacity === '0') {
+                                    newElement.style.display = '';
+                                    newElement.style.visibility = 'visible';
+                                    newElement.style.opacity = '1';
+                                    PD2DebugBadge('CR: force show #' + dataSetCount);
+                                }
+                            } catch(_){}
+                        }, 300);
+                    });
+                } catch (e) {
+                    container.appendChild(newElement);
+                    console.warn('PD2: append new dataset fallback', e);
+                }
+            }
+
+            updateDataSetCount();
+
+            // Setup handlers after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                setupSelectHandlers();
+                showNotification(`เพิ่มชุดข้อมูลที่ ${dataSetCount} เรียบร้อยแล้ว`, 'green');
+
+                // Scroll to new data set
+                if (newElement && typeof newElement.scrollIntoView === 'function') newElement.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Copy and Add Data Set
+        function copyAndAddDataSet() {
+            if (dataSetCount >= 100) {
+                showNotification('ไม่สามารถเพิ่มชุดข้อมูลได้ เนื่องจากถึงขีดจำกัด 100 ชุด', 'error');
+                return;
+            }
+            
+            const lastDataSet = document.querySelector(`[data-set="${dataSetCount}"]`);
+            if (!lastDataSet) {
+                addDataSet();
+                return;
+            }
+            
+            // Get data from last set
+            const lastData = {};
+            const inputs = lastDataSet.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (!input.readOnly && !input.disabled && input.value) {
+                    const fieldName = input.name.replace(`_${dataSetCount}`, '');
+                    lastData[fieldName] = input.value;
+                }
+            });
+            
+            // Create new data set
+            dataSetCount++;
+            const container = document.getElementById('dataContainer');
+            const newDataSet = document.createElement('div');
+            newDataSet.innerHTML = generateDataSet(dataSetCount);
+            const newElement = newDataSet.firstElementChild;
+            if (newElement) {
+                try {
+                    newElement.style.opacity = '0';
+                    newElement.style.transition = 'opacity 180ms ease-out';
+                    newElement.style.visibility = 'hidden';
+                    container.appendChild(newElement);
+                    console.log('PD2: appended copied dataset', dataSetCount, newElement);
+                    PD2DebugBadge('CR: append copy #' + dataSetCount);
+                    requestAnimationFrame(() => {
+                        try {
+                            newElement.style.visibility = 'visible';
+                            void newElement.offsetWidth;
+                            newElement.style.opacity = '1';
+                            newElement.scrollIntoView && newElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            const prevOverflow = container.style.overflow;
+                            container.style.overflow = 'visible';
+                            setTimeout(() => { container.style.overflow = prevOverflow || ''; }, 300);
+                        } catch(_){ }
+                        setTimeout(() => {
+                            try {
+                                if (newElement.offsetHeight < 8 || getComputedStyle(newElement).opacity === '0') {
+                                    newElement.style.display = '';
+                                    newElement.style.visibility = 'visible';
+                                    newElement.style.opacity = '1';
+                                    PD2DebugBadge('CR: force show copy #' + dataSetCount);
+                                }
+                            } catch(_){}
+                        }, 300);
+                    });
+                } catch (e) {
+                    container.appendChild(newElement);
+                    console.warn('PD2: append copied dataset fallback', e);
+                }
+            }
+
+            // Fill with copied data after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                const newInputs = newElement ? newElement.querySelectorAll('input, select') : [];
+                newInputs.forEach(input => {
+                    if (!input.readOnly && !input.disabled) {
+                        const fieldName = input.name.replace(`_${dataSetCount}`, '');
+                        if (lastData[fieldName]) {
+                            input.value = lastData[fieldName];
+                        }
+                    }
+                });
+                
+                // Setup handlers for the new data set
+                setupSelectHandlers();
+                
+                showNotification(`คัดลอกและเพิ่มชุดข้อมูลที่ ${dataSetCount} เรียบร้อยแล้ว`, 'blue');
+                
+                // Scroll to new data set
+                if (newElement && typeof newElement.scrollIntoView === 'function') newElement.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+            updateDataSetCount();
+        }
+
+        // Remove Data Set
+        function removeDataSet(setNumber) {
+            if (dataSetCount <= 1) {
+                showNotification('ไม่สามารถลบชุดข้อมูลสุดท้ายได้', 'error');
+                return;
+            }
+            
+            const dataSet = document.querySelector(`[data-set="${setNumber}"]`);
+            if (dataSet) {
+                dataSet.remove();
+                dataSetCount--;
+                updateDataSetCount();
+                showNotification(`ลบชุดข้อมูลที่ ${setNumber} เรียบร้อยแล้ว`, 'red');
+            }
+        }
+
+        // Update Data Set Count Display
+        function updateDataSetCount() {
+            document.getElementById('dataSetCount').textContent = dataSetCount;
+        }
+
+        // Setup Select Handlers
+        function setupSelectHandlers() {
+            document.querySelectorAll('select').forEach(select => {
+                select.addEventListener('change', function() {
+                    if (this.value === 'ADD_NEW') {
+                        const fieldType = this.name.includes('machine') ? 'machine' : 
+                                        this.name.includes('employee') ? 'employee' : 'fabric';
+                        addNewContext = { type: fieldType, selectName: this.name, setNumber: (this.name.split('_')[1]||'').trim(), selectEl: this };
+                        openModal(fieldType);
+                        this.value = ''; // Reset select
+                        return;
+                    }
+                    // Sync manual machine when user selects a machine
+                    if (this.name.startsWith('machine_')) {
+                        const setNumber = this.name.split('_')[1];
+                        const manual = document.querySelector(`[name="machineManual_${setNumber}"]`);
+                        if (manual) {
+                            manual.value = this.value || '';
+                        }
+                    }
+                    // Sync manual field when user selects a fabric size
+                    if (this.name.startsWith('fabricSize_')) {
+                        const setNumber = this.name.split('_')[1];
+                        const manual = document.querySelector(`[name="fabricSizeManual_${setNumber}"]`);
+                        if (manual && this.value) {
+                            manual.value = this.value;
+                        }
+                    }
+                });
+            });
+
+            // ซิงก์ค่าที่กรอกเองกับ select เดิม (ให้พฤติกรรมเหมือน A/B)
+            // ขนาดหน้าผ้า: ถ้าตรงรายการจะเลือกให้, ไม่ตรงจะเคลียร์ select (คงค่า manual-first ไว้)
+            document.querySelectorAll('input[name^="fabricSizeManual_"]').forEach(input => {
+                const setNumber = input.name.split('_')[1];
+                const selectEl = document.querySelector(`[name="fabricSize_${setNumber}"]`);
+                const syncSelect = () => {
+                    const val = (input.value||'').trim();
+                    if (!selectEl) return;
+                    if (fabricSizes.includes(val)) {
+                        selectEl.value = val;
+                    } else if (selectEl.value !== 'ADD_NEW') {
+                        selectEl.value = '';
+                    }
+                };
+                input.addEventListener('input', syncSelect);
+                input.addEventListener('change', syncSelect);
+
+                // ติดตั้งแนะนำแบบทันทีด้วยรายการจาก fabricSizes
+                try {
+                    attachInstantSuggestions(input, (q) => {
+                        const query = (q||'').toString().trim().toLowerCase();
+                        if (!query) return fabricSizes.slice(0, 8);
+                        return fabricSizes.filter(s => s.toLowerCase().includes(query)).slice(0, 8);
+                    }, (chosen) => {
+                        input.value = chosen;
+                        syncSelect();
+                    });
+                } catch(_) {}
+            });
+
+            // เครื่องทอ NO: จับคู่แบบเท่ากันหรือขึ้นต้น (ไม่สนเคส) แล้วซิงก์กลับ select
+            document.querySelectorAll('input[name^="machineManual_"]').forEach(input => {
+                const setNumber = input.name.split('_')[1];
+                const selectEl = document.querySelector(`[name="machine_${setNumber}"]`);
+                const syncSelect = () => {
+                    const v = (input.value||'').trim();
+                    if (!selectEl) return;
+                    const up = v.toUpperCase();
+                    const found = machines.find(m => m.toUpperCase() === up || m.toUpperCase().startsWith(up));
+                    selectEl.value = found ? found : '';
+                };
+                input.addEventListener('input', syncSelect);
+                input.addEventListener('change', syncSelect);
+
+                // ติดตั้งแนะนำแบบทันทีด้วยตัวเลือกจาก machines
+                try {
+                    attachInstantSuggestions(input, (q) => {
+                        const query = (q||'').toString().trim().toLowerCase();
+                        const list2 = machines.filter(m => /ครั้ง\s*2/.test(m));
+                        const list3 = machines.filter(m => /ครั้ง\s*3/.test(m));
+                        if (!query) return [...list2, ...list3];
+                        return machines.filter(s => s.toLowerCase().includes(query));
+                    }, (chosen) => {
+                        input.value = chosen;
+                        syncSelect();
+                    });
+                } catch(_) {}
+            });
+        }
+
+        // Lightweight instant suggestions overlay (click + arrow keys + enter)
+        function attachInstantSuggestions(inputEl, optionsProvider, onSelect) {
+            if (!inputEl) return;
+            let dropdown = null; let activeIndex = -1; let items = [];
+
+            const close = () => { if (dropdown) { dropdown.remove(); dropdown = null; activeIndex = -1; items = []; } };
+            const position = () => {
+                if (!dropdown) return;
+                const rect = inputEl.getBoundingClientRect();
+                dropdown.style.position = 'fixed';
+                dropdown.style.left = rect.left + 'px';
+                dropdown.style.top = (rect.bottom + 2) + 'px';
+                dropdown.style.width = rect.width + 'px';
+                dropdown.style.zIndex = 10000;
+            };
+
+            const render = (opts) => {
+                items = opts || [];
+                if (!dropdown) {
+                    dropdown = document.createElement('div');
+                    dropdown.className = 'instant-suggest shadow-lg';
+                    dropdown.style.background = '#ffffff';
+                    dropdown.style.border = '1px solid rgba(0,0,0,0.1)';
+                    dropdown.style.borderRadius = '6px';
+                    dropdown.style.maxHeight = '220px';
+                    dropdown.style.overflowY = 'auto';
+                    dropdown.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+                    document.body.appendChild(dropdown);
+                }
+                dropdown.innerHTML = '';
+                if (!items.length) { close(); return; }
+                items.forEach((text, idx) => {
+                    const it = document.createElement('div');
+                    it.textContent = text;
+                    it.style.padding = '8px 10px';
+                    it.style.cursor = 'pointer';
+                    it.style.color = '#08321a';
+                    it.addEventListener('mouseenter', () => { setActive(idx); });
+                    it.addEventListener('mousedown', (e) => { e.preventDefault(); choose(idx); });
+                    dropdown.appendChild(it);
+                });
+                position();
+            };
+
+            const setActive = (idx) => {
+                activeIndex = idx;
+                if (!dropdown) return;
+                [...dropdown.children].forEach((el, i) => {
+                    el.style.background = i === activeIndex ? 'rgba(0,177,64,0.12)' : 'transparent';
+                });
+            };
+
+            const choose = (idx) => {
+                if (idx < 0 || idx >= items.length) return;
+                const value = items[idx];
+                if (typeof onSelect === 'function') onSelect(value);
+                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                close();
+            };
+
+            inputEl.addEventListener('focus', () => {
+                const opts = optionsProvider(inputEl.value || '');
+                render(opts);
+            });
+            inputEl.addEventListener('input', () => {
+                const opts = optionsProvider(inputEl.value || '');
+                render(opts);
+            });
+            inputEl.addEventListener('keydown', (e) => {
+                if (!dropdown) return;
+                if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(items.length - 1, activeIndex + 1)); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(0, activeIndex - 1)); }
+                else if (e.key === 'Enter') { if (activeIndex >= 0) { e.preventDefault(); choose(activeIndex); } }
+                else if (e.key === 'Escape') { close(); }
+            });
+            inputEl.addEventListener('blur', () => setTimeout(close, 100));
+            window.addEventListener('resize', position);
+            window.addEventListener('scroll', position, true);
+        }
+
+        // Modal Functions
+        function openModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            modal.classList.remove('hidden');
+            
+            // Clear previous inputs
+            if (type === 'employee') {
+                document.getElementById('newEmployeeId').value = '';
+                document.getElementById('newEmployeeName').value = '';
+            } else {
+                document.getElementById(`new${type.charAt(0).toUpperCase() + type.slice(1)}${type === 'fabric' ? 'Size' : ''}`).value = '';
+            }
+        }
+
+        function closeModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            modal.classList.add('hidden');
+        }
+
+    function saveModalData(type) {
+            let newValue = '';
+            let isValid = false;
+            
+            if (type === 'employee') {
+                const id = document.getElementById('newEmployeeId').value.trim();
+                const name = document.getElementById('newEmployeeName').value.trim();
+                
+                if (id && name) {
+                    newValue = id;
+                    if (!employees.some(e => e.id === id)) {
+                        employees.push({ id: id, name: name });
+                    }
+                    isValid = true;
+                }
+            } else if (type === 'machine') {
+                newValue = document.getElementById('newMachine').value.trim();
+                if (newValue) {
+                    if (!machines.includes(newValue)) {
+                        machines.push(newValue);
+                    }
+                    isValid = true;
+                }
+            } else if (type === 'fabric') {
+                newValue = document.getElementById('newFabricSize').value.trim();
+                if (newValue) {
+                    if (!fabricSizes.includes(newValue)) {
+                        fabricSizes.push(newValue);
+                    }
+                    isValid = true;
+                }
+            }
+            
+            if (isValid) {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        if (type === 'employee') {
+                            const emp = employees.find(e => e.id === newValue);
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'employee', data: { id: emp.id, name: emp.name } }, '*');
+                        } else if (type === 'machine') {
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'machine', data: { value: newValue } }, '*');
+                        } else if (type === 'fabric') {
+                            window.parent.postMessage({ type: 'PD2_ADD_CUSTOM', category: 'fabric', data: { value: newValue } }, '*');
+                        }
+                    }
+                } catch(_) {}
+
+                const originName = (addNewContext && addNewContext.type === type) ? addNewContext.selectName : null;
+                updateAllSelects(type, newValue, originName);
+                addNewContext = null;
+                closeModal(type);
+                showNotification(`เพิ่มข้อมูลใหม่เรียบร้อยแล้ว`, 'success');
+            } else {
+                showNotification('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+            }
+        }
+
+        // Update All Selects
+        function updateAllSelects(type, newValue, originSelectName) {
+            const selects = document.querySelectorAll(`select[name*="${type === 'employee' ? 'employee' : type === 'fabric' ? 'fabricSize' : 'machine'}"]`);
+            
+            selects.forEach(select => {
+                const isOrigin = (originSelectName && select.name === originSelectName);
+                const prevValue = select.value;
+                // Remove old ADD_NEW option
+                const addNewOption = select.querySelector('option[value="ADD_NEW"]');
+                if (addNewOption) {
+                    addNewOption.remove();
+                }
+                
+                // Add new option if missing
+                let exists = Array.from(select.options).some(o => o.value === newValue);
+                if (!exists) {
+                    const newOption = document.createElement('option');
+                    if (type === 'employee') {
+                        const emp = employees.find(e => e.id === newValue);
+                        newOption.value = newValue;
+                        newOption.textContent = emp ? `${emp.id} - ${emp.name}` : newValue;
+                    } else {
+                        newOption.value = newValue;
+                        newOption.textContent = newValue;
+                    }
+                    select.appendChild(newOption);
+                }
+                
+                // Re-add ADD_NEW option
+                const addNewOptionNew = document.createElement('option');
+                addNewOptionNew.value = 'ADD_NEW';
+                addNewOptionNew.textContent = 'คีย์ข้อมูลใหม่';
+                select.appendChild(addNewOptionNew);
+                
+                // Restore selection for others; select new only for origin
+                if (isOrigin) {
+                    select.value = newValue;
+                    if (type === 'fabric') {
+                        const setNumber = select.name.split('_')[1];
+                        const manual = document.querySelector(`[name="fabricSizeManual_${setNumber}"]`);
+                        if (manual) manual.value = newValue;
+                    }
+                } else {
+                    select.value = prevValue === 'ADD_NEW' ? '' : prevValue;
+                }
+            });
+        }
+
+        // Refresh All Selects
+        function refreshAllSelects() {
+            // Refresh machine selects
+            document.querySelectorAll('select[name*="machine"]').forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = `
+                    <option value="">เลือกเครื่องทอ</option>
+                    ${machines.map(machine => `<option value="${machine}">${machine}</option>`).join('')}
+                    <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                `;
+                select.value = currentValue;
+            });
+            
+            // Refresh employee selects
+            document.querySelectorAll('select[name*="employee"]').forEach(select => {
+                if (!select.name.includes('employeeB')) {
+                    const currentValue = select.value;
+                    select.innerHTML = `
+                        <option value="">เลือกพนักงาน</option>
+                        ${employees.map(emp => `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`).join('')}
+                        <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                    `;
+                    select.value = currentValue;
+                }
+            });
+            
+            // Refresh fabric selects
+            document.querySelectorAll('select[name*="fabricSize"]').forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = `
+                    <option value="">เลือกขนาดหน้าผ้า</option>
+                    ${fabricSizes.map(size => `<option value="${size}">${size}</option>`).join('')}
+                    <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
+                `;
+                select.value = currentValue;
+            });
+        }
+
+        function mergeSharedLists(shared) {
+            if (!shared) return;
+            (shared.machines||[]).forEach(m => { if (!machines.includes(m)) machines.push(m); });
+            (shared.fabricSizes||[]).forEach(f => { if (!fabricSizes.includes(f)) fabricSizes.push(f); });
+            (shared.employees||[]).forEach(emp => { if (!employees.some(e => e.id === emp.id)) employees.push(emp); });
+            try { refreshAllSelects(); } catch(_) {}
+        }
+
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'PD2_REQUEST_SYNC' }, '*');
+            }
+        } catch(_) {}
+
+        window.addEventListener('message', (ev) => {
+            const m = ev?.data;
+            if (m && m.type === 'PD2_SYNC_CUSTOM') {
+                mergeSharedLists(m.payload);
+            }
+        });
+
+        // Data Submission Functions
+        async function submitData() {
+            console.log('🚀 เริ่มต้นการส่งข้อมูล');
+            
+            const allData = collectAllData();
+            if (!allData || allData.length === 0) {
+                showNotification('ไม่พบข้อมูลที่จะส่ง', 'error');
+                return;
+            }
+            
+            // Save data for recovery before submission
+            saveDataForRecovery(allData);
+            
+            showLoading();
+            updateProgressStep(1);
+            updateLoadingStatus('กำลังเตรียมข้อมูล...');
+            
+            const payload = {
+                action: 'saveData',
+                data: {
+                    title: "รายงานตัดม้วนผ้า แผนกผลิต 2",
+                    timestamp: new Date().toISOString(),
+                    totalSets: allData.length,
+                    data: allData
+                },
+                sheetId: API_CONFIG.sheetId,
+                folderId: API_CONFIG.folderId,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                await submitWithRetry(payload, 3, 1);
+            } catch (error) {
+                console.error('❌ การส่งข้อมูลล้มเหลว:', error);
+                hideLoading();
+                showNotification('การส่งข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง', 'error');
+            }
+        }
+
+        async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false) {
+            console.log(`🔄 ความพยายามที่ ${currentAttempt}/${maxRetries}${useBackup ? ' (ใช้ backup)' : ''}`);
+            updateProgressStep(2);
+            updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
+            if (!SYSTEM_HEALTH.isOnline) throw new Error('ไม่มีการเชื่อมต่ออินเทอร์เน็ต');
+            await new Promise(r => setTimeout(r, 1000));
+            updateProgressStep(3);
+            updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
+            let endpoint = API_CONFIG.endpoint;
+            if (useBackup && API_CONFIG.backupEndpoints.length > 0) {
+                const backupIndex = (currentAttempt - 1) % API_CONFIG.backupEndpoints.length;
+                endpoint = API_CONFIG.backupEndpoints[backupIndex];
+                console.log(`🔄 ใช้ backup endpoint: ${endpoint}`);
+            }
+            try {
+                const submissionId = (self.crypto && crypto.randomUUID ? crypto.randomUUID() : 'sub-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                const payload = { ...data, submissionId, systemInfo: { userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: currentAttempt, endpoint } };
+                // แสดงขั้นตอนที่ 4 ก่อนเริ่มส่ง เพื่อให้ผู้ใช้เห็นการเปลี่ยนแปลง
+                updateProgressStep(4);
+                updateLoadingStatus('กำลังส่งข้อมูล...');
+                // ให้เวลา UI วาดผลเล็กน้อย
+                await new Promise(r => setTimeout(r, 80));
+
+                // Simple request (หลบ preflight)
+                const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: controller.signal, cache: 'no-store', keepalive: true });
+                clearTimeout(timeoutId);
+                let ok = response.ok; let txt=''; let json=null;
+                try { txt = await response.text(); if (txt) { try { json = JSON.parse(txt); } catch(_){} } } catch(_){}
+                const logicalSuccess = json && (json.success === true || json.status === 'ok');
+                if (!ok || !logicalSuccess) {
+                    const pending = { savedAt: new Date().toISOString(), submissionId, endpoint, httpStatus: response.status, ok, logicalSuccess, bodySample: (txt||'').slice(0,500), payload };
+                    LS.set('pendingSubmission', JSON.stringify(pending));
+                    throw new Error('การยืนยันผลล้มเหลว HTTP:' + response.status + ' successFlag:' + logicalSuccess);
+                }
+                updateProgressStep(5);
+                updateLoadingStatus('ยืนยันการบันทึก...');
+                // ให้เห็นขั้นตอนที่ 5 ชัดเจนก่อนปิดหน้าต่าง
+                await new Promise(r => setTimeout(r, 200));
+                LS.remove('pendingSubmission');
+                SYSTEM_HEALTH.saveFailureCount = 0; SYSTEM_HEALTH.lastSaveTime = new Date();
+                const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
+                hideLoading();
+                showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                console.log('✅ ส่งข้อมูลสำเร็จ', { submissionId, totalRows, response: json });
+            } catch (error) {
+                const isLikelyCors = (error instanceof TypeError) || /fetch|network|cors/i.test(error.message || '');
+                if (currentAttempt === 1 && isLikelyCors) {
+                    try {
+                        console.warn('⚠️ Simple POST ล้มเหลว อาจติด CORS -> ลอง JSONP');
+                        const jsonpResult = await jsonpFallback(data, endpoint);
+                        if (jsonpResult && jsonpResult.success) {
+                            const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
+                            updateProgressStep(5);
+                            // แสดงผลขั้นตอน 5 ชั่วครู่ก่อนปิด
+                            await new Promise(r => setTimeout(r, 200));
+                            hideLoading();
+                            showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                            SYSTEM_HEALTH.saveFailureCount = 0; LS.remove('pendingSubmission');
+                            return;
+                        }
+                    } catch (jsonpErr) { console.error('❌ JSONP fallback ล้มเหลว:', jsonpErr); }
+                }
+                console.error(`❌ ความพยายามที่ ${currentAttempt} ล้มเหลว:`, error);
+                ERROR_LOG.log(error, `Submit attempt ${currentAttempt}`); SYSTEM_HEALTH.saveFailureCount++;
+                if (currentAttempt < maxRetries) {
+                    updateLoadingStatus(`กำลังลองใหม่... (${currentAttempt + 1}/${maxRetries})`);
+                    const delay = API_CONFIG.retryDelay * Math.pow(2, currentAttempt - 1);
+                    await new Promise(r => setTimeout(r, delay));
+                    const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup);
+                } else {
+                    if (SYSTEM_HEALTH.saveFailureCount >= SYSTEM_HEALTH.maxFailures) showNotification('ระบบมีปัญหาการส่งข้อมูลซ้ำๆ กรุณาติดต่อผู้ดูแลระบบ', 'error');
+                    try { if (LS.get('pendingSubmission')) showNotification('ไม่สามารถยืนยันผล เซฟ pending รอส่งใหม่', 'warning'); } catch(_){}
+                    throw error;
+                }
+            }
+        }
+
+        // JSONP fallback helper
+        function jsonpFallback(originalPayload, endpoint) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!originalPayload || originalPayload.action !== 'saveData') return reject(new Error('JSONP รองรับเฉพาะ saveData'));
+                    const minimal = { action: 'saveData', data: originalPayload.data };
+                    const jsonStr = JSON.stringify(minimal);
+                    const encoded = encodeURIComponent(jsonStr);
+                    if (encoded.length > 7000) return reject(new Error('ข้อมูลยาวเกินไปสำหรับ JSONP'));
+                    const cbName = '__jsonpCB_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+                    const url = endpoint + '?action=saveData&data=' + encoded + '&callback=' + cbName;
+                    const script = document.createElement('script');
+                    let timeoutId;
+                    window[cbName] = function(resp){ clearTimeout(timeoutId); try { delete window[cbName]; } catch(_){} script.remove(); resolve(resp); };
+                    script.onerror = function(){ clearTimeout(timeoutId); try { delete window[cbName]; } catch(_){} script.remove(); reject(new Error('JSONP script load error')); };
+                    timeoutId = setTimeout(() => { try { delete window[cbName]; } catch(_){} script.remove(); reject(new Error('JSONP timeout')); }, 15000);
+                    script.src = url; document.head.appendChild(script);
+                } catch(err) { reject(err); }
+            });
+        }
+
+        // Collect All Data
+    function collectAllData() {
+            const allData = [];
+            const dataSets = document.querySelectorAll('.data-set');
+            
+            dataSets.forEach((dataSet, index) => {
+                const setNumber = (dataSet.getAttribute('data-set') || (index + 1)).toString();
+        // Manual-first for fabric size (ignore whitespace-only manual input)
+    const fabricSelectVal = dataSet.querySelector(`[name="fabricSize_${setNumber}"]`)?.value || '';
+        const fabricManualVal = dataSet.querySelector(`[name="fabricSizeManual_${setNumber}"]`)?.value || '';
+        const manualTrim = fabricManualVal.trim();
+        const chosenFabric = manualTrim || fabricSelectVal;
+    // Prefer manual machine if provided (ignore whitespace-only)
+    const machineSelectVal = dataSet.querySelector(`[name="machine_${setNumber}"]`)?.value || '';
+    const machineManualVal = dataSet.querySelector(`[name="machineManual_${setNumber}"]`)?.value || '';
+    const machineTrim = (machineManualVal||'').trim();
+    const chosenMachine = machineTrim || machineSelectVal;
+                const setData = {
+                    setNumber: Number(setNumber),
+                    date: dataSet.querySelector(`[name="date_${setNumber}"]`)?.value || '',
+            machine: chosenMachine,
+                    fabricSize: chosenFabric,
+                    fabricSizeManual: fabricManualVal,
+                    lotNo: dataSet.querySelector(`[name="lotNo_${setNumber}"]`)?.value || '',
+                    lengthA: dataSet.querySelector(`[name="lengthA_${setNumber}"]`)?.value || '',
+                    lengthB: dataSet.querySelector(`[name="lengthB_${setNumber}"]`)?.value || ''
+                };
+                
+                allData.push(setData);
+            });
+            
+            return allData;
+        }
+
+        // Storage Functions - ปรับปรุงให้แข็งแกร่งขึ้น
+        function saveToLocalStorage() {
+            const saveStartTime = performance.now();
+            
+            try {
+                const allData = collectAllData();
+                
+                // Validate data before saving
+                if (!allData || allData.length === 0) {
+                    console.warn('⚠️ ไม่มีข้อมูลที่จะบันทึก');
+                    return;
+                }
+                
+                const storageData = {
+                    version: '2.0', // เพิ่ม version tracking
+                    timestamp: new Date().toISOString(),
+                    dataSetCount: dataSetCount,
+                    data: allData,
+                    // custom lists removed (session-only for new entries)
+                    systemHealth: {
+                        saveTime: saveStartTime,
+                        errorCount: SYSTEM_HEALTH.performanceMetrics.errorCount,
+                        lastSaveTime: SYSTEM_HEALTH.lastSaveTime
+                    }
+                };
+                
+                // Check storage size before saving
+                const dataSize = JSON.stringify(storageData).length;
+                const maxSize = 5 * 1024 * 1024; // 5MB limit
+                
+                if (dataSize > maxSize) {
+                    // Clean old data if size is too large
+                    cleanOldStorageData();
+                }
+                
+                // Create backup before overwriting
+                const existingData = localStorage.getItem('productionData');
+                if (existingData) {
+                    localStorage.setItem('productionDataBackup', existingData);
+                }
+                
+                localStorage.setItem('productionData', JSON.stringify(storageData));
+                
+                const saveTime = performance.now() - saveStartTime;
+                SYSTEM_HEALTH.performanceMetrics.saveTime = saveTime;
+                SYSTEM_HEALTH.lastSaveTime = new Date();
+                
+                console.log(`💾 บันทึกข้อมูลแล้ว (${saveTime.toFixed(2)}ms, ${(dataSize/1024).toFixed(2)}KB)`);
+                
+                // Only show notification if manually triggered
+                if (arguments.length > 0 && arguments[0] === true) {
+                    showNotification('บันทึกข้อมูลเรียบร้อยแล้ว', 'purple');
+                }
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'Save to localStorage failed');
+                console.error('❌ ไม่สามารถบันทึกข้อมูลได้:', error);
+                
+                // Try to recover from backup
+                if (error.name === 'QuotaExceededError') {
+                    showNotification('พื้นที่จัดเก็บข้อมูลเต็ม กำลังล้างข้อมูลเก่า...', 'warning');
+                    cleanOldStorageData();
+                    
+                    // Try saving again
+                    try {
+                        localStorage.setItem('productionData', JSON.stringify(storageData));
+                        showNotification('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                    } catch (retryError) {
+                        showNotification('ไม่สามารถบันทึกข้อมูลได้ กรุณาล้างข้อมูลเก่า', 'error');
+                    }
+                } else {
+                    showNotification('ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            }
+        }
+        
+        function cleanOldStorageData() {
+            try {
+                // Remove old error logs
+                const errorLog = localStorage.getItem('errorLog');
+                if (errorLog) {
+                    const logs = JSON.parse(errorLog);
+                    const recentLogs = logs.slice(0, 50); // Keep only 50 recent entries
+                    localStorage.setItem('errorLog', JSON.stringify(recentLogs));
+                }
+                
+                // Remove old backup data
+                localStorage.removeItem('productionDataBackup');
+                
+                // Remove other temporary data
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.startsWith('temp_') || key.startsWith('old_'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                console.log(`🧹 ล้างข้อมูลเก่าแล้ว (${keysToRemove.length} รายการ)`);
+                
+            } catch (error) {
+                ERROR_LOG.log(error, 'Clean old storage data failed');
+                console.error('❌ ไม่สามารถล้างข้อมูลเก่าได้:', error);
+            }
+        }
+
+    function loadFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem('productionData');
+                if (!stored) {
+                    console.log('ℹ️ ไม่พบข้อมูลที่บันทึกไว้');
+                    return;
+                }
+                
+                const storageData = JSON.parse(stored);
+                
+                // ไม่กู้คืน custom lists เพื่อให้เป็นข้อมูลชั่วคราวต่อ session และกันข้อมูลซ้ำ
+                
+                // Clear existing data sets
+                document.getElementById('dataContainer').innerHTML = '';
+                
+                // Restore data sets
+                dataSetCount = storageData.dataSetCount || 1;
+                for (let i = 1; i <= dataSetCount; i++) {
+                    const container = document.getElementById('dataContainer');
+                    const newDataSet = document.createElement('div');
+                    newDataSet.innerHTML = generateDataSet(i);
+                    const child = newDataSet.firstElementChild;
+                    if (child) {
+                        container.appendChild(child);
+                        try { child.style.display = ''; child.style.opacity = ''; child.classList.remove('hidden','invisible'); child.removeAttribute('hidden'); } catch(_){ }
+                        PD2DebugBadge('CR: restore #' + i);
+                        requestAnimationFrame(() => { try { child.classList.remove('data-set'); void child.offsetWidth; child.classList.add('data-set'); child.style.opacity = '1'; child.style.transform='none'; child.style.visibility='visible'; child.style.zIndex='10'; child.scrollIntoView && child.scrollIntoView({behavior:'smooth', block:'nearest'}); try{ const prev=container.style.overflow; container.style.overflow='visible'; setTimeout(()=>{container.style.overflow=prev||'';},300);}catch(_){}} catch(_){ } setTimeout(()=>{ try { if (child.offsetHeight < 8 || getComputedStyle(child).opacity === '0') { child.style.display=''; child.style.visibility='visible'; child.style.opacity='1'; PD2DebugBadge('CR: force show restore #' + i); } } catch(_){} }, 300); });
+                    }
+                }
+                
+                // Fill data
+                if (storageData.data) {
+                    storageData.data.forEach((setData, index) => {
+                        const setNumber = index + 1;
+                        const dataSet = document.querySelector(`[data-set="${setNumber}"]`);
+                        if (dataSet) {
+                            Object.keys(setData).forEach(key => {
+                                if (key !== 'setNumber') {
+                                    const input = dataSet.querySelector(`[name="${key}_${setNumber}"]`);
+                                    if (input && !input.readOnly) {
+                                        input.value = setData[key];
+                                    }
+                                }
+                            });
+
+                            // Restore machine into manual if not in options
+                            const machVal = setData.machine || '';
+                            if (machVal) {
+                                const machSel = dataSet.querySelector(`[name="machine_${setNumber}"]`);
+                                if (machSel) {
+                                    const inList = Array.from(machSel.options).some(o => o.value === machVal);
+                                    if (!inList) {
+                                        const machManual = dataSet.querySelector(`[name="machineManual_${setNumber}"]`);
+                                        if (machManual) {
+                                            machManual.value = machVal;
+                                            machSel.value = '';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                updateDataSetCount();
+                setupSelectHandlers();
+                refreshAllSelects();
+                
+                console.log('📂 โหลดข้อมูลเรียบร้อยแล้ว');
+                showNotification('โหลดข้อมูลเรียบร้อยแล้ว', 'success');
+                
+            } catch (error) {
+                console.error('❌ ไม่สามารถโหลดข้อมูลได้:', error);
+                showNotification('ไม่สามารถโหลดข้อมูลได้', 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            try {
+                localStorage.removeItem('productionData');
+                LS.remove('pendingSubmission');
+                console.log('🗑️ ล้างข้อมูลแล้ว');
+                showNotification('ล้างข้อมูลเรียบร้อยแล้ว', 'red');
+            } catch (error) {
+                console.error('❌ ไม่สามารถล้างข้อมูลได้:', error);
+                showNotification('ไม่สามารถล้างข้อมูลได้', 'error');
+            }
+        }
+
+        // Reset all data sets to a single fresh set
+        function resetToSingleDataSet() {
+            try {
+                const ok = confirm('ยืนยันการรีเซ็ตการบันทึกข้อมูล ให้เริ่มใหม่ด้วย 1 ชุดข้อมูลหรือไม่?');
+                if (!ok) return;
+
+                // Clear stored data for this module
+                localStorage.removeItem('productionData');
+                LS.remove('pendingSubmission');
+
+                // Rebuild DOM with only one fresh data set
+                const container = document.getElementById('dataContainer');
+                if (!container) throw new Error('ไม่พบ dataContainer');
+                container.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = generateDataSet(1);
+                const child = wrapper.firstElementChild;
+                if (child) {
+                    container.appendChild(child);
+                    try {
+                        child.style.opacity='0'; child.style.visibility='hidden'; child.style.transition='opacity 180ms ease-out';
+                        PD2DebugBadge('CR: reset to 1');
+                        requestAnimationFrame(() => { try { child.style.visibility='visible'; void child.offsetWidth; child.style.opacity='1'; child.scrollIntoView && child.scrollIntoView({behavior:'smooth', block:'nearest'}); const prev=container.style.overflow; container.style.overflow='visible'; setTimeout(()=>{container.style.overflow=prev||'';},300); } catch(_){} setTimeout(()=>{ try { if (child.offsetHeight < 8 || getComputedStyle(child).opacity === '0') { child.style.display=''; child.style.visibility='visible'; child.style.opacity='1'; PD2DebugBadge('CR: force show reset'); } } catch(_){} }, 300); });
+                    } catch(_){ }
+                }
+
+                // Reset counters and UI
+                dataSetCount = 1;
+                updateDataSetCount();
+                setupSelectHandlers();
+
+                // Persist the fresh state
+                saveToLocalStorage();
+
+                // UX
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showNotification('รีเซ็ตสำเร็จ เหลือ 1 ชุดข้อมูล', 'success');
+            } catch (error) {
+                console.error('❌ ไม่สามารถรีเซ็ตชุดข้อมูลได้:', error);
+                showNotification('ไม่สามารถรีเซ็ตชุดข้อมูลได้', 'error');
+            }
+        }
+
+        // Recovery System
+        function saveDataForRecovery(data) {
+            try {
+                const recoveryData = {
+                    timestamp: new Date().toISOString(),
+                    data: data
+                };
+                LS.set('pendingSubmission', JSON.stringify(recoveryData));
+                console.log('🔄 บันทึกข้อมูลสำหรับกู้คืน');
+            } catch (error) {
+                console.error('❌ ไม่สามารถบันทึกข้อมูลสำหรับกู้คืนได้:', error);
+            }
+        }
+
+        function checkForPendingSubmissions() {
+            try {
+                const pending = LS.get('pendingSubmission');
+                if (pending) {
+                    const recoveryData = JSON.parse(pending);
+                    const timestamp = new Date(recoveryData.timestamp);
+                    const now = new Date();
+                    const hoursDiff = (now - timestamp) / (1000 * 60 * 60);
+                    
+                    if (hoursDiff > 1) {
+                        // Auto cleanup old data
+                        LS.remove('pendingSubmission');
+                        console.log('🧹 ลบข้อมูลค้างส่งที่เก่าแล้ว');
+                    } else {
+                        // Show recovery modal
+                        document.getElementById('recoveryModal').classList.remove('hidden');
+                        console.log('🔄 พบข้อมูลค้างส่ง');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ ไม่สามารถตรวจสอบข้อมูลค้างส่งได้:', error);
+            }
+        }
+
+        function retryPendingSubmission() {
+            try {
+                const pending = LS.get('pendingSubmission');
+                if (pending) {
+                    const recoveryData = JSON.parse(pending);
+                    document.getElementById('recoveryModal').classList.add('hidden');
+                    
+                    const payload = {
+                        action: 'saveData',
+                        data: {
+                            title: "รายงานแผนกผลิต 2 สำหรับ ตัดม้วน (กู้คืน)",
+                            timestamp: recoveryData.timestamp,
+                            totalSets: recoveryData.data.length,
+                            data: recoveryData.data
+                        },
+                        sheetId: API_CONFIG.sheetId,
+                        folderId: API_CONFIG.folderId,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    showLoading();
+                    submitWithRetry(payload, 3, 1);
+                }
+            } catch (error) {
+                console.error('❌ ไม่สามารถลองส่งข้อมูลใหม่ได้:', error);
+                showNotification('ไม่สามารถลองส่งข้อมูลใหม่ได้', 'error');
+            }
+        }
+
+        function discardPendingSubmission() {
+            LS.remove('pendingSubmission');
+            document.getElementById('recoveryModal').classList.add('hidden');
+            showNotification('ยกเลิกข้อมูลค้างส่งแล้ว', 'success');
+        }
+
+        // UI Management Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            // Reset progress steps
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                if (!step) continue;
+                step.classList.remove('active', 'completed');
+                // clear any previously applied inline styles
+                step.style.backgroundColor = '';
+                step.style.color = '';
+                step.style.borderColor = '';
+            }
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function updateLoadingStatus(message) {
+            document.getElementById('loadingStatus').textContent = message;
+        }
+
+        function updateProgressStep(stepNumber) {
+            // Mark previous steps as completed
+            for (let i = 1; i < stepNumber; i++) {
+                const step = document.getElementById(`step${i}`);
+                if (!step) continue;
+                step.classList.remove('active');
+                step.classList.add('completed');
+                // apply inline styles so Tailwind utility classes don't hide state
+                step.style.backgroundColor = '#059669';
+                step.style.color = '#ffffff';
+                step.style.borderColor = 'transparent';
+            }
+            
+            // Mark current step as active
+            const currentStep = document.getElementById(`step${stepNumber}`);
+            if (currentStep) {
+                currentStep.classList.add('active');
+                currentStep.classList.remove('completed');
+                currentStep.style.backgroundColor = '#16a34a';
+                currentStep.style.color = '#ffffff';
+                currentStep.style.borderColor = 'transparent';
+            }
+
+            // Reset any later steps (in case of retries) to neutral style
+            for (let j = stepNumber + 1; j <= 5; j++) {
+                const later = document.getElementById(`step${j}`);
+                if (!later) continue;
+                later.classList.remove('active', 'completed');
+                later.style.backgroundColor = ''; // revert to class-based color
+                later.style.color = '';
+                later.style.borderColor = '';
+            }
+        }
+
+                function showNotification(message, type = 'info') {
+                    // load shared PD2 notification module (safe JS loader)
+                    (function(){
+                        if (window.PD2Notify) return;
+                        try {
+                            const s = document.createElement('script');
+                            s.src = '../pd2-notify.js';
+                            s.async = false;
+                            s.addEventListener('error', () => { try { console.warn('pd2-notify failed to load'); } catch(_){} });
+                            document.head.appendChild(s);
+                        } catch(_){}
+                    })();
+
+                    try {
+                        if (window.parent && window.parent !== window && window.parent.PD2Notify) {
+                            return window.parent.PD2Notify(message, type);
+                        }
+                        if (window.PD2Notify) return window.PD2Notify(message, type);
+
+                        if (!document.getElementById('pd2-notify-loader')) {
+                            const s = document.createElement('script');
+                            s.id = 'pd2-notify-loader';
+                            s.src = '../pd2-notify.js';
+                            s.defer = true;
+                            s.onload = () => {
+                                try {
+                                    const fn = (window.parent && window.parent.PD2Notify) ? window.parent.PD2Notify : window.PD2Notify;
+                                    if (fn) fn(message, type);
+                                } catch(e){ console.error('PD2Notify onload', e); }
+                            };
+                            s.onerror = () => { console.error('Failed to load shared pd2-notify.js'); };
+                            document.head.appendChild(s);
+                        } else {
+                            const start = Date.now();
+                            const interval = setInterval(() => {
+                                const fn = (window.parent && window.parent.PD2Notify) ? window.parent.PD2Notify : window.PD2Notify;
+                                if (fn) { clearInterval(interval); return fn(message, type); }
+                                if (Date.now() - start > 5000) clearInterval(interval);
+                            }, 100);
+                        }
+                    } catch (err) { console.error('showNotification error', err); }
+                }
+
+        // System Health Check Function
+        function showSystemHealth() {
+            const healthData = {
+                online: SYSTEM_HEALTH.isOnline,
+                lastSave: SYSTEM_HEALTH.lastSaveTime,
+                saveFailures: SYSTEM_HEALTH.saveFailureCount,
+                loadTime: SYSTEM_HEALTH.performanceMetrics.loadTime,
+                saveTime: SYSTEM_HEALTH.performanceMetrics.saveTime,
+                errorCount: SYSTEM_HEALTH.performanceMetrics.errorCount,
+                recentErrors: ERROR_LOG.getRecentErrors(24),
+                storageUsed: getStorageUsage(),
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    cookieEnabled: navigator.cookieEnabled,
+                    onLine: navigator.onLine
+                }
+            };
+            
+            let healthStatus = '✅ ระบบทำงานปกติ';
+            let healthColor = 'success';
+            
+            if (!healthData.online) {
+                healthStatus = '⚠️ ไม่มีการเชื่อมต่ออินเทอร์เน็ต';
+                healthColor = 'warning';
+            } else if (healthData.saveFailures > 5) {
+                healthStatus = '❌ ระบบมีปัญหาการส่งข้อมูล';
+                healthColor = 'error';
+            } else if (healthData.errorCount > 10) {
+                healthStatus = '⚠️ พบข้อผิดพลาดหลายครั้ง';
+                healthColor = 'warning';
+            }
+            
+            const healthReport = `
+สถานะระบบ: ${healthStatus}
+
+📊 ข้อมูลประสิทธิภาพ:
+- เวลาโหลดระบบ: ${healthData.loadTime.toFixed(2)}ms
+- เวลาบันทึกข้อมูล: ${healthData.saveTime.toFixed(2)}ms
+- จำนวนข้อผิดพลาด: ${healthData.errorCount}
+- ความล้มเหลวในการส่ง: ${healthData.saveFailures}
+
+💾 การใช้พื้นที่จัดเก็บ:
+- ใช้แล้ว: ${(healthData.storageUsed.used/1024).toFixed(2)}KB
+- เหลือ: ${(healthData.storageUsed.remaining/1024).toFixed(2)}KB
+
+🌐 การเชื่อมต่อ:
+- สถานะ: ${healthData.online ? 'เชื่อมต่อ' : 'ไม่เชื่อมต่อ'}
+- บันทึกล่าสุด: ${healthData.lastSave ? new Date(healthData.lastSave).toLocaleString('th-TH') : 'ยังไม่เคย'}
+
+${healthData.recentErrors.length > 0 ? `\n⚠️ ข้อผิดพลาดล่าสุด (24 ชม.):\n${healthData.recentErrors.slice(0, 3).map(e => `- ${e.error.substring(0, 50)}...`).join('\n')}` : ''}
+            `;
+            
+            // Copy to clipboard for easy sharing
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(healthReport).then(() => {
+                    showNotification('คัดลอกรายงานสุขภาพระบบแล้ว', 'success');
+                });
+            }
+            
+            console.log('🏥 รายงานสุขภาพระบบ:', healthData);
+            alert(healthReport);
+            showNotification(healthStatus, healthColor);
+        }
+        
+        function getStorageUsage() {
+            try {
+                let used = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        used += localStorage[key].length + key.length;
+                    }
+                }
+                
+                // Estimate remaining space (5MB typical limit)
+                const estimated = 5 * 1024 * 1024;
+                return {
+                    used: used,
+                    remaining: Math.max(0, estimated - used)
+                };
+            } catch (error) {
+                return { used: 0, remaining: 0 };
+            }
+        }
+
+        // Note: First data set is already created in the main DOMContentLoaded event
+    </script>
+    <script>
+        try {
+            const notifyReady = () => {
+                try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'PD2_READY' }, '*'); } catch(_){}
+            };
+            requestAnimationFrame(() => requestAnimationFrame(notifyReady));
+        } catch(_){}
+    </script>
+</body>
+</html>
