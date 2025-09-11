@@ -19,18 +19,48 @@ wss.on('connection', ws => {
   console.log('[dev-watcher] client connected');
   ws.send(JSON.stringify({ type: 'hello', msg: 'dev-watcher' }));
   ws.on('close', () => console.log('[dev-watcher] client disconnected'));
+  ws.on('error', (err) => console.error('[dev-watcher] WebSocket error:', err));
+});
+
+wss.on('error', (err) => {
+  console.error('[dev-watcher] WebSocket server error:', err);
 });
 
 function broadcast(obj) {
   const str = JSON.stringify(obj);
-  wss.clients.forEach(c => { if (c.readyState === WebSocket.OPEN) c.send(str); });
+  wss.clients.forEach(c => { 
+    if (c.readyState === WebSocket.OPEN) {
+      try {
+        c.send(str);
+      } catch (err) {
+        console.error('[dev-watcher] Error broadcasting to client:', err);
+      }
+    }
+  });
 }
 
 const watcher = chokidar.watch(WATCH_GLOBS, { ignoreInitial: true, awaitWriteFinish: { stabilityThreshold: 120, pollInterval: 10 } });
 watcher.on('all', (event, changedPath) => {
-  const rel = path.relative(process.cwd(), changedPath);
-  console.log(`[dev-watcher] ${event}: ${rel}`);
-  broadcast({ type: 'reload', path: rel, event });
+  try {
+    const rel = path.relative(process.cwd(), changedPath);
+    console.log(`[dev-watcher] ${event}: ${rel}`);
+    broadcast({ type: 'reload', path: rel, event });
+  } catch (err) {
+    console.error('[dev-watcher] Error handling file change:', err);
+  }
 });
 
-process.on('SIGINT', () => { console.log('[dev-watcher] stopping'); watcher.close(); wss.close(); process.exit(0); });
+watcher.on('error', (err) => {
+  console.error('[dev-watcher] File watcher error:', err);
+});
+
+process.on('SIGINT', () => { 
+  console.log('[dev-watcher] stopping'); 
+  try {
+    watcher.close(); 
+    wss.close(); 
+  } catch (err) {
+    console.error('[dev-watcher] Error during shutdown:', err);
+  }
+  process.exit(0); 
+});

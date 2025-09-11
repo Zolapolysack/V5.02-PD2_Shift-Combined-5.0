@@ -153,13 +153,16 @@
     .sparkle-btn.sparkle .dot { opacity:1; animation: tinyStars 520ms ease-out forwards }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased">
+<!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
+<body class="bg-slate-100 text-slate-800 antialiased pb-[env(safe-area-inset-bottom,0)]">
   <!-- ======================== Header ======================== -->
-  <header class="py-12">
-    <div class="container mx-auto px-4">
+  <!-- mobile responsive fix: reduce header padding on small screens -->
+  <header class="py-8 md:py-12">
+    <div class="container mx-auto px-3 sm:px-4">
       <div class="full-bleed">
         <div class="mx-auto max-w-4xl rounded-2xl p-10 md:p-12 glass shadow-lg">
-          <div class="flex items-center gap-4 md:gap-6">
+          <!-- mobile responsive fix: allow tighter gaps on small screens -->
+          <div class="flex items-center gap-3 md:gap-6">
           <div class="icon-circle icon-blue shadow-md">
             <!-- Logo / report icon -->
             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -182,9 +185,10 @@
   </header>
 
   <!-- ======================== Main Content ======================== -->
-  <main class="pb-16">
-    <div class="container mx-auto px-4">
-  <section aria-label="ลิงก์รายงานสำคัญ" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+  <!-- mobile responsive fix: adjust container padding and gaps -->
+  <main class="pb-12 md:pb-16">
+    <div class="container mx-auto px-3 sm:px-4">
+  <section aria-label="ลิงค์รายงานสำคัญ" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
         <!-- Card: กะ A -->
   <article class="bg-indigo-50 border border-indigo-100 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out card-animate h-full flex flex-col">
           <div class="flex items-start gap-4">
@@ -303,7 +307,7 @@
           <div class="h-3 md:h-6"></div>
           <div class="mt-6 mt-auto flex items-center justify-between pl-12 md:pl-16">
             <a
-              href="https://colab.research.google.com/drive/1clqDwzxJXlwN37FHGp46odnSUNxPaCXW#scrollTo=iyxs7Aaimsy7"
+              href="https://colab.research.google.com/drive/1clqDwzxJXlwN37FHGp46odnSUNxPaCXW#scrollTo=Zo6e5Qb6yaQH"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="เปิดโปรแกรมสร้างใบรายงาน (ใบยาว) ในแท็บใหม่"

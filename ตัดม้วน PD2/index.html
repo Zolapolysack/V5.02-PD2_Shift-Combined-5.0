@@ -12,12 +12,33 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         :root{
-            --ais-green: #00b140; /* primary AIS-like green (assumption) */
-            --ais-green-dark: #008f2a;
-            --ais-accent: #9beab0;
-            --ais-info: #00a3a3;
-            --card-bg: rgba(255,255,255,0.95);
-            --muted: #6b7280;
+            /* Purple-blue theme */
+            --ais-green: #1e293b; /* deep blue */
+            --ais-green-dark: #0f172a; /* deeper blue */
+            --ais-green-600: rgba(30,41,59,0.18); /* blue-900, transparent */
+            --ais-green-500: rgba(51,65,85,0.13); /* blue-gray-800, transparent */
+            --ais-green-400: rgba(71,85,105,0.10); /* blue-gray-700, transparent */
+            --ais-green-700: rgba(15,23,42,0.22); /* blue-950, transparent */
+            --ais-green-800: rgba(30,41,59,0.13); /* blue-900, transparent */
+            --ais-green-300: rgba(100,116,139,0.08); /* blue-gray-500, transparent */
+            --ais-green-200: rgba(51,65,85,0.07); /* blue-gray-800, more transparent */
+            --ais-green-spot: rgba(30,41,59,0.10); /* blue-900, transparent */
+            --ais-green-strong: rgba(15,23,42,0.13); /* blue-950, transparent */
+            --ais-green-outline: rgba(71,85,105,0.09); /* blue-gray-700, transparent */
+
+            /* Complementary purple/blue/pink accents */
+            --ais-accent: #e9d5ff; /* soft lilac accent */
+            --ais-info: #a78bfa; /* info / brighter violet */
+
+            /* Card / neutral tokens tuned to fit purple theme */
+            --card-bg: rgba(255,255,255,0.96);
+            --muted: #bdb4d8;
+
+            /* Optional background helpers used elsewhere */
+            --bg-gradient-start: #7c3aed;
+            --bg-gradient-end: #6366f1;
+            --glass-border: rgba(139,92,246,0.10);
+            --glass-rim: rgba(167,139,250,0.10);
         }
 
         * {
@@ -34,35 +55,106 @@
             letter-spacing: 0.01em;
             font-weight: 400; /* Increased from 300 */
             min-height: 100vh;
-            /* Modern multi-stop green gradient with subtle teal & lime accents */
-            background:linear-gradient(135deg, #101010 0%, #333333 100%);
-            /* Fallback for older browsers */
-            background-color: #0b7a4a;
+            /* Modern purple-blue gradient */
+            background: linear-gradient(120deg, #0f172a 0%, #1e293b 40%, #2563eb 100%);
+            background-color: #0f172a;
             color: #f0f4f8; /* Brighter, high-contrast text color */
             background-attachment: fixed;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Card surfaces updated to AIS theme */
         .glass {
-            /* Purple / violet calm surface */
-            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(28,10,40,0.16) 100%);
-            background-color: rgba(48,18,72,0.52); /* fallback */
-            -webkit-backdrop-filter: blur(6px) saturate(1.05);
-            backdrop-filter: blur(6px) saturate(1.05);
-            border: 1px solid rgba(255,255,255,0.04);
-            border-left-color: rgba(124,58,237,0.12);  /* subtle purple edge */
-            border-top-color: rgba(124,58,237,0.07);
-            box-shadow: 0 10px 30px rgba(20,8,36,0.42), inset 0 1px 0 rgba(255,255,255,0.02);
-            border-radius: 12px;
-            transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms ease, background 180ms ease;
+            position: relative;
+            overflow: hidden;
+            padding: 0.85rem;
+            border-radius: 14px;
+
+            /* Purple glass theme */
+            background:
+                linear-gradient(120deg, rgba(30,41,59,0.13) 0%, rgba(51,65,85,0.10) 60%, rgba(100,116,139,0.09) 100%),
+                linear-gradient(180deg, rgba(71,85,105,0.07) 0%, rgba(15,23,42,0.10) 100%);
+            background-blend-mode: overlay, normal;
+            background-color: rgba(30,41,59,0.10);
+
+            /* preserve blur effect */
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+
+            /* subtle purple rim for contrast on dark backgrounds */
+            border: 1px solid rgba(71,85,105,0.09);
+            outline: 1px solid rgba(30,41,59,0.07);
+
+            /* purple ambience instead of neutral gray/black */
+            box-shadow:
+                0 10px 36px rgba(30,41,59,0.13),
+                0 2px 10px rgba(15,23,42,0.10),
+                inset 0 1px 0 rgba(255,255,255,0.01),
+                0 0 24px var(--ais-green-300);
+
+            color: #ffffff; /* pale blue-tinted text for readability */
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms ease, background 220ms ease, border-color 220ms ease;
+            will-change: transform, box-shadow;
         }
+
+        /* Decorative soft highlights (no interaction) */
+        .glass::before {
+            content: "";
+            pointer-events: none;
+            position: absolute;
+            left: -20%;
+            top: -30%;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.06), transparent 28%),
+                radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.03), transparent 18%);
+            mix-blend-mode: screen;
+            opacity: 0.95;
+            transform: translateZ(0);
+        }
+
+        /* Soft inner shadow to add thickness */
+        .glass::after {
+            content: "";
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -10px 30px rgba(2,6,23,0.06);
+        }
+
+        /* Slightly stronger hover lift (kept gentle because .glass:hover exists below) */
+        @media (hover: hover) and (pointer: fine) {
+            .glass:hover {
+                transform: translateY(-6px);
+                box-shadow:
+                    0 22px 64px rgba(6,18,10,0.48),
+                    0 8px 28px rgba(6,18,10,0.18),
+                    0 0 32px var(--ais-green-500); /* subtle green glow */
+                border-color: var(--ais-green-outline);
+            }
+        }
+
+        /* Respect reduced-motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            .glass, .glass::before, .glass::after { transition: none; transform: none; }
+        }
+        
 
         .glass:hover {
             transform: translateY(-3px);
-            box-shadow: 0 16px 40px rgba(18,6,40,0.52), 0 0 22px rgba(124,58,237,0.10);
-            background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(40,14,60,0.22) 100%);
-            outline: 1px solid rgba(124,58,237,0.06);
+            /* darker base shadow + soft green rim */
+            box-shadow: 0 18px 44px rgba(2,18,12,0.56), 0 0 28px rgba(0,0,0,0.12), 0 0 36px var(--ais-green-500);
+            /* layered background: deeper green base with subtle highlight and a soft vignette to add depth */
+            background:
+                radial-gradient(600px 120px at 10% 10%, rgba(255,255,255,0.03), transparent 12%),
+                linear-gradient(180deg, var(--ais-green-spot) 0%, var(--ais-green-700) 40%, var(--ais-green-800) 100%),
+                linear-gradient(180deg, var(--ais-green-500) 0%, var(--ais-green-strong) 100%);
+            outline: 1px solid rgba(4,120,60,0.08);
+            border-color: var(--ais-green-outline);
+            /* subtle glow effect using box-shadow inset for inner sheen */
+            --glass-hover-inner: inset 0 1px 0 rgba(255,255,255,0.02);
         }
 
         .glass-strong {
@@ -110,7 +202,7 @@
 
         .header-hero h1 { 
             text-shadow: 0 6px 18px rgba(3,50,26,0.12), 0 1px 0 rgba(255,255,255,0.6);
-            color: #08321a;
+            color: #0e0051;
             font-weight: 600;
         }
 
@@ -144,8 +236,9 @@
 
         .btn-glow:hover, .button-glow:hover {
             transform: translateY(-4px);
-            filter: brightness(1.08);
-            box-shadow: 0 12px 30px rgba(6,12,34,0.18);
+            filter: brightness(1.04);
+            /* add a subtle green glow to match theme */
+            box-shadow: 0 14px 34px rgba(6,18,10,0.22), 0 0 26px var(--ais-green-500);
         }
 
         .btn-glow::after {
@@ -169,7 +262,7 @@
             background: linear-gradient(135deg, #007a2f 0%, #00b140 100%);
         }
 
-        .btn-green:hover { background: linear-gradient(135deg, #008f2a 0%, #31c77b 100%); }
+    .btn-green:hover { background: linear-gradient(135deg, #00943a 0%, #39d16b 100%); box-shadow: 0 10px 30px var(--ais-green-600), 0 0 22px var(--ais-green-500); }
 
         /* Info */
         .btn-ais-info {
@@ -231,7 +324,7 @@
 
         /* Keep focus visual (green) but preserve consistent sizing */
         .input-field:focus {
-            box-shadow: 0 0 0 4px rgba(0,177,64,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            box-shadow: 0 0 0 4px var(--ais-green-200), 0 1px 2px rgba(0,0,0,0.04);
             border-color: var(--ais-green-dark) !important;
             outline: none;
             background: #fff !important;
@@ -254,9 +347,22 @@
         }
 
         .input-field::placeholder { color: #6b7280; opacity: 1; }
+        
+        /* Specific colors for length input fields */
+        input[id^="lengthA_"] {
+            color: #2563eb !important; /* Blue color for Shift A */
+        }
+        
+        input[id^="lengthB_"] {
+            color: #dc2626 !important; /* Red color for Shift B */
+        }
+        
         .instant-suggestions, .instant-suggest { color: #04121a; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; box-shadow: 0 8px 20px rgba(2,6,23,0.12); }
         .instant-suggestions div, .instant-suggest div { color: #04121a; }
-        .instant-suggestions div:hover, .instant-suggest div:hover { background: #eff6ff; }
+        .instant-suggestions div:hover, .instant-suggest div:hover {
+            background: linear-gradient(90deg, var(--ais-green-500), var(--ais-green-400));
+            box-shadow: 0 8px 22px rgba(2,18,10,0.12), 0 0 18px var(--ais-green-400);
+        }
 
         /* Layout: two-column aligned grid for left/right fields inside each data set */
         .data-set .form-grid {
@@ -443,8 +549,19 @@
         })();
     </script>
     <!-- LEGACY / OLD MOBILE SUPPORT END -->
+    <style id="pd2-reduced-motion-global">
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
 </head>
-<body class="min-h-screen">
+<!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
+<body class="min-h-screen pb-[env(safe-area-inset-bottom,0)]" style="overflow-x:hidden;">
     <!-- Header Section (cleaned) -->
     <div class="glass-strong header-hero mx-4 mt-4 p-6 mb-6">
         <!-- Decorative bubbles layer -->
@@ -463,7 +580,7 @@
     <!-- Control Panel -->
     <div class="glass rounded-lg mx-4 mb-6 p-6">
         <div class="flex justify-center">
-            <div class="flex items-center bg-white bg-opacity-50 rounded-lg px-4 py-2">
+            <div class="flex items-center bg-white rounded-lg px-4 py-2">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <defs>
                         <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -487,29 +604,25 @@
     </div>
 
     <!-- Quick Actions Box -->
-    <div class="glass rounded-lg mx-4 my-6 p-6">
-        <div class="flex flex-wrap gap-4 justify-center">
-            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+    <div class="glass rounded-lg mx-4 my-6 p-6 w-full max-w-full px-2">
+        <div class="flex flex-wrap gap-4 justify-center w-full max-w-full sm:flex-row flex-col">
+            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-plus-circle w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 เพิ่มชุดข้อมูลใหม่
             </button>
-            
-            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-files w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 คัดลอกโดยเพิ่มชุดข้อมูล
             </button>
-            
-            <button onclick="clearLocalStorage()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="clearLocalStorage()" class="btn-glow bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-trash w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 ล้างข้อมูลชั่วคราว
             </button>
-            
-            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-arrow-repeat w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 รีเซ็ตการบันทึกข้อมูล
             </button>
-            
-            <button onclick="showSystemHealth()" class="btn-glow btn-ais-info px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="showSystemHealth()" class="btn-glow btn-ais-info px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-heart-pulse w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 ตรวจสอบระบบ
             </button>
@@ -517,16 +630,19 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="glass rounded-lg mx-4 my-6 p-6">
-        <div class="flex flex-wrap gap-4 justify-center">
-            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+    <div class="glass rounded-lg mx-4 my-6 p-6 w-full max-w-full px-2">
+        <div class="flex flex-wrap gap-4 justify-center w-full max-w-full sm:flex-row flex-col">
+            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-save w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 บันทึกชั่วคราว
             </button>
-            
-            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <i class="bi bi-check2-circle w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
                 บันทึกข้อมูลทั้งหมด
+            </button>
+            <button onclick="exportPNG()" class="btn-glow text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto" style="background-color: #f50494;">
+                <i class="bi bi-image w-5 h-5 mr-2" aria-hidden="true" style="font-size:1.05rem"></i>
+                บันทึกเป็นรูปภาพ
             </button>
         </div>
     </div>
@@ -535,8 +651,9 @@
 
     <!-- Modals -->
     <!-- Machine Modal -->
-    <div id="machineModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <!-- mobile responsive fix: ensure modal fits small screens with safe padding -->
+    <div id="machineModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="glass-strong rounded-lg w-full sm:max-w-md p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,8 +688,9 @@
     </div>
 
     <!-- Employee Modal -->
-    <div id="employeeModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <!-- mobile responsive fix: ensure modal fits small screens with safe padding -->
+    <div id="employeeModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="glass-strong rounded-lg w-full sm:max-w-md p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,8 +724,9 @@
     </div>
 
     <!-- Fabric Size Modal -->
-    <div id="fabricModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <!-- mobile responsive fix: ensure modal fits small screens with safe padding -->
+    <div id="fabricModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="glass-strong rounded-lg w-full sm:max-w-md p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -641,10 +760,14 @@
     </div>
 
     <!-- Loading Overlay -->
+    <!-- mobile responsive fix: reduce overlay padding and allow small margins -->
     <div id="loadingOverlay" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center">
-        <div class="glass-strong rounded-lg p-8 max-w-md w-full mx-4">
-            <div class="text-center">
-                <div class="loading-spinner mx-auto mb-4"></div>
+        <div class="glass-strong rounded-lg p-6 w-full sm:max-w-sm mx-4">
+            <div class="text-center space-y-4">
+                <div class="mx-auto w-14 h-14 relative">
+                    <div class="pd2-spinner" aria-hidden="true"></div>
+                    <div class="sr-only" role="status">กำลังบันทึก</div>
+                </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">กำลังบันทึกข้อมูล</h3>
                 <p class="text-gray-600 mb-4" id="loadingStatus">กำลังเตรียมข้อมูล...</p>
                 
@@ -656,6 +779,13 @@
                     <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step4">4</div>
                     <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step5">5</div>
                 </div>
+
+                <style>
+                /* Minimal professional spinner */
+                @keyframes pd2Spin { to { transform: rotate(360deg); } }
+                .pd2-spinner { width:100%; height:100%; box-sizing:border-box; border:3px solid rgba(0,0,0,0.07); border-top-color:var(--color-accent,#10b981); border-radius:50%; animation: pd2Spin .8s linear infinite; }
+                @media (prefers-reduced-motion: reduce) { .pd2-spinner { animation:none; } }
+                </style>
                 
                 <div class="text-sm text-gray-500">
                     <div>1. เตรียมข้อมูล</div>
@@ -669,11 +799,12 @@
     </div>
 
     <!-- Notifications -->
-    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <!-- mobile responsive fix: constrain notifications width/offset -->
+    <div id="notifications" class="fixed top-2 right-2 sm:top-4 sm:right-4 z-50 space-y-2 max-w-[92vw] sm:max-w-none"></div>
 
     <!-- Recovery Modal -->
     <div id="recoveryModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+        <div class="glass-strong rounded-lg w-full sm:max-w-md p-6">
             <div class="flex items-center mb-4">
                 <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <defs>
@@ -1184,6 +1315,27 @@
                     debounceTimer = setTimeout(saveToLocalStorage, 2000);
                 }
             });
+
+            // Color change for length input fields
+            document.addEventListener('input', function(e) {
+                if (e.target.id && e.target.id.startsWith('lengthA_')) {
+                    e.target.style.color = '#2563eb'; // Blue for Shift A
+                } else if (e.target.id && e.target.id.startsWith('lengthB_')) {
+                    e.target.style.color = '#dc2626'; // Red for Shift B
+                }
+            });
+
+            // Apply colors to existing length input fields on page load
+            document.querySelectorAll('input[id^="lengthA_"]').forEach(input => {
+                if (input.value.trim() !== '') {
+                    input.style.color = '#2563eb'; // Blue for Shift A
+                }
+            });
+            document.querySelectorAll('input[id^="lengthB_"]').forEach(input => {
+                if (input.value.trim() !== '') {
+                    input.style.color = '#dc2626'; // Red for Shift B
+                }
+            });
         }
 
         // Generate Data Set HTML
@@ -1642,7 +1794,8 @@
                 activeIndex = idx;
                 if (!dropdown) return;
                 [...dropdown.children].forEach((el, i) => {
-                    el.style.background = i === activeIndex ? 'rgba(0,177,64,0.12)' : 'transparent';
+                    // Use CSS variable for theme-consistent hover background
+                    el.style.background = i === activeIndex ? 'var(--ais-green-500)' : 'transparent';
                 });
             };
 
@@ -1656,12 +1809,20 @@
             };
 
             inputEl.addEventListener('focus', () => {
-                const opts = optionsProvider(inputEl.value || '');
-                render(opts);
+                const currentValue = inputEl.value || '';
+                if (currentValue.trim() !== '') {
+                    const opts = optionsProvider(currentValue);
+                    render(opts);
+                }
             });
             inputEl.addEventListener('input', () => {
-                const opts = optionsProvider(inputEl.value || '');
-                render(opts);
+                const currentValue = inputEl.value || '';
+                if (currentValue.trim() !== '') {
+                    const opts = optionsProvider(currentValue);
+                    render(opts);
+                } else {
+                    close();
+                }
             });
             inputEl.addEventListener('keydown', (e) => {
                 if (!dropdown) return;
@@ -1861,6 +2022,12 @@
         // Data Submission Functions
         async function submitData() {
             console.log('🚀 เริ่มต้นการส่งข้อมูล');
+
+            // Performance log container
+            if (!window.PD2PerfLog) window.PD2PerfLog = [];
+            const t0 = performance.now();
+            const mark = (phase, extra) => { try { window.PD2PerfLog.push({ module:'CUT', phase, t: performance.now(), dt: +(performance.now()-t0).toFixed(1), ...(extra||{}) }); } catch(_){} };
+            mark('start');
             
             const allData = collectAllData();
             if (!allData || allData.length === 0) {
@@ -1897,14 +2064,25 @@
             }
         }
 
-        async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false) {
+        const PD2_SUBMIT_CFG = {
+            minStep5VisibleMs: 90,          // ขั้นตอน 5 จะไม่แสดงต่ำกว่านี้ (เพื่อไม่ให้กระพริบเร็วเกินไป)
+            preSendPaintMs: 50,             // เวลาก่อนเริ่ม fetch เพื่อให้ UI วาด step 4
+            attemptTimeoutMs: 10000,        // timeout ต่อครั้ง (ms)
+            baseBackoffMs: 450,             // ฐาน backoff
+            backoffFactor: 2,               // คูณทุกครั้ง
+            jitterMs: 150                   // สุ่มเพิ่ม 0..jitterMs ลดการชนพร้อมกัน
+        };
+
+        async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false, timeline) {
+            const attemptStart = performance.now();
+            const attemptInfo = { attempt: currentAttempt };
             console.log(`🔄 ความพยายามที่ ${currentAttempt}/${maxRetries}${useBackup ? ' (ใช้ backup)' : ''}`);
-            updateProgressStep(2);
-            updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
+            updateProgressStep(2); updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
             if (!SYSTEM_HEALTH.isOnline) throw new Error('ไม่มีการเชื่อมต่ออินเทอร์เน็ต');
-            await new Promise(r => setTimeout(r, 1000));
-            updateProgressStep(3);
-            updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
+            timeline && timeline('validate');
+            // (เดิมรอ 1000ms) ลดเหลือ micro-wait เล็กน้อยให้ progress แสดง
+            await new Promise(r => setTimeout(r, 60));
+            updateProgressStep(3); updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
             let endpoint = API_CONFIG.endpoint;
             if (useBackup && API_CONFIG.backupEndpoints.length > 0) {
                 const backupIndex = (currentAttempt - 1) % API_CONFIG.backupEndpoints.length;
@@ -1914,13 +2092,13 @@
             try {
                 const submissionId = (self.crypto && crypto.randomUUID ? crypto.randomUUID() : 'sub-' + Date.now() + '-' + Math.random().toString(16).slice(2));
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                const timeoutMs = PD2_SUBMIT_CFG.attemptTimeoutMs; // ใช้ค่า config ใหม่
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
                 const payload = { ...data, submissionId, systemInfo: { userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: currentAttempt, endpoint } };
                 // แสดงขั้นตอนที่ 4 ก่อนเริ่มส่ง เพื่อให้ผู้ใช้เห็นการเปลี่ยนแปลง
-                updateProgressStep(4);
-                updateLoadingStatus('กำลังส่งข้อมูล...');
-                // ให้เวลา UI วาดผลเล็กน้อย
-                await new Promise(r => setTimeout(r, 80));
+                updateProgressStep(4); updateLoadingStatus('กำลังส่งข้อมูล...');
+                await new Promise(r => setTimeout(r, PD2_SUBMIT_CFG.preSendPaintMs));
+                timeline && timeline('send');
 
                 // Simple request (หลบ preflight)
                 const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: controller.signal, cache: 'no-store', keepalive: true });
@@ -1935,27 +2113,52 @@
                 }
                 updateProgressStep(5);
                 updateLoadingStatus('ยืนยันการบันทึก...');
-                // ให้เห็นขั้นตอนที่ 5 ชัดเจนก่อนปิดหน้าต่าง
-                await new Promise(r => setTimeout(r, 200));
+                timeline && timeline('step5');
+                const step5ShownAt = performance.now();
+                // Adaptive visibility (เดิม 200ms): แสดงอย่างน้อย minStep5VisibleMs แต่ไม่บังคับเพิ่มหากช้าอยู่แล้ว
+                const needMs = PD2_SUBMIT_CFG.minStep5VisibleMs - (performance.now() - step5ShownAt);
+                if (needMs > 10) { await new Promise(r => setTimeout(r, needMs)); }
                 LS.remove('pendingSubmission');
                 SYSTEM_HEALTH.saveFailureCount = 0; SYSTEM_HEALTH.lastSaveTime = new Date();
                 const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
                 hideLoading();
                 showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                try {
+                    const fn = (window.parent && window.parent !== window && window.parent.PD2NotifyCenteredSuccess)
+                        ? window.parent.PD2NotifyCenteredSuccess
+                        : window.PD2NotifyCenteredSuccess;
+                    if (fn) {
+                        fn(totalRows);
+                    } else if (window.parent && window.parent !== window) {
+                        // Fallback: ask parent via postMessage
+                        try { window.parent.postMessage({ type: 'PD2_CENTERED_SUCCESS', count: totalRows }, '*'); } catch(_){ }
+                    }
+                } catch(_){ }
                 console.log('✅ ส่งข้อมูลสำเร็จ', { submissionId, totalRows, response: json });
             } catch (error) {
                 const isLikelyCors = (error instanceof TypeError) || /fetch|network|cors/i.test(error.message || '');
-                if (currentAttempt === 1 && isLikelyCors) {
+        if (currentAttempt === 1 && isLikelyCors) {
                     try {
                         console.warn('⚠️ Simple POST ล้มเหลว อาจติด CORS -> ลอง JSONP');
                         const jsonpResult = await jsonpFallback(data, endpoint);
                         if (jsonpResult && jsonpResult.success) {
                             const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
                             updateProgressStep(5);
-                            // แสดงผลขั้นตอน 5 ชั่วครู่ก่อนปิด
-                            await new Promise(r => setTimeout(r, 200));
+                const step5ShownAt2 = performance.now();
+                const needMs2 = PD2_SUBMIT_CFG.minStep5VisibleMs - (performance.now() - step5ShownAt2);
+                if (needMs2 > 10) { await new Promise(r => setTimeout(r, needMs2)); }
                             hideLoading();
                             showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                            try {
+                                const fn = (window.parent && window.parent !== window && window.parent.PD2NotifyCenteredSuccess)
+                                    ? window.parent.PD2NotifyCenteredSuccess
+                                    : window.PD2NotifyCenteredSuccess;
+                                if (fn) {
+                                    fn(totalRows);
+                                } else if (window.parent && window.parent !== window) {
+                                    try { window.parent.postMessage({ type: 'PD2_CENTERED_SUCCESS', count: totalRows }, '*'); } catch(_){ }
+                                }
+                            } catch(_){ }
                             SYSTEM_HEALTH.saveFailureCount = 0; LS.remove('pendingSubmission');
                             return;
                         }
@@ -1965,9 +2168,11 @@
                 ERROR_LOG.log(error, `Submit attempt ${currentAttempt}`); SYSTEM_HEALTH.saveFailureCount++;
                 if (currentAttempt < maxRetries) {
                     updateLoadingStatus(`กำลังลองใหม่... (${currentAttempt + 1}/${maxRetries})`);
-                    const delay = API_CONFIG.retryDelay * Math.pow(2, currentAttempt - 1);
-                    await new Promise(r => setTimeout(r, delay));
-                    const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup);
+            const base = PD2_SUBMIT_CFG.baseBackoffMs * Math.pow(PD2_SUBMIT_CFG.backoffFactor, currentAttempt - 1);
+            const jitter = Math.random() * PD2_SUBMIT_CFG.jitterMs;
+            const delay = Math.min(base + jitter, 5000);
+            await new Promise(r => setTimeout(r, delay));
+            const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup, timeline);
                 } else {
                     if (SYSTEM_HEALTH.saveFailureCount >= SYSTEM_HEALTH.maxFailures) showNotification('ระบบมีปัญหาการส่งข้อมูลซ้ำๆ กรุณาติดต่อผู้ดูแลระบบ', 'error');
                     try { if (LS.get('pendingSubmission')) showNotification('ไม่สามารถยืนยันผล เซฟ pending รอส่งใหม่', 'warning'); } catch(_){}
@@ -2031,7 +2236,172 @@
             return allData;
         }
 
-        // Storage Functions - ปรับปรุงให้แข็งแกร่งขึ้น
+        // PNG Export (CUT): Renders key fields for each data set into a single PNG
+        function exportPNG() {
+            try {
+                const data = collectAllData();
+                if (!data || data.length === 0) {
+                    try { showNotification('ไม่มีข้อมูลสำหรับสร้างรูปภาพ', 'warning'); } catch(_) { alert('ไม่มีข้อมูลสำหรับสร้างรูปภาพ'); }
+                    return;
+                }
+
+                const now = new Date();
+                const headerTitle = 'รายงานตัดม้วน PD2 - บันทึกเป็น PNG';
+                const headerTime = 'สร้างเมื่อ: ' + now.toLocaleString('th-TH');
+                const headerCount = 'จำนวนชุดข้อมูล: ' + data.length;
+                const rawLines = [headerTitle, headerTime, headerCount, ''];
+
+                data.forEach((set, idx) => {
+                    rawLines.push('ชุดข้อมูลที่ ' + (idx + 1));
+                    rawLines.push('วันที่: ' + (set.date || ''));
+                    rawLines.push('เครื่องทอ NO: ' + (set.machine || ''));
+                    rawLines.push('ขนาดหน้าผ้า: ' + (set.fabricSize || ''));
+                    if (set.lotNo) rawLines.push('Lot No: ' + set.lotNo);
+                    rawLines.push('ความยาวตัดม้วน กะ A (เมตร): ' + (set.lengthA || ''));
+                    rawLines.push('ความยาวตัดม้วน กะ B (เมตร): ' + (set.lengthB || ''));
+                    rawLines.push('');
+                });
+
+                // Canvas sizing and wrapping
+                const padding = 32;
+                const width = 1080;
+                const fontSize = 28;
+                const lineHeight = Math.round(fontSize * 1.4);
+                const fontFamily = "Kanit, Tahoma, sans-serif";
+
+                const measureCanvas = document.createElement('canvas');
+                const mctx = measureCanvas.getContext('2d');
+                mctx.font = `${fontSize}px ${fontFamily}`;
+                const maxTextWidth = width - padding * 2;
+
+                const wrapText = (text) => {
+                    const words = (text || '').toString().split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (let i = 0; i < words.length; i++) {
+                        const testLine = line ? (line + ' ' + words[i]) : words[i];
+                        const metrics = mctx.measureText(testLine);
+                        if (metrics.width > maxTextWidth && line) {
+                            lines.push(line);
+                            line = words[i];
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    if (line) lines.push(line);
+                    for (let i = 0; i < lines.length; i++) {
+                        if (mctx.measureText(lines[i]).width > maxTextWidth) {
+                            const broken = [];
+                            let current = lines[i];
+                            while (mctx.measureText(current).width > maxTextWidth && current.length > 1) {
+                                let lo = 1, hi = current.length, cut = 1;
+                                while (lo <= hi) {
+                                    const mid = (lo + hi) >> 1;
+                                    const substr = current.slice(0, mid);
+                                    if (mctx.measureText(substr).width <= maxTextWidth) { cut = mid; lo = mid + 1; } else { hi = mid - 1; }
+                                }
+                                broken.push(current.slice(0, cut));
+                                current = current.slice(cut);
+                            }
+                            if (current) broken.push(current);
+                            lines.splice(i, 1, ...broken);
+                            i += broken.length - 1;
+                        }
+                    }
+                    return lines;
+                };
+
+                const finalLines = [];
+                rawLines.forEach(line => {
+                    const wrapped = wrapText(line);
+                    if (wrapped.length === 0) finalLines.push('');
+                    else finalLines.push(...wrapped);
+                });
+
+                const height = padding * 2 + finalLines.length * lineHeight;
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = Math.max(height, padding * 2 + lineHeight);
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#111827';
+                ctx.font = `${fontSize}px ${fontFamily}`;
+                ctx.textBaseline = 'top';
+
+                let y = padding;
+                const x = padding;
+                finalLines.forEach((ln, i) => {
+                    if (/^ชุดข้อมูลที่\s+\d+/.test(ln)) {
+                        ctx.font = `bold ${fontSize}px ${fontFamily}`;
+                    } else if (i <= 2) {
+                        ctx.font = `600 ${fontSize}px ${fontFamily}`;
+                    } else {
+                        ctx.font = `${fontSize}px ${fontFamily}`;
+                    }
+                    ctx.fillText(ln, x, y);
+                    y += lineHeight;
+                });
+
+                const pad = (n) => (n < 10 ? '0' + n : '' + n);
+                const yyyy = now.getFullYear();
+                const mm = pad(now.getMonth() + 1);
+                const dd = pad(now.getDate());
+                const hh = pad(now.getHours());
+                const mi = pad(now.getMinutes());
+                const ss = pad(now.getSeconds());
+                const filename = `PD2_CUT_${yyyy}${mm}${dd}_${hh}${mi}${ss}.png`;
+
+                // Use blob-based save to avoid navigation/new tab
+                canvas.toBlob(async (blob) => {
+                    if (!blob) { try { showNotification('ไม่สามารถสร้างไฟล์ PNG', 'error'); } catch(_) {}; return; }
+
+                    // 1) File System Access API
+                    if (window.showSaveFilePicker) {
+                        try {
+                            const handle = await window.showSaveFilePicker({
+                                suggestedName: filename,
+                                types: [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]
+                            });
+                            const writable = await handle.createWritable();
+                            await writable.write(blob);
+                            await writable.close();
+                            try { showNotification('บันทึกไฟล์สำเร็จ', 'blue'); } catch(_) {}
+                            return;
+                        } catch(_){}
+                    }
+
+                    // 2) Web Share API with files (mobile)
+                    try {
+                        const file = new File([blob], filename, { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: 'PD2 Export', text: 'PD2 CUT' });
+                            try { showNotification('เปิดเมนูแชร์ไฟล์แล้ว', 'blue'); } catch(_) {}
+                            return;
+                        }
+                    } catch(_){}
+
+                    // 3) Anchor + object URL fallback (same tab)
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.target = '_self';
+                    a.rel = 'noopener';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+                }, 'image/png');
+            } catch (err) {
+                console.error('❌ ไม่สามารถสร้าง PNG ได้:', err);
+                try { showNotification('ไม่สามารถสร้าง PNG ได้', 'error'); } catch(_) { alert('ไม่สามารถสร้าง PNG ได้'); }
+            }
+        }
+
+    // Storage Functions - ปรับปรุงให้แข็งแกร่งขึ้น
         function saveToLocalStorage() {
             const saveStartTime = performance.now();
             

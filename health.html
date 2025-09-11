@@ -10,7 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <style>*{font-family:'Kanit',sans-serif}</style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-black via-slate-900 to-sky-800 text-white">
+<!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
+<body class="min-h-screen bg-gradient-to-br from-black via-slate-900 to-sky-800 text-white pb-[env(safe-area-inset-bottom,0)]">
   <div class="max-w-3xl mx-auto p-6">
     <h1 class="text-2xl font-semibold">สถานะระบบ</h1>
     <p class="text-white/70 mt-1">หน้าอ่านอย่างเดียว ไม่แตะข้อมูลผู้ใช้</p>

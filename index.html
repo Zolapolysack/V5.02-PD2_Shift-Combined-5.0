@@ -4,90 +4,70 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Language" content="th" />
+  <!-- Added meta enhancements -->
+  <meta name="description" content="ระบบบันทึกข้อมูลกะ A/B ตัดม้วน และรายงาน แผนกผลิต 2 - ใช้งานได้ทั้งออฟไลน์และออนไลน์" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="color-scheme" content="light dark" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>ระบบบันทึกข้อมูลรายงานแผนกผลิต 2</title>
   <script src="https://cdn.tailwindcss.com/3.4.10"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Preload Kanit to improve FCP -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <!-- Load shared PD2 notification module once at the parent level -->
   <script src="./pd2-notify.js" defer></script>
   <style>
+    :root { --pd2-green:#16a34a; --pd2-green-accent:#22c55e; --pd2-red:#f43f5e; --pd2-blue:#24a8ea; --pd2-purple:#6d28d9; }
     * { font-family: 'Kanit', sans-serif; }
     body { background: linear-gradient(135deg, #0a0a0a 50%, #0ea5e9 100%); min-height: 100vh; }
-  .glass { background: rgba(255,255,255,0.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+    .glass { background: rgba(255,255,255,0.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
     .tab-btn { transition: all .2s ease; }
-    .tab-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border-color:#16a34a; }
+    .tab-btn.active { background: linear-gradient(135deg, var(--pd2-green-accent), var(--pd2-green)); color: #fff; border-color:var(--pd2-green); }
     .tab-btn:not(.active) { background: rgba(255,255,255,0.9); color:#111827; border-color:#e5e7eb; }
     .frame-wrap { height: calc(100vh - 112px); /* header(32)+box(80)≈112 */ }
     @media (max-width: 768px) { .frame-wrap { height: calc(100vh - 140px); } }
-  .hero-blur { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  /* Loading overlay for iframe navigation */
-  .loading-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.85); z-index:40; }
-  .loading-hidden { display:none; }
-  .pill-btn[disabled] { opacity:.55; cursor:not-allowed; }
+    .hero-blur { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    /* Loading overlay for iframe navigation */
+    .loading-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.85); z-index:40; }
+    .loading-hidden { display:none; }
+    .pill-btn[disabled] { opacity:.55; cursor:not-allowed; }
     /* Pro look helpers */
-    .gradient-text {
-      font-weight: 700;
-      background: linear-gradient(90deg,
-        #ffffff 0%,
-        #f3f4f6 35%,
-        #e5e7eb 65%,
-        #cbd5d1 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      /* remove outline/stroke and heavy shadows for clean text edges */
-      -webkit-text-stroke: 0;
-      text-shadow: 0 1px 0 rgba(0,0,0,0.10); /* very subtle grounding shadow only */
-      filter: none;
-      letter-spacing: 0.2px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+    .gradient-text { font-weight: 700; background: linear-gradient(90deg,#ffffff 0%,#f3f4f6 35%,#e5e7eb 65%,#cbd5d1 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 0; text-shadow: 0 1px 0 rgba(0,0,0,0.10); filter: none; letter-spacing: 0.2px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     .sticky-card { position: sticky; top: 1rem; z-index: 50; }
     .pill-group { background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.65); padding: .25rem; border-radius: .875rem; display: inline-flex; gap: .25rem; }
-    .pill-btn {
-      position: relative;
-      padding: .625rem 1.125rem; /* slightly taller */
-      border-radius: .85rem;
-      font-weight: 400; /* lighter as requested */
-      color:#0f172a;
-      transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
-      will-change: transform, box-shadow;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    }
+    .pill-btn { position: relative; padding: .625rem 1.125rem; border-radius: .85rem; font-weight: 400; color:#0f172a; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease; will-change: transform, box-shadow; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
     .pill-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
     .pill-btn:active { transform: translateY(0); box-shadow: 0 3px 10px rgba(0,0,0,.1); }
     .pill-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.7), 0 8px 20px rgba(0,0,0,.18); }
-    .pill-btn::after {
-      content: "";
-      position: absolute; inset: -1px;
-      background: radial-gradient(120px 60px at var(--x,10%) 50%, rgba(255,255,255,.35), transparent 60%);
-      opacity: 0; transition: opacity .25s ease;
-      pointer-events: none;
-    }
+    .pill-btn::after { content: ""; position: absolute; inset: -1px; background: radial-gradient(120px 60px at var(--x,10%) 50%, rgba(255,255,255,.35), transparent 60%); opacity: 0; transition: opacity .25s ease; pointer-events: none; }
     .pill-btn:hover::after { opacity: .6; }
-    .pill-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); color:#fff; box-shadow: 0 14px 30px rgba(34,197,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
-  /* Make B active appear red to differentiate */
-  #btnB.pill-btn.active { background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 14px 30px rgba(244,63,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
-  /* Make Cut (บันทึกตัดม้วน) active appear orange */
-  #btnCut.pill-btn.active { background: linear-gradient(135deg, #05a3e6, #24a8ea); box-shadow: 0 14px 30px rgba(245,158,11,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
-  /* Make Report (รายงาน) active appear dark purple */
-  #btnReport.pill-btn.active { background: linear-gradient(135deg, #4c1d95, #6d28d9); box-shadow: 0 14px 30px rgba(109,40,217,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
-    .bg-grid {
-      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.12) 1px, transparent 0);
-      background-size: 22px 22px;
-    }
+    .pill-btn.active { background: linear-gradient(135deg, var(--pd2-green-accent), var(--pd2-green)); color:#fff; box-shadow: 0 14px 30px rgba(34,197,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    #btnB.pill-btn.active { background: linear-gradient(135deg, #ef4444, var(--pd2-red)); box-shadow: 0 14px 30px rgba(244,63,94,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    #btnCut.pill-btn.active { background: linear-gradient(135deg, #05a3e6, var(--pd2-blue)); box-shadow: 0 14px 30px rgba(245,158,11,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    #btnReport.pill-btn.active { background: linear-gradient(135deg, #4c1d95, var(--pd2-purple)); box-shadow: 0 14px 30px rgba(109,40,217,.28), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    .bg-grid { background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.12) 1px, transparent 0); background-size: 22px 22px; }
     .spotlight { position: absolute; inset: 0; opacity: .8; mix-blend-mode: screen; }
-    .spotlight:before, .spotlight:after {
-      content: ""; position: absolute; border-radius: 9999px; filter: blur(60px);
-    }
+    .spotlight:before, .spotlight:after { content: ""; position: absolute; border-radius: 9999px; filter: blur(60px); }
     .spotlight:before { width: 480px; height: 480px; left: -120px; top: -140px; background: radial-gradient(circle, rgba(34,211,238,.35), transparent 60%); }
     .spotlight:after { width: 540px; height: 540px; right: -160px; bottom: -180px; background: radial-gradient(circle, rgba(167,139,250,.35), transparent 60%); }
   </style>
+  <style id="pd2-reduced-motion-global">
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen">
+<!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
+<body class="min-h-screen pb-[env(safe-area-inset-bottom,0)]" style="overflow-x:hidden;">
+  <!-- Skip to main content link -->
+  <a href="#workbench" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-black/70 text-white px-3 py-2 rounded">ข้ามไปยังพื้นที่ทำงาน</a>
   <!-- Top Nav / Brand -->
   <header class="mx-4 mt-4">
     <div class="glass sticky-card rounded-xl p-3 flex items-center justify-between shadow-lg ring-1 ring-white/20">
@@ -111,7 +91,9 @@
   </header>
 
   <!-- Hero Section -->
-  <section class="relative overflow-hidden mt-4 mx-4 rounded-2xl min-h-[280px] md:min-h-[360px] flex items-center">
+  <main id="main" role="main">
+  <!-- mobile responsive fix: reduce hero min height on very small screens -->
+  <section class="relative overflow-hidden mt-4 mx-4 rounded-2xl min-h-[240px] sm:min-h-[280px] md:min-h-[360px] flex items-center">
     <div class="absolute inset-0 -z-10">
       <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-400/30 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"></div>
@@ -121,8 +103,9 @@
       <div class="spotlight" aria-hidden="true"></div>
       <div class="px-6 py-8 md:px-10 md:py-12">
         <div class="max-w-full text-left">
-          <h1 class="gradient-text whitespace-nowrap tracking-tight text-[clamp(1rem,4vw,2.6rem)] md:text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-tight">ระบบบันทึกข้อมูลกะ A & B และตัดม้วนผ้า PD2 </h1>
-          <p class="text-white/85 mt-3 whitespace-nowrap text-[clamp(0.9rem,2.2vw,1.125rem)]">รวมการทำงานของทั้งสองกะสามารถสลับกะได้ บันทึกข้อมูล รองรับการใช้งานทั้งออนไลน์และออฟไลน์</p>
+          <!-- mobile responsive fix: allow wrapping on small screens to prevent overflow -->
+          <h1 class="gradient-text whitespace-normal sm:whitespace-nowrap break-words tracking-tight text-[clamp(1rem,4vw,2.6rem)] md:text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-tight">ระบบบันทึกข้อมูลกะ A & B และตัดม้วนผ้า PD2 </h1>
+          <p class="text-white/85 mt-3 whitespace-normal sm:whitespace-nowrap text-[clamp(0.9rem,2.2vw,1.125rem)]">รวมการทำงานของทั้งสองกะสามารถสลับกะได้ บันทึกข้อมูล รองรับการใช้งานทั้งออนไลน์และออฟไลน์</p>
         </div>
       </div>
     </div>
@@ -190,11 +173,12 @@
           <div class="text-sm md:text-base text-white/70">สามารถสลับได้ ข้อมูลจะยังอยู่ตามกะที่เลือก</div>
         </div>
         <div class="flex justify-center">
-          <div class="pill-group shadow-md w-full md:w-[720px] lg:w-[800px]">
-            <button id="btnA" aria-pressed="true" class="pill-btn active text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ A</button>
-            <button id="btnB" aria-pressed="false" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ B</button>
-            <button id="btnCut" aria-pressed="false" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกตัดม้วน</button>
-            <button id="btnReport" aria-pressed="false" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">รายงาน</button>
+          <!-- mobile responsive fix: allow buttons to wrap on small screens -->
+          <div class="pill-group shadow-md w-full md:w-[720px] lg:w-[800px] flex-wrap sm:flex-nowrap gap-2">
+            <button id="btnA" aria-pressed="true" aria-controls="workbench" class="pill-btn active text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ A</button>
+            <button id="btnB" aria-pressed="false" aria-controls="workbench" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกข้อมูลกะ B</button>
+            <button id="btnCut" aria-pressed="false" aria-controls="workbench" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">บันทึกตัดม้วน</button>
+            <button id="btnReport" aria-pressed="false" aria-controls="workbench" class="pill-btn text-base md:text-lg ring-1 ring-black/0 hover:ring-black/5 flex-1">รายงาน</button>
           </div>
         </div>
       </div>
@@ -219,22 +203,24 @@
       </div>
     </div>
   </section>
-
+  </main>
   <!-- Footer -->
   <footer class="mx-4 mb-6 mt-10">
     <div class="glass rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm">
-  <div class="text-white/70">© 2025 Production Dept. 2 • Unified Shift Console v5.01</div>
+  <div class="text-white/70">© 2025 Production Dept. 2 • Unified Shift Console v5.02</div>
       <div class="text-white/60">รองรับการใช้งานบนอุปกรณ์พกพา และเบราว์เซอร์หลัก</div>
     </div>
   </footer>
 
   <!-- Toast -->
   <!-- Notifications container (pre-created so Tailwind JIT includes classes used by pd2-notify.js) -->
-  <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2 hidden" aria-hidden="true"></div>
+  <!-- mobile responsive fix: constrain width and nudge position on small screens -->
+  <div id="notifications" class="fixed top-2 right-2 sm:top-4 sm:right-4 z-50 space-y-2 max-w-[92vw] sm:max-w-none hidden" aria-hidden="true" role="region" aria-label="การแจ้งเตือนระบบ"></div>
 
   
 
-  <div id="toast" role="status" aria-live="polite" class="fixed top-4 left-4 z-[100] px-4 py-2 rounded-lg glass text-white/95 text-sm shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 text-left max-w-xs">
+  <!-- mobile responsive fix: constrain toast width and offsets on small screens -->
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true" class="fixed top-2 left-2 sm:top-4 sm:left-4 z-[100] px-4 py-2 rounded-lg glass text-white/95 text-sm shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 text-left max-w-[92vw] sm:max-w-xs">
     
   </div>
 
@@ -363,6 +349,15 @@
           broadcastShared();
         } else if (fromActiveFrame && m.type === 'PD2_REQUEST_SYNC') {
           broadcastShared(ev.source);
+        } else if (m.type === 'PD2_CENTERED_SUCCESS') {
+          try {
+            const count = typeof m.count === 'number' ? m.count : 0;
+            if (window.PD2NotifyCenteredSuccess) {
+              window.PD2NotifyCenteredSuccess(count);
+            } else if (window.PD2Notify) {
+              window.PD2Notify('สำเร็จ '+count+' รายการ','success');
+            }
+          } catch(_){ }
         }
       });
 
@@ -434,6 +429,8 @@
           currentModule = target;
           // sync lists to the freshly loaded iframe
           try { setTimeout(() => broadcastShared(frame.contentWindow), 0); } catch(_){}
+          // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
+          try { setTimeout(() => { applyMobileScrollLockToIframe(frame?.contentDocument || frame?.contentWindow?.document); }, 0); } catch(_){ }
           // toasts per module
           if (!options.initial) {
             showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว');
@@ -470,6 +467,8 @@
               navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
               currentModule = target;
               try { setTimeout(() => broadcastShared(frame.contentWindow), 0); } catch(_){ }
+              // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
+              try { setTimeout(() => { applyMobileScrollLockToIframe(frame?.contentDocument || frame?.contentWindow?.document); }, 0); } catch(_){ }
               if (!options.initial) {
                 try { showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว'); } catch(_){}
               }
@@ -483,7 +482,7 @@
   PD2Log('navigateTo.setSrc', withVer(pathFor(target)));
   frame.src = withVer(pathFor(target));
         // Watchdog timeout to recover UI even if load doesn't fire
-  navState.timer = setTimeout(onErrorTimeout, 15000);
+  navState.timer = setTimeout(onErrorTimeout, 10000);
       }
 
       // Wire buttons to new navigator
@@ -513,23 +512,19 @@
         try {
           const targets = ['A','B','CUT','REPORT'];
           const run = () => {
+            if (document.hidden) { return; }
             targets.forEach(t => {
+              if (t === currentModule) return; // skip already loaded
               const p = withVer(pathFor(t));
               PD2Log('prefetch.attempt', t, p);
-              // Use fetch to warm browser cache for the document
               fetch(p, { method: 'GET', credentials: 'same-origin', cache: 'force-cache' })
-                .then(r => {
-                  if (r.ok) PD2Log('prefetch.ok', t, { status: r.status });
-                  else PD2Log('prefetch.non-2xx', t, { status: r.status });
-                })
+                .then(r => { if (r.ok) PD2Log('prefetch.ok', t, { status: r.status }); else PD2Log('prefetch.non-2xx', t, { status: r.status }); })
                 .catch(e => PD2Log('prefetch.err', t, { error: String(e) }));
             });
           };
-
           if ('requestIdleCallback' in window) {
             requestIdleCallback(() => run(), { timeout: 2000 });
           } else {
-            // Slight delay to allow initial UI to settle
             setTimeout(run, 1500);
           }
         } catch (err) { PD2Log('prefetch.fail', String(err)); }
@@ -566,6 +561,88 @@
   // initial navigation via controller (defaults to A)
   if (!frame.src || frame.src === 'about:blank') {
     navigateTo('A', { initial: true });
+  }
+
+  // Helper: Inject mobile-only CSS and touch handler into iframe to lock scrolling to vertical on small screens
+  function applyMobileScrollLockToIframe(doc){
+    try {
+      if (!doc) return;
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+      if (!isMobile) return; // only on small screens
+      const head = doc.head || doc.getElementsByTagName('head')[0] || doc.documentElement;
+      if (!head) return;
+
+      // Inject CSS once
+      if (!doc.getElementById('pd2-mobile-scroll-lock')) {
+        const style = doc.createElement('style');
+        style.id = 'pd2-mobile-scroll-lock';
+        style.type = 'text/css';
+  style.textContent = `
+@media (max-width: 767px) {
+  html, body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  body, main, .container, .wrapper, .content, .module, .inner, .inner-module, .page, .sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  /* Prevent flex/grid children from overflowing horizontally */
+  main > *, .container > *, .wrapper > *, .content > *, .module > *, .inner > *, .inner-module > *, .page > *, .sheet > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+  }
+  img { max-width: 100%; height: auto; display: block; }
+  table { width: 100%; table-layout: fixed; word-break: break-word; }
+  /* Encourage vertical scrolling only within common containers */
+  .inner-module, .module, main, .content, .wrapper, .page, .sheet {
+    overflow-x: hidden !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  /* Opt-in horizontal scrolling areas when necessary */
+  [data-allow-x] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x !important;
+  }
+}
+        `;
+        head.appendChild(style);
+      }
+
+      // Attach a conservative touch handler to block predominantly horizontal pans
+      if (!doc.__pd2ScrollLockAttached) {
+        doc.__pd2ScrollLockAttached = true;
+        let startX = 0, startY = 0;
+        doc.addEventListener('touchstart', function(e){
+          const t = e.touches && e.touches[0];
+          if (!t) return;
+          startX = t.clientX; startY = t.clientY;
+        }, { passive: true });
+        doc.addEventListener('touchmove', function(e){
+          try {
+            if (!window.matchMedia || !window.matchMedia('(max-width: 767px)').matches) return; // guard on resize
+            if (!e.touches || e.touches.length !== 1) return;
+            const t = e.touches[0];
+            const dx = Math.abs(t.clientX - startX);
+            const dy = Math.abs(t.clientY - startY);
+            // Opt-out: allow horizontal gestures inside elements explicitly marked
+            const allowX = e.target && e.target.closest && e.target.closest('[data-allow-x]');
+            if (!allowX && dx > dy) {
+              e.preventDefault(); // block horizontal pan
+            }
+          } catch(_) { /* no-op */ }
+        }, { passive: false });
+      }
+    } catch(_) { /* no-op */ }
   }
         
   // Mobile viewport adjustments

@@ -2,13 +2,18 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>ระบบบันทึกข้อมูลรายงานแผนกผลิต 2 - กะ B </title>
     <script src="https://cdn.tailwindcss.com/3.4.10"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* mobile override: prevent narrow columns and clipping on iOS */
+        @media (max-width: 640px) {
+            body { background-attachment: scroll !important; }
+            .glass-strong, .glass, .data-set { max-width: 100% !important; margin-left: 8px !important; margin-right: 8px !important; box-sizing: border-box !important; }
+        }
         * {
             font-family: 'Kanit', sans-serif;
             font-feature-settings: "liga" 1, "kern" 1;
@@ -33,9 +38,50 @@
         }
         
         .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* กลมกลืนกับพื้นหลังหลัก แต่ปรับให้ไม่เข้มเกินไปเป็นค่าเริ่มต้น */
+            background:
+                linear-gradient(135deg, rgba(0,0,0,0.32) 0%, rgba(8,143,215,0.08) 100%),
+                linear-gradient(135deg, #000000 0%, #088fd7 100%);
+            background-blend-mode: overlay;
+            backdrop-filter: blur(10px) saturate(110%);
+            -webkit-backdrop-filter: blur(10px) saturate(110%);
+            border: 1px solid rgba(8,143,215,0.10);
+            color: #e6f9ff;
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 24px rgba(2,6,23,0.22);
+            transition: background 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+        }
+
+        /* เล็กน้อยเมื่อโฟกัส / โฮเวอร์ ให้ดูมีมิติแต่ไม่ฉูดฉาด */
+        .glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(2,6,23,0.26);
+        }
+
+        /* ต่ำกว่าบนหน้า: ปรับให้กล่องที่อยู่ด้านล่าง (เช่น Quick Actions / Action Buttons)
+           พื้นหลังเบากว่าและแสงน้อยลง เพื่อไม่ให้ดูเข้มจนเกินไป */
+        .glass.mx-4.my-6,
+        .glass.mx-4.my-6.p-6 {
+            background:
+                radial-gradient(circle at 10% 10%, rgba(255,255,255,0.06), transparent 18%),
+                linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(8,143,215,0.04) 40%, rgba(2,6,23,0.16) 100%),
+                linear-gradient(135deg, rgba(4,20,26,0.36) 0%, rgba(8,143,215,0.06) 100%);
+            background-blend-mode: overlay, overlay, multiply;
+            border: 1px solid rgba(8,143,215,0.06);
+            box-shadow: 0 6px 14px rgba(2,6,23,0.12);
+            color: #f1fbff; /* สว่างขึ้นเล็กน้อยแต่ยังคอนทราสต์กับพื้นมืด */
+        }
+
+        /* ถ้าต้องการเฉพาะสองกล่องนั้นแบบแม่นยำ ให้เพิ่มคลาส .soft ที่ HTML:
+           <div class="glass soft ..."> ... </div>
+           แล้วใช้ selector นี้แทนตัวบน */
+        .glass.soft {
+            background:
+                linear-gradient(135deg, rgba(0,0,0,0.16) 0%, rgba(8,143,215,0.03) 100%),
+                linear-gradient(135deg, #413d3d63 0%, #088fd7 100%);
+            border: 1px solid rgba(8,143,215,0.05);
+            box-shadow: 0 5px 12px rgba(2,6,23,0.10);
+            color: #f6feff;
         }
         
         .glass-strong {
@@ -48,6 +94,25 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Remove embossed / raised visual effects for accessibility and flat look */
+        label.block.font-medium.mb-2.text-base,
+        label.block.font-medium.mb-2.text-base * {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        /* Improve label clarity: stronger weight, precise spacing, high contrast */
+        label.block.font-medium.mb-2.text-base {
+            color: #ffffff !important;
+            font-weight: 600 !important; /* semibold for better legibility */
+            letter-spacing: 0.005em !important;
+        }
+
+        /* Neutralize glass shadows while keeping rounded corners */
+        .glass, .glass-strong, .glass-light {
+            box-shadow: none !important;
+            border-radius: 0.5rem;
         }
         
         .btn-glow, .button-glow {
@@ -302,8 +367,19 @@
         })();
     </script>
     <!-- LEGACY / OLD MOBILE SUPPORT END -->
+    <style id="pd2-reduced-motion-global">
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
 </head>
-<body class="min-h-screen">
+<!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
+<body class="min-h-screen pb-[env(safe-area-inset-bottom,0)]" style="overflow-x:hidden;">
     <!-- Header Section -->
     <div class="glass-strong rounded-lg mx-4 mt-4 p-6 mb-6">
         <div class="text-center mb-4">
@@ -312,7 +388,7 @@
         </div>
         
         <!-- Status Bar -->
-        <div class="flex items-center justify-between bg-white bg-opacity-50 rounded-lg p-4">
+        <div class="flex items-center justify-between bg-white rounded-lg p-4">
             <div class="flex items-center">
                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <defs>
@@ -367,7 +443,7 @@
     <!-- Control Panel -->
     <div class="glass rounded-lg mx-4 mb-6 p-6">
         <div class="flex justify-center">
-            <div class="flex items-center bg-white bg-opacity-50 rounded-lg px-4 py-2">
+            <div class="flex items-center bg-white rounded-lg px-4 py-2">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <defs>
                         <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -391,37 +467,33 @@
     </div>
 
     <!-- Quick Actions Box -->
-    <div class="glass rounded-lg mx-4 my-6 p-6">
-        <div class="flex flex-wrap gap-4 justify-center">
-            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+    <div class="glass rounded-lg mx-4 my-6 p-6 w-full max-w-full px-2">
+        <div class="flex flex-wrap gap-4 justify-center w-full max-w-full sm:flex-row flex-col">
+            <button onclick="addDataSet()" class="btn-glow btn-green text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
                 </svg>
                 เพิ่มชุดข้อมูลใหม่
             </button>
-            
-            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="copyAndAddDataSet()" class="btn-glow btn-blue text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                 </svg>
                 คัดลอกโดยเพิ่มชุดข้อมูล
             </button>
-            
-            <button onclick="clearLocalStorage()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="clearLocalStorage()" class="btn-glow bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>
                 ล้างข้อมูลชั่วคราว
             </button>
-
-            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="resetToSingleDataSet()" class="btn-glow btn-red text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 5V2L8 6l4 4V7c2.757 0 5 2.243 5 5a5 5 0 0 1-5 5c-2.05 0-3.813-1.232-4.58-3H5.35c.84 3.45 3.95 6 7.65 6 4.418 0 8-3.582 8-8s-3.582-8-8-8z"/>
                 </svg>
                 รีเซ็ตการบันทึกข้อมูล
             </button>
-            
-            <button onclick="showSystemHealth()" class="btn-glow bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="showSystemHealth()" class="btn-glow bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
@@ -431,20 +503,25 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="glass rounded-lg mx-4 my-6 p-6">
-        <div class="flex flex-wrap gap-4 justify-center">
-            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+    <div class="glass rounded-lg mx-4 my-6 p-6 w-full max-w-full px-2">
+        <div class="flex flex-wrap gap-4 justify-center w-full max-w-full sm:flex-row flex-col">
+            <button onclick="saveToLocalStorage(true)" class="btn-glow btn-purple text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
                 </svg>
                 บันทึกชั่วคราว
             </button>
-            
-            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center">
+            <button onclick="submitData()" class="btn-glow btn-orange text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
                 บันทึกข้อมูลทั้งหมด
+            </button>
+            <button onclick="exportPNG()" class="btn-glow text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto" style="background-color: #f50494;">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2 2.5 3-4 4.5 6H6l2.5-4.5zM8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                </svg>
+                บันทึกเป็นรูปภาพ
             </button>
         </div>
     </div>
@@ -452,7 +529,7 @@
     <!-- Modals -->
     <!-- Machine Modal -->
     <div id="machineModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <div class="glass-strong rounded-lg w-full sm:max-w-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,7 +565,7 @@
 
     <!-- Employee Modal -->
     <div id="employeeModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <div class="glass-strong rounded-lg w-full sm:max-w-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -523,7 +600,7 @@
 
     <!-- Fabric Size Modal -->
     <div id="fabricModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <div class="glass-strong rounded-lg w-full sm:max-w-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -558,9 +635,12 @@
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center">
-        <div class="glass-strong rounded-lg p-8 max-w-md w-full mx-4">
-            <div class="text-center">
-                <div class="loading-spinner mx-auto mb-4"></div>
+        <div class="glass-strong rounded-lg p-6 w-full sm:max-w-sm mx-4">
+            <div class="text-center space-y-4">
+                <div class="mx-auto w-14 h-14 relative">
+                    <div class="pd2-spinner" aria-hidden="true"></div>
+                    <div class="sr-only" role="status">กำลังบันทึก</div>
+                </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">กำลังบันทึกข้อมูล</h3>
                 <p class="text-gray-600 mb-4" id="loadingStatus">กำลังเตรียมข้อมูล...</p>
                 
@@ -572,6 +652,12 @@
                     <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step4">4</div>
                     <div class="progress-step w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold" id="step5">5</div>
                 </div>
+
+                <style>
+                @keyframes pd2Spin { to { transform: rotate(360deg); } }
+                .pd2-spinner { width:100%; height:100%; box-sizing:border-box; border:3px solid rgba(0,0,0,0.07); border-top-color:var(--color-accent,#10b981); border-radius:50%; animation: pd2Spin .8s linear infinite; }
+                @media (prefers-reduced-motion: reduce) { .pd2-spinner { animation:none; } }
+                </style>
                 
                 <div class="text-sm text-gray-500">
                     <div>1. เตรียมข้อมูล</div>
@@ -589,7 +675,7 @@
 
     <!-- Recovery Modal -->
     <div id="recoveryModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-strong rounded-lg max-w-md w-full p-6">
+    <div class="glass-strong rounded-lg w-full sm:max-w-md p-6">
             <div class="flex items-center mb-4">
                 <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <defs>
@@ -1142,7 +1228,8 @@
                         ` : ''}
                     </div>
 
-                    <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- mobile responsive fix: stack columns on small screens -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- ข้อมูลพื้นฐาน -->
                         <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
                             <h3 class="text-lg font-normal text-white mb-4 flex items-center">
@@ -1161,52 +1248,47 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">วันที่</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">วันที่</label>
                                     <input type="date" name="date_${setNumber}" value="${today}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เครื่องทอ NO</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">เครื่องทอ NO</label>
                                     <select name="machine_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
                                         <option value="">เลือกเครื่องทอ</option>
                                         ${machines.map(machine => `<option value="${machine}">${machine}</option>`).join('')}
                                         <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
                                     </select>
                                     <div class="mt-3">
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เครื่องทอ NO (กรอกเอง)</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">เครื่องทอ NO (กรอกเอง)</label>
                                         <input type="text" name="machineManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์หมายเลขเครื่อง เช่น CL96">
                                         <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
                                     </div>
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ B</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ชื่อพนักงานทอ กะ B</label>
                                     <select name="employeeA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
                                         <option value="">เลือกพนักงาน</option>
                                         ${employees.map(emp => `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`).join('')}
                                         <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
                                     </select>
                                     <div class="mt-3">
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ B (กรอกเอง)</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ชื่อพนักงานทอ กะ B (กรอกเอง)</label>
                                         <input type="text" name="employeeAManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์รหัสหรือชื่อ">
                                         <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
                                     </div>
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ชื่อพนักงานทอ กะ A</label>
-                                    <input type="text" name="employeeB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
-                                </div>
-                                
-                                <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาดหน้าผ้า</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ขนาดหน้าผ้า</label>
                                     <select name="fabricSize_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg">
                                         <option value="">เลือกขนาดหน้าผ้า</option>
                                         ${fabricSizes.map(size => `<option value="${size}">${size}</option>`).join('')}
                                         <option value="ADD_NEW">คีย์ข้อมูลใหม่</option>
                                     </select>
                                     <div class="mt-3">
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาดหน้าผ้า (กรอกเอง)</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ขนาดหน้าผ้า (กรอกเอง)</label>
                                         <input type="text" name="fabricSizeManual_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="พิมพ์ขนาดหน้าผ้า">
                                         <p class="text-xs text-gray-200 mt-1">เลือกได้ 2 ทาง: เลือกจากรายการ หรือกรอกเอง</p>
                                     </div>
@@ -1233,45 +1315,33 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ขนาด Lot.No</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ขนาด Lot.No</label>
                                     <input type="text" name="lotNo_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="กรอกขนาด Lot.No">
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">เลขที่ใบสั่งผลิต</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">เลขที่ใบสั่งผลิต</label>
                                     <input type="text" name="orderNo_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="กรอกเลขที่ใบสั่งผลิต">
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 gap-4">
                                     <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ยอดทอ กะ B</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ยอดทอ กะ B</label>
                                         <input type="number" name="productionA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 800">
                                     </div>
-                                    <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ยอดทอ กะ A</label>
-                                        <input type="number" name="productionB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
-                                    </div>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 gap-4">
                                     <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ความเร็วรอบ กะ B</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ความเร็วรอบ กะ B</label>
                                         <input type="number" name="speedA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 120">
                                     </div>
-                                    <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ความเร็วรอบ กะ A</label>
-                                        <input type="number" name="speedB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
-                                    </div>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 gap-4">
                                     <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ประสิทธิภาพ กะ B%</label>
+                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ประสิทธิภาพ กะ B%</label>
                                         <input type="number" name="efficiencyA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 65" min="0" max="100">
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ประสิทธิภาพ กะ A%</label>
-                                        <input type="number" name="efficiencyB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
                                     </div>
                                 </div>
                             </div>
@@ -1279,7 +1349,8 @@
                     </div>
 
                     <!-- เลขมิเตอร์และความยาว -->
-                    <div class="grid lg:grid-cols-2 gap-6 mt-6">
+                    <!-- mobile responsive fix: stack columns on small screens -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                         <div class="glass-light rounded-lg p-4" style="background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(3px);">
                             <h3 class="text-lg font-normal text-white mb-4 flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1297,23 +1368,13 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B: เริ่มงาน</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">กะ B: เริ่มงาน</label>
                                     <input type="number" name="meterStartA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 500">
                                 </div>
                                 
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B: เลิกงาน</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">กะ B: เลิกงาน</label>
                                     <input type="number" name="meterEndA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 1000">
-                                </div>
-                                
-                                <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A: เริ่มงาน</label>
-                                    <input type="number" name="meterStartB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
-                                </div>
-                                
-                                <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A: เลิกงาน</label>
-                                    <input type="number" name="meterEndB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
                                 </div>
                             </div>
                         </div>
@@ -1346,18 +1407,13 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ B</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">กะ B</label>
                                     <input type="number" name="lengthA_${setNumber}" class="input-field w-full p-3 border border-gray-300 rounded-lg" placeholder="เช่น 2500" step="0.01">
-                                </div>
-                                
-                                <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">กะ A</label>
-                                    <input type="number" name="lengthB_${setNumber}" placeholder="ไม่สามารถแก้ไขได้" class="readonly-field w-full p-3 border border-gray-300 rounded-lg text-center" readonly disabled>
                                 </div>
                                 
                                 <!-- ค่าแรงพนักงาน (กะ B) -->
                                 <div>
-                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">ค่าแรงพนักงาน (กะ B)</label>
+                                    <label class="block font-medium mb-2 text-base" style="color: white; font-weight: 450;">ค่าแรงพนักงาน (กะ B)</label>
                                     <input type="text" name="wageB_${setNumber}" class="input-field wage-a-input w-full p-3 border border-gray-300 rounded-lg" placeholder="ค่าแรงพนักงาน" inputmode="decimal" autocomplete="off" readonly>
                                     <p class="text-xs text-red-500 mt-1 hidden" data-wageB-error="${setNumber}"></p>
                                 </div>
@@ -1546,6 +1602,29 @@
                         this.value = ''; // Reset select
                         return;
                     }
+
+                    // Sync selected value into corresponding manual input automatically
+                    try {
+                        const setNumber = (this.name.split('_')[1] || '').trim();
+                        if (!setNumber) return;
+                        if (this.name.startsWith('machine_')) {
+                            const manual = document.querySelector(`input[name="machineManual_${setNumber}"]`);
+                            if (manual) manual.value = this.value || '';
+                        } else if (this.name.startsWith('employeeA_')) {
+                            const manual = document.querySelector(`input[name="employeeAManual_${setNumber}"]`);
+                            if (manual) {
+                                if (this.value) {
+                                    const opt = this.options[this.selectedIndex];
+                                    manual.value = opt && opt.text ? opt.text : this.value;
+                                } else {
+                                    manual.value = '';
+                                }
+                            }
+                        } else if (this.name.startsWith('fabricSize_')) {
+                            const manual = document.querySelector(`input[name="fabricSizeManual_${setNumber}"]`);
+                            if (manual) manual.value = this.value || '';
+                        }
+                    } catch(_) {}
                 });
             });
 
@@ -2042,14 +2121,24 @@
             }
         }
 
-        async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false) {
+        const PD2_SUBMIT_CFG = {
+            minStep5VisibleMs: 90,
+            preSendPaintMs: 50,
+            attemptTimeoutMs: 10000,
+            baseBackoffMs: 450,
+            backoffFactor: 2,
+            jitterMs: 150
+        };
+        if (!window.PD2PerfLog) window.PD2PerfLog = [];
+        const perfStartB = () => performance.now();
+        async function submitWithRetry(data, maxRetries, currentAttempt, useBackup = false, t0) {
+            if (!t0) t0 = perfStartB();
+            const mark = (phase, extra) => { try { window.PD2PerfLog.push({ module:'SHIFT_B', phase, t: performance.now(), dt:+(performance.now()-t0).toFixed(1), ...(extra||{}) }); } catch(_){} };
             console.log(`🔄 ความพยายามที่ ${currentAttempt}/${maxRetries}${useBackup ? ' (ใช้ backup)' : ''}`);
-            updateProgressStep(2);
-            updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
+            updateProgressStep(2); updateLoadingStatus('กำลังตรวจสอบข้อมูล...');
             if (!SYSTEM_HEALTH.isOnline) throw new Error('ไม่มีการเชื่อมต่ออินเทอร์เน็ต');
-            await new Promise(r => setTimeout(r, 1000));
-            updateProgressStep(3);
-            updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
+            await new Promise(r => setTimeout(r, 60));
+            updateProgressStep(3); updateLoadingStatus('กำลังเชื่อมต่อเซิร์ฟเวอร์...');
             let endpoint = API_CONFIG.endpoint;
             if (useBackup && API_CONFIG.backupEndpoints.length > 0) {
                 const backupIndex = (currentAttempt - 1) % API_CONFIG.backupEndpoints.length;
@@ -2059,12 +2148,12 @@
             try {
                 const submissionId = (self.crypto && crypto.randomUUID ? crypto.randomUUID() : 'sub-' + Date.now() + '-' + Math.random().toString(16).slice(2));
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                const timeoutId = setTimeout(() => controller.abort(), PD2_SUBMIT_CFG.attemptTimeoutMs);
                 const payload = { ...data, submissionId, systemInfo: { userAgent: navigator.userAgent, timestamp: new Date().toISOString(), attempt: currentAttempt, endpoint } };
                 // แสดงขั้นตอนที่ 4 ชัดเจน ก่อนเริ่มส่งข้อมูล
-                updateProgressStep(4);
-                updateLoadingStatus('กำลังส่งข้อมูล...');
-                await flushUI();
+                updateProgressStep(4); updateLoadingStatus('กำลังส่งข้อมูล...');
+                await new Promise(r => setTimeout(r, PD2_SUBMIT_CFG.preSendPaintMs));
+                mark('send');
                 // Simple request (หลบ preflight)
                 const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: controller.signal, cache: 'no-store', keepalive: true });
                 clearTimeout(timeoutId);
@@ -2076,35 +2165,54 @@
                     LS.set('pendingSubmission', JSON.stringify(pending));
                     throw new Error('การยืนยันผลล้มเหลว HTTP:' + response.status + ' successFlag:' + logicalSuccess);
                 }
-                updateProgressStep(5);
-                updateLoadingStatus('ยืนยันการบันทึก...');
-                await flushUI();
+                updateProgressStep(5); updateLoadingStatus('ยืนยันการบันทึก...');
+                mark('step5');
+                const s5At = performance.now();
+                const need = PD2_SUBMIT_CFG.minStep5VisibleMs - (performance.now() - s5At);
+                if (need > 10) await new Promise(r => setTimeout(r, need));
                 LS.remove('pendingSubmission');
                 SYSTEM_HEALTH.saveFailureCount = 0; SYSTEM_HEALTH.lastSaveTime = new Date();
                 const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
-                // หน่วงเล็กน้อยเพื่อให้ผู้ใช้เห็นสถานะขั้นตอนที่ 5
-                await sleep(400);
                 hideLoading();
                 showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                try {
+                    const fn = (window.parent && window.parent !== window && window.parent.PD2NotifyCenteredSuccess)
+                        ? window.parent.PD2NotifyCenteredSuccess
+                        : window.PD2NotifyCenteredSuccess;
+                    if (fn) {
+                        fn(totalRows);
+                    } else if (window.parent && window.parent !== window) {
+                        try { window.parent.postMessage({ type: 'PD2_CENTERED_SUCCESS', count: totalRows }, '*'); } catch(_){ }
+                    }
+                } catch(_){ }
                 console.log('✅ ส่งข้อมูลสำเร็จ', { submissionId, totalRows, response: json });
             } catch (error) {
                 const isLikelyCors = (error instanceof TypeError) || /fetch|network|cors/i.test(error.message || '');
-                if (currentAttempt === 1 && isLikelyCors) {
+        if (currentAttempt === 1 && isLikelyCors) {
                     try {
                         console.warn('⚠️ Simple POST ล้มเหลว อาจติด CORS -> ลอง JSONP');
                         // อัปเดตขั้นตอนเป็นการส่งข้อมูล ก่อนเริ่ม JSONP
-                        updateProgressStep(4);
-                        updateLoadingStatus('กำลังส่งข้อมูล...');
-                        await flushUI();
+            updateProgressStep(4); updateLoadingStatus('กำลังส่งข้อมูล...');
+            await new Promise(r => setTimeout(r, PD2_SUBMIT_CFG.preSendPaintMs));
                         const jsonpResult = await jsonpFallback(data, endpoint);
                         if (jsonpResult && jsonpResult.success) {
                             const totalRows = (data && data.data && data.data.data) ? data.data.data.length : 0;
-                            updateProgressStep(5);
-                            updateLoadingStatus('ยืนยันการบันทึก...');
-                            await flushUI();
-                            await sleep(400);
+                updateProgressStep(5); updateLoadingStatus('ยืนยันการบันทึก...');
+                const s5At2 = performance.now();
+                const need2 = PD2_SUBMIT_CFG.minStep5VisibleMs - (performance.now() - s5At2);
+                if (need2 > 10) await new Promise(r => setTimeout(r, need2));
                             hideLoading();
                             showNotification('บันทึกสำเร็จ '+ totalRows +' รายการ', 'orange');
+                            try {
+                                const fn = (window.parent && window.parent !== window && window.parent.PD2NotifyCenteredSuccess)
+                                    ? window.parent.PD2NotifyCenteredSuccess
+                                    : window.PD2NotifyCenteredSuccess;
+                                if (fn) {
+                                    fn(totalRows);
+                                } else if (window.parent && window.parent !== window) {
+                                    try { window.parent.postMessage({ type: 'PD2_CENTERED_SUCCESS', count: totalRows }, '*'); } catch(_){ }
+                                }
+                            } catch(_){ }
                             SYSTEM_HEALTH.saveFailureCount = 0; LS.remove('pendingSubmission');
                             return;
                         }
@@ -2114,9 +2222,11 @@
                 ERROR_LOG.log(error, `Submit attempt ${currentAttempt}`); SYSTEM_HEALTH.saveFailureCount++;
                 if (currentAttempt < maxRetries) {
                     updateLoadingStatus(`กำลังลองใหม่... (${currentAttempt + 1}/${maxRetries})`);
-                    const delay = API_CONFIG.retryDelay * Math.pow(2, currentAttempt - 1);
-                    await new Promise(r => setTimeout(r, delay));
-                    const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup);
+            const base = PD2_SUBMIT_CFG.baseBackoffMs * Math.pow(PD2_SUBMIT_CFG.backoffFactor, currentAttempt - 1);
+            const jitter = Math.random() * PD2_SUBMIT_CFG.jitterMs;
+            const delay = Math.min(base + jitter, 5000);
+            await new Promise(r => setTimeout(r, delay));
+            const shouldUseBackup = currentAttempt >= 2; return submitWithRetry(data, maxRetries, currentAttempt + 1, shouldUseBackup, t0);
                 } else {
                     if (SYSTEM_HEALTH.saveFailureCount >= SYSTEM_HEALTH.maxFailures) showNotification('ระบบมีปัญหาการส่งข้อมูลซ้ำๆ กรุณาติดต่อผู้ดูแลระบบ', 'error');
                     try { if (LS.get('pendingSubmission')) showNotification('ไม่สามารถยืนยันผล เซฟ pending รอส่งใหม่', 'warning'); } catch(_){}
@@ -2193,6 +2303,175 @@
             });
             
             return allData;
+        }
+
+        // PNG Export (Shift B): Renders selected fields from all data sets to a single image
+        function exportPNG() {
+            try {
+                const data = collectAllData();
+                if (!data || data.length === 0) {
+                    try { showNotification('ไม่มีข้อมูลสำหรับสร้างรูปภาพ', 'warning'); } catch(_) { alert('ไม่มีข้อมูลสำหรับสร้างรูปภาพ'); }
+                    return;
+                }
+
+                // Prepare text lines
+                const now = new Date();
+                const headerTitle = 'รายงานกะ B - บันทึกเป็น PNG';
+                const headerTime = 'สร้างเมื่อ: ' + now.toLocaleString('th-TH');
+                const headerCount = 'จำนวนชุดข้อมูล: ' + data.length;
+                const rawLines = [headerTitle, headerTime, headerCount, ''];
+
+                data.forEach((set, idx) => {
+                    rawLines.push('ชุดข้อมูลที่ ' + (idx + 1));
+                    rawLines.push('วันที่: ' + (set.date || ''));
+                    rawLines.push('เครื่องทอ NO: ' + (set.machine || ''));
+                    // Note: file uses employeeA for B module selection; we output as กะ B label to match UI
+                    rawLines.push('ชื่อพนักงานทอ กะ B: ' + (set.employeeA || ''));
+                    rawLines.push('ขนาดหน้าผ้า: ' + (set.fabricSize || ''));
+                    rawLines.push('กะ B: เริ่มงาน: ' + (set.meterStartA || ''));
+                    rawLines.push('กะ B: เลิกงาน: ' + (set.meterEndA || ''));
+                    rawLines.push('ความยาวตัดม้วน (เมตร): ' + (set.lengthA || ''));
+                    rawLines.push('ค่าแรงพนักงาน (กะ B): ' + (set.wageB || ''));
+                    rawLines.push('');
+                });
+
+                // Canvas sizing and wrapping
+                const padding = 32;
+                const width = 1080;
+                const fontSize = 28;
+                const lineHeight = Math.round(fontSize * 1.4);
+                const fontFamily = "Kanit, Tahoma, sans-serif";
+
+                const measureCanvas = document.createElement('canvas');
+                const mctx = measureCanvas.getContext('2d');
+                mctx.font = `${fontSize}px ${fontFamily}`;
+                const maxTextWidth = width - padding * 2;
+
+                const wrapText = (text) => {
+                    const words = (text || '').toString().split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (let i = 0; i < words.length; i++) {
+                        const testLine = line ? (line + ' ' + words[i]) : words[i];
+                        const metrics = mctx.measureText(testLine);
+                        if (metrics.width > maxTextWidth && line) {
+                            lines.push(line);
+                            line = words[i];
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    if (line) lines.push(line);
+                    for (let i = 0; i < lines.length; i++) {
+                        if (mctx.measureText(lines[i]).width > maxTextWidth) {
+                            const broken = [];
+                            let current = lines[i];
+                            while (mctx.measureText(current).width > maxTextWidth && current.length > 1) {
+                                let lo = 1, hi = current.length, cut = 1;
+                                while (lo <= hi) {
+                                    const mid = (lo + hi) >> 1;
+                                    const substr = current.slice(0, mid);
+                                    if (mctx.measureText(substr).width <= maxTextWidth) { cut = mid; lo = mid + 1; } else { hi = mid - 1; }
+                                }
+                                broken.push(current.slice(0, cut));
+                                current = current.slice(cut);
+                            }
+                            if (current) broken.push(current);
+                            lines.splice(i, 1, ...broken);
+                            i += broken.length - 1;
+                        }
+                    }
+                    return lines;
+                };
+
+                const finalLines = [];
+                rawLines.forEach(line => {
+                    const wrapped = wrapText(line);
+                    if (wrapped.length === 0) finalLines.push('');
+                    else finalLines.push(...wrapped);
+                });
+
+                const height = padding * 2 + finalLines.length * lineHeight;
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = Math.max(height, padding * 2 + lineHeight);
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#111827';
+                ctx.font = `${fontSize}px ${fontFamily}`;
+                ctx.textBaseline = 'top';
+
+                let y = padding;
+                const x = padding;
+                finalLines.forEach((ln, i) => {
+                    if (/^ชุดข้อมูลที่\s+\d+/.test(ln)) {
+                        ctx.font = `bold ${fontSize}px ${fontFamily}`;
+                    } else if (i <= 2) {
+                        ctx.font = `600 ${fontSize}px ${fontFamily}`;
+                    } else {
+                        ctx.font = `${fontSize}px ${fontFamily}`;
+                    }
+                    ctx.fillText(ln, x, y);
+                    y += lineHeight;
+                });
+
+                const pad = (n) => (n < 10 ? '0' + n : '' + n);
+                const yyyy = now.getFullYear();
+                const mm = pad(now.getMonth() + 1);
+                const dd = pad(now.getDate());
+                const hh = pad(now.getHours());
+                const mi = pad(now.getMinutes());
+                const ss = pad(now.getSeconds());
+                const filename = `PD2_ShiftB_${yyyy}${mm}${dd}_${hh}${mi}${ss}.png`;
+
+                // Use blob-based save to avoid opening new tabs
+                canvas.toBlob(async (blob) => {
+                    if (!blob) { try { showNotification('ไม่สามารถสร้างไฟล์ PNG', 'error'); } catch(_) {}; return; }
+
+                    // 1) File System Access API
+                    if (window.showSaveFilePicker) {
+                        try {
+                            const handle = await window.showSaveFilePicker({
+                                suggestedName: filename,
+                                types: [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]
+                            });
+                            const writable = await handle.createWritable();
+                            await writable.write(blob);
+                            await writable.close();
+                            try { showNotification('บันทึกไฟล์สำเร็จ', 'blue'); } catch(_) {}
+                            return;
+                        } catch(_){}
+                    }
+
+                    // 2) Web Share API with files (mobile)
+                    try {
+                        const file = new File([blob], filename, { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: 'PD2 Export', text: 'PD2 Shift B' });
+                            try { showNotification('เปิดเมนูแชร์ไฟล์แล้ว', 'blue'); } catch(_) {}
+                            return;
+                        }
+                    } catch(_){}
+
+                    // 3) Anchor + object URL fallback (same tab)
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.target = '_self';
+                    a.rel = 'noopener';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+                }, 'image/png');
+            } catch (err) {
+                console.error('❌ ไม่สามารถสร้าง PNG ได้:', err);
+                try { showNotification('ไม่สามารถสร้าง PNG ได้', 'error'); } catch(_) { alert('ไม่สามารถสร้าง PNG ได้'); }
+            }
         }
 
         // Storage namespace helper (safe for combined UI)
