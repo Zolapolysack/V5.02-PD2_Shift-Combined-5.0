@@ -7,7 +7,8 @@
     "start": "http-server . -p 8080",
     "watch-reload": "node ./dev/watch-and-reload.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+  "test:watch": "jest --watch",
+  "make-icons": "node ./scripts/make-icons.js"
   },
   "keywords": [
     "pd2",
@@ -21,7 +22,8 @@
     "jest": "^30.1.3",
     "jsdom": "^26.1.0",
     "http-server": "^14.1.1",
-    "ws": "^8.13.0"
+  "ws": "^8.13.0",
+  "jimp": "^0.16.1"
   },
   "dependencies": {
     "winston": "^3.17.0",

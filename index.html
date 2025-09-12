@@ -18,6 +18,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <!-- Load shared PD2 notification module once at the parent level -->
   <script src="./pd2-notify.js" defer></script>
+  <!-- PWA: manifest + icons -->
+  <link rel="manifest" href="./manifest.json">
+  <!-- Use root images.png as a single source icon; browsers will scale as needed. Replace with proper sizes if available. -->
+  <link rel="icon" href="./images.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="./images.png" />
   <style>
     :root { --pd2-green:#16a34a; --pd2-green-accent:#22c55e; --pd2-red:#f43f5e; --pd2-blue:#24a8ea; --pd2-purple:#6d28d9; }
     * { font-family: 'Kanit', sans-serif; }
@@ -732,6 +737,16 @@
             socket.addEventListener('close', () => console.debug('[dev-ws] disconnected'));
           } catch(_){}
         })();
+      </script>
+      <!-- Register service worker to enable installation on supporting browsers -->
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+              console.debug('PD2: service worker registered', reg.scope);
+            }).catch(err => { console.debug('PD2: sw registration failed', err); });
+          });
+        }
       </script>
 </body>
 </html>
