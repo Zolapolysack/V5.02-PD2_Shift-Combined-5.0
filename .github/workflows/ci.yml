@@ -7,20 +7,23 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run tests
         run: npm test --silent
-      - name: Audit
+
+      - name: Run audit (fail on high or critical)
         run: |
-          npm audit --audit-level=high || true
-        # do not fail the workflow on audit; maintainers can adjust to 'exit 1' if desired
+          npm audit --audit-level=high || (echo "npm audit detected high/critical vulnerabilities" && exit 1)
