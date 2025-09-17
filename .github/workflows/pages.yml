@@ -47,6 +47,11 @@ jobs:
           cp sw.js public/ 2>/dev/null || true
           cp -r assets public/assets 2>/dev/null || true
           cp -r icon public/icon 2>/dev/null || true
+          # Include shift module subpages (Thai + spaces in folder names) for iframe loading
+          cp -r "ปรับ script PD2_Shift-A_V4.0" "public/ปรับ script PD2_Shift-A_V4.0" 2>/dev/null || true
+          cp -r "ปรับ script PD2_Shift-B_V4.0" "public/ปรับ script PD2_Shift-B_V4.0" 2>/dev/null || true
+          cp -r "ตัดม้วน PD2" "public/ตัดม้วน PD2" 2>/dev/null || true
+          cp -r "link google sheet" "public/link google sheet" 2>/dev/null || true
           # (ไม่ copy โฟลเดอร์ server/ และ scripts/ เพื่อไม่ให้สับสนบน Pages)
           touch public/.nojekyll
           echo "Deployed at $(date -u)" > public/DEPLOY_INFO.txt

@@ -795,6 +795,10 @@
       } else if (hash.includes('report')) {
         PD2Log('initialHash', 'REPORT');
         navigateTo('REPORT', { initial: true });
+      } else {
+        // Default: auto-load module A so that page is not blank on first visit
+        PD2Log('initialHash', 'A (default)');
+        navigateTo('A', { initial: true });
       }
 
       // Prefetch / warm-up module HTML in idle time to reduce perceived load delay
