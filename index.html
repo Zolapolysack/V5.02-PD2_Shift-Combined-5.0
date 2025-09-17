@@ -80,7 +80,19 @@
         <div class="relative">
           <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 shadow-inner"></div>
           <!-- Brand image points to images.png (placed at workspace root) -->
-          <img id="brandImg" src="images.png" alt="Brand" class="absolute inset-0 z-10 w-10 h-10 rounded-lg object-cover ring-1 ring-white/40" onerror="this.remove()" />
+          <link rel="preload" as="image" href="images.png" />
+          <img id="brandImg" src="images.png" alt="Brand" class="absolute inset-0 z-10 w-10 h-10 rounded-lg object-cover ring-1 ring-white/40" onerror="(function(img){
+              // Attempt fallback chain inside GH Pages if root image missing
+              const fallbacks = ['icon/icon_preview.png','icon/images.png','icon/icon_preview_sharp.png'];
+              for (let i=0;i<fallbacks.length;i++) {
+                const testSrc = fallbacks[i];
+                const probe = new Image();
+                probe.onload = function(){ img.onerror=null; img.src=testSrc; };
+                probe.src = testSrc + '?v='+Date.now();
+              }
+              // If all fail after short delay, remove element
+              setTimeout(()=>{ if(!img.complete || img.naturalWidth===0){ try{img.remove();}catch(_){}} }, 1400);
+            })(this)" />
         </div>
         <div class="leading-tight">
           <div class="text-white text-lg font-semibold">Production Dept. 2</div>
