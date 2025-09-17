@@ -5,10 +5,16 @@
   "main": "pd2-notify.js",
   "scripts": {
     "start": "http-server . -p 8080",
+    "start:api": "node server/index.js",
+    "pm2:start": "npx pm2 start ecosystem.config.js",
+    "pm2:stop": "npx pm2 stop ecosystem.config.js || true",
     "watch-reload": "node ./dev/watch-and-reload.js",
     "test": "jest",
   "test:watch": "jest --watch",
-  "make-icons": "node ./scripts/make-icons.js"
+  "make-icons": "node ./scripts/make-icons.js",
+  "smoke": "node ./scripts/smoke.js",
+  "health:full": "node ./scripts/full-health.js"
+  ,"sheets:validate": "node ./scripts/validate-google-creds.js"
   },
   "keywords": [
     "pd2",
@@ -26,6 +32,7 @@
   "jimp": "^0.16.1"
   },
   "dependencies": {
+    "googleapis": "^144.0.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   }

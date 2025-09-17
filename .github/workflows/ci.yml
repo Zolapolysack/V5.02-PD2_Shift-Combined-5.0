@@ -27,3 +27,14 @@ jobs:
       - name: Run audit (fail on high or critical)
         run: |
           npm audit --audit-level=high || (echo "npm audit detected high/critical vulnerabilities" && exit 1)
+      - name: Start http-server (background)
+        run: npx http-server . -p 8080 &
+
+      - name: Wait for server
+        run: |
+          for i in {1..10}; do
+            curl -sSf http://127.0.0.1:8080/ && break || sleep 1;
+          done
+
+      - name: Run healthcheck script
+        run: node ./scripts/healthcheck.js

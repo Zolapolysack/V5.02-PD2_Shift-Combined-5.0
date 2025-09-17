@@ -1,0 +1,5 @@
+example.com {
+    # Caddy automatically provisions TLS via Let's Encrypt
+    reverse_proxy /api/* http://127.0.0.1:8787
+    reverse_proxy /* http://127.0.0.1:8080
+}

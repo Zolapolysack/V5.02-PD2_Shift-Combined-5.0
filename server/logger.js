@@ -2,7 +2,8 @@
 import { createLogger, format, transports } from 'winston';
 import 'winston-daily-rotate-file';
 
-const SENSITIVE_FIELDS = ['password', 'token', 'secret'];
+// Expanded sensitive keywords for internal deployment hardening
+const SENSITIVE_FIELDS = ['password', 'token', 'secret', 'apikey', 'auth', 'credential', 'bearer'];
 const MASK = '[MASKED]';
 
 function maskSensitiveObject(obj, fields = SENSITIVE_FIELDS) {
@@ -34,7 +35,10 @@ const maskFormat = format((info) => {
     } catch {
       // Not JSON, mask string directly
       SENSITIVE_FIELDS.forEach(f => {
-        info.message = info.message.replace(new RegExp(f + '[^\s"\']*', 'gi'), MASK);
+        try {
+          // Replace occurrences like token=xxxx, token:"xxxx", bearer abc123
+          info.message = info.message.replace(new RegExp(`(${f})(\s*[:=]\s*"?[A-Za-z0-9._-]{2,})`, 'gi'), `$1:${MASK}`);
+        } catch(_) {}
       });
     }
   }

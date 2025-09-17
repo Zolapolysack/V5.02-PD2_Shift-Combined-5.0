@@ -91,6 +91,23 @@
   <a href="#overview" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">ภาพรวม</a>
   <a href="#shift" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">เลือกกะ</a>
   <a href="#workbench" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">หน้าทำงาน</a>
+  <div class="relative" id="pd2ResetWrap">
+    <button id="pd2ResetBtn" type="button" class="px-3 py-2 rounded-md border border-rose-400/60 text-rose-200 hover:text-white hover:bg-rose-500/20 hover:border-rose-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70 relative" title="รีเซ็ตระบบ">
+      <span class="select-none">รีเซ็ตระบบ ▾</span>
+      <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-400 shadow-md ring-2 ring-rose-900/60 animate-pulse"></span>
+    </button>
+    <div id="pd2ResetMenu" class="hidden absolute right-0 mt-1 w-56 rounded-md border border-white/15 bg-slate-900/95 backdrop-blur px-2 py-2 shadow-lg z-50">
+      <div class="text-[11px] uppercase tracking-wide text-slate-400 mb-1 px-1">รีเซ็ต</div>
+      <button data-mode="partial" class="pd2-reset-item w-full text-left text-sm rounded px-2 py-1.5 hover:bg-slate-700/60 text-slate-200">
+        รีเซ็ตบางส่วน
+
+      </button>
+      <button data-mode="full" class="pd2-reset-item w-full text-left text-sm rounded px-2 py-1.5 hover:bg-rose-600/30 text-rose-300">
+        รีเซ็ตทั้งหมด
+        <!-- removed -->
+      </button>
+    </div>
+  </div>
       </nav>
     </div>
   </header>
@@ -235,7 +252,7 @@
       const btnB = document.getElementById('btnB');
       const btnCut = document.getElementById('btnCut');
   const btnReport = document.getElementById('btnReport');
-      const frame = document.getElementById('shiftFrame');
+  let frame = document.getElementById('shiftFrame');
   // Hero buttons removed per request
       const toast = document.getElementById('toast');
   // Simple cache-busting token so GH Pages picks up latest subpages
@@ -284,30 +301,50 @@
 
       // Shared session-only lists for cross-iframe sync
       const SHARED = { machines: [], fabricSizes: [
+        // Merged + updated (2025-09-17) – ordering by first two leading digits ascending, then logically grouped; mixed/non-pure numeric prefixes at end
         "1425800",
+        "1621720SMFX",
+        "1625800",
+        "1625800SM",
         "1725800",
         "1825800SM",
         "1921720",
+        "19251000SM",
         "1925800",
         "1925800SM",
         "2021720UV",
+        "2021750",
         "2021850UV",
+        "20251000",
+        "2025650",
+        "2025700",
         "2025800",
         "2025800SM",
         "2025800SMN",
         "2025850",
         "2121670SM",
         "2125650",
+        "2125700",
         "2125800",
+        "2221940",
+        "23211125120SMFX",
+        "23211125130",
+        "2321112514051",
+        "2321112512551",
+        "2321750",
         "2325650",
+        "2325800SM",
+        "2421112512551",
         "2625650",
         "262575051",
         "2625800",
         "2625850SM",
         "2825850",
+        "1R042325650",
+        "FCL022325650",
+        "SCL0223211125",
         "scl052325650",
-        "test2025800",
-        "2321112512551"
+        "test2025800"
       ], employees: [] };
       const withSafeStr = (v) => (v == null ? '' : String(v).trim());
 
@@ -369,8 +406,63 @@
       // Robust navigation controller to prevent UI freeze when switching modules
   const loadingEl = document.getElementById('frameLoading');
       const loadingLabelEl = document.getElementById('frameLoadingLabel');
-  const navState = { busy: false, token: 0, timer: null, retry: 0 };
+  const navState = { busy: false, token: 0, timer: null, retry: 0, pendingTarget: null, startedAt: 0, autoRecoveryAttempts: 0 };
   let currentModule = null; // 'A' | 'B' | 'CUT' | 'REPORT'
+  // Multi-iframe cache (can be disabled via ?nocache=1 for fallback safety or debugging)
+  const searchParams = (() => { try { return new URL(location.href).searchParams; } catch(_) { return new URLSearchParams(); } })();
+  const NO_CACHE_MODE = searchParams.get('nocache') === '1';
+  if (NO_CACHE_MODE) { console.info('[PD2_NAV] NO_CACHE_MODE active - using single iframe navigation'); }
+  const frameCache = {}; // { A: HTMLIFrameElement, ... } (suppressed if NO_CACHE_MODE)
+  const FRAME_CACHE_LIMIT = 3; // ถ้าเกินจะลบตัวที่ไม่ใช้งานนานสุด
+  const frameUseOrder = []; // LRU tracking
+
+  function touchFrameOrder(key){
+    if (NO_CACHE_MODE) return; // skip LRU in no-cache mode
+    const idx = frameUseOrder.indexOf(key);
+    if (idx !== -1) frameUseOrder.splice(idx,1);
+    frameUseOrder.push(key);
+    if (frameUseOrder.length > FRAME_CACHE_LIMIT) {
+      const evict = frameUseOrder.shift();
+      if (evict && frameCache[evict] && evict !== currentModule) {
+        try { frameCache[evict].remove(); } catch(_){ }
+        delete frameCache[evict];
+        console.info('[PD2_NAV] evict', evict);
+      }
+    }
+  }
+  const baseFrame = frame; // original placeholder iframe
+
+  function getOrCreateFrame(target) {
+    if (NO_CACHE_MODE) {
+      // Always reuse single base frame
+      return baseFrame;
+    }
+    if (frameCache[target]) { touchFrameOrder(target); return frameCache[target]; }
+    const ifr = Object.keys(frameCache).length === 0 && baseFrame && !baseFrame.dataset.bound
+      ? baseFrame
+      : document.createElement('iframe');
+    if (!ifr.parentNode) baseFrame.parentNode.appendChild(ifr);
+    ifr.className = 'w-full h-full border-0 absolute inset-0';
+    ifr.style.display = 'none';
+    ifr.setAttribute('data-module', target);
+    ifr.title = 'Shift Frame ' + target;
+    ifr.dataset.bound = '1';
+    frameCache[target] = ifr;
+    touchFrameOrder(target);
+    return ifr;
+  }
+
+  function showFrame(target) {
+    if (!NO_CACHE_MODE) {
+      Object.values(frameCache).forEach(f => { f.style.display = 'none'; });
+    }
+    const f = getOrCreateFrame(target);
+    if (!NO_CACHE_MODE) {
+      f.style.display = 'block';
+    }
+    frame = f;
+    return f;
+  }
 
       function setNavDisabled(disabled) {
         pills.forEach(b => { if (!b) return; b.disabled = disabled; });
@@ -409,13 +501,64 @@
         if (!options.force && currentModule === target) {
           return;
         }
-        // If already navigating, ignore rapid clicks (prevents lock/freeze)
+        // Rapid switching handling:
+        // If a navigation is in-flight, we don't just ignore. We either interrupt (if target already cached & loaded)
+        // or queue the last requested target to auto-run after current load completes.
         if (navState.busy && !options.force) {
-          PD2Log('navigateTo.ignored.busy', target);
+          const cachedWhileBusy = frameCache[target];
+          if (cachedWhileBusy && cachedWhileBusy.dataset.loaded === '1') {
+            // Interrupt current slow load and switch immediately to cached target
+            console.info('[PD2_NAV] interrupt-cache-switch', target);
+            try { clearTimeout(navState.timer); } catch(_){}
+            // Invalidate previous navigation token so its load/ready handlers become stale no-ops
+            navState.token += 1;
+            navState.busy = false;
+            navState.retry = 0;
+            navState.pendingTarget = null;
+            hideLoading();
+            setNavDisabled(false);
+            // Fast path identical to cache-hit logic below (duplicated for clarity inside interrupt scenario)
+            const startInt = Date.now();
+            showFrame(target);
+            currentModule = target;
+            setActive(buttonFor(target));
+            updateHash(target);
+            console.info('[PD2_NAV] cache-hit', target, { elapsedMs: Date.now() - startInt, interrupted: true });
+            if (!options.initial) {
+              showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว');
+            }
+            try { setTimeout(() => broadcastShared(cachedWhileBusy.contentWindow), 0); } catch(_){ }
+            return;
+          }
+          // Queue latest desired target
+          navState.pendingTarget = target;
+          setActive(buttonFor(target)); // Optimistically reflect user's latest intent
+          console.info('[PD2_NAV] queued', target);
           return;
         }
   PD2Log('navigateTo.start', target, opts);
-  navState.busy = true; navState.token += 1; const myToken = navState.token; navState.retry = 0;
+
+  // If we already have a cached loaded iframe for this module, switch instantly (no network / reload)
+  const cached = (!NO_CACHE_MODE) ? frameCache[target] : null;
+  if (!NO_CACHE_MODE && cached && cached.dataset.loaded === '1' && !options.force) {
+    const start = Date.now();
+    showFrame(target);
+    currentModule = target;
+    setActive(buttonFor(target));
+    setNavDisabled(false);
+    updateHash(target);
+    hideLoading();
+    console.info('[PD2_NAV] cache-hit', target, { elapsedMs: Date.now() - start });
+    if (!options.initial) {
+      showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว');
+    }
+    // Broadcast shared state into the (now visible) iframe to ensure sync
+    try { setTimeout(() => broadcastShared(cached.contentWindow), 0); } catch(_){}
+    return;
+  }
+
+  // Slow path: first load for this module
+  navState.busy = true; navState.token += 1; const myToken = navState.token; navState.retry = 0; navState.startedAt = Date.now();
         clearTimeout(navState.timer);
         const btn = buttonFor(target);
         setActive(btn);
@@ -424,68 +567,149 @@
   showLoading(target === 'A' ? 'กำลังโหลด กะ A...' : target === 'B' ? 'กำลังโหลด กะ B...' : target === 'CUT' ? 'กำลังโหลด หน้าตัดม้วน...' : 'กำลังโหลด รายงาน...');
         updateHash(target);
 
-        const onLoad = () => {
+        // Prepare (or create) iframe for this navigation
+  const targetFrame = showFrame(target);
+  try { targetFrame.dataset.navToken = String(myToken); } catch(_){}
+        // Early readiness polling: if onload/PD2_READY lost but DOM becomes interactive/complete, finalize quickly
+        (function earlyPoll(tok, mod, ifr){
+          let attempts = 0;
+          const max = 40; // ~4s @100ms
+          function tick(){
+            if (tok !== navState.token) return; // stale
+            if (!navState.busy) return; // already finished
+            try {
+              const doc = ifr.contentDocument || ifr.contentWindow && ifr.contentWindow.document;
+              if (doc && (doc.readyState === 'interactive' || doc.readyState === 'complete')) {
+                // Basic heuristic: ensure some body content exists
+                if (doc.body && doc.body.children && doc.body.children.length > 5) {
+                  console.info('[PD2_NAV] early-poll-finalize', mod, { token: tok, readyState: doc.readyState });
+                  try { ifr.dataset.loaded = '1'; } catch(_){ }
+                  navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
+                  currentModule = mod;
+                  try { setTimeout(() => broadcastShared(ifr.contentWindow), 0); } catch(_){ }
+                  if (navState.pendingTarget && navState.pendingTarget !== currentModule) {
+                    const nxt = navState.pendingTarget; navState.pendingTarget = null; setTimeout(() => navigateTo(nxt), 0);
+                  }
+                  return;
+                }
+              }
+            } catch(_){ }
+            attempts++;
+            if (attempts < max && navState.busy && tok === navState.token) setTimeout(tick, 100);
+          }
+          setTimeout(tick, 120);
+        })(myToken, target, targetFrame);
+
+  const onLoad = () => {
           // Stale load event from previous navigation? Ignore.
           if (myToken !== navState.token) return;
+          if (targetFrame.dataset.navToken && targetFrame.dataset.navToken !== String(myToken)) return;
           PD2Log('navigateTo.onload', target, { token: myToken });
+          try {
+            const now = Date.now();
+            const start = window.__pd2_nav_start || now;
+            const elapsed = now - start;
+            console.info('[PD2_NAV] onload', target, { token: myToken, elapsedMs: elapsed });
+          } catch(_){}
+          try { targetFrame.dataset.loaded = '1'; } catch(_){}
           clearTimeout(navState.timer);
           try { window.removeEventListener('message', onReadyMessage); } catch(_){}
           navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
           currentModule = target;
           // sync lists to the freshly loaded iframe
-          try { setTimeout(() => broadcastShared(frame.contentWindow), 0); } catch(_){}
-          // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
-          try { setTimeout(() => { applyMobileScrollLockToIframe(frame?.contentDocument || frame?.contentWindow?.document); }, 0); } catch(_){ }
+            try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
+            // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
+            try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
           // toasts per module
           if (!options.initial) {
             showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว');
+          }
+          // Dequeue any pending target (last user intent) and navigate immediately
+          if (navState.pendingTarget && navState.pendingTarget !== currentModule) {
+            const nextTarget = navState.pendingTarget;
+            navState.pendingTarget = null;
+            console.info('[PD2_NAV] dequeue-after-load', nextTarget);
+            setTimeout(() => navigateTo(nextTarget), 0);
           }
         };
         const onErrorTimeout = () => {
           if (myToken !== navState.token) return;
           PD2Log('navigateTo.timeout', target, { token: myToken, retry: navState.retry });
-          if (navState.retry < 1) {
+          if (navState.retry < 2) {
             navState.retry++;
-            // retry once with force
-            if (loadingLabelEl) loadingLabelEl.textContent = 'โหลดช้า กำลังลองใหม่...';
-            try { frame.removeAttribute('src'); } catch(_){}
-            setTimeout(() => navigateTo(target, { force: true }), 300);
+            // progressive backoff
+            const wait = navState.retry === 1 ? 350 : 700;
+            if (loadingLabelEl) loadingLabelEl.textContent = 'โหลดช้า กำลังลองใหม่ ('+navState.retry+')...';
+            try { frame.removeAttribute('src'); } catch(_){ }
+            setTimeout(() => navigateTo(target, { force: true }), wait);
             return;
           }
-          try { window.removeEventListener('message', onReadyMessage); } catch(_){}
+          // Give control back but schedule background auto-recovery if user doesn't change
+          try { window.removeEventListener('message', onReadyMessage); } catch(_){ }
           navState.busy = false; setNavDisabled(false); hideLoading();
-          showToast('โหลดช้าผิดปกติหรือไม่สำเร็จ กรุณาลองใหม่');
+          showToast('โหลดช้า กดเปลี่ยนโมดูลใหม่ หรือระบบจะลองกู้เอง');
+          // schedule auto recovery (only if still same module desired and not cache loaded)
+          if (!frameCache[target] || frameCache[target].dataset.loaded !== '1') {
+            scheduleAutoRecovery(target);
+          }
         };
 
         // Attach one-time load listener per navigation
-        frame.addEventListener('load', onLoad, { once: true });
+  targetFrame.addEventListener('load', onLoad, { once: true });
         // Also accept an early 'PD2_READY' postMessage from the iframe when the iframe's UI is painted
-        const onReadyMessage = (ev) => {
+  const onReadyMessage = (ev) => {
           try {
             const m = ev && ev.data;
             if (!m || typeof m !== 'object') return;
             if (m.type === 'PD2_READY' && ev.source === frame.contentWindow) {
               // make sure it's for the current navigation token
               if (myToken !== navState.token) return;
+              if (targetFrame.dataset.navToken && targetFrame.dataset.navToken !== String(myToken)) return;
               PD2Log('navigateTo.readyMsg', target, { token: myToken });
-              try { clearTimeout(navState.timer); } catch(_){}
+              try {
+                const now = Date.now();
+                const start = window.__pd2_nav_start || now;
+                const elapsed = now - start;
+                console.info('[PD2_NAV] PD2_READY', target, { token: myToken, elapsedMs: elapsed });
+              } catch(_){}
+              try { targetFrame.dataset.loaded = '1'; } catch(_){}
+              try { clearTimeout(navState.timer); } catch(_){ }
               navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
               currentModule = target;
               try { setTimeout(() => broadcastShared(frame.contentWindow), 0); } catch(_){ }
               // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
               try { setTimeout(() => { applyMobileScrollLockToIframe(frame?.contentDocument || frame?.contentWindow?.document); }, 0); } catch(_){ }
+                try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
+                // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
+                try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
+                try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
+                // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
+                try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
               if (!options.initial) {
                 try { showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว'); } catch(_){}
               }
               // remove listener (one-time)
               try { window.removeEventListener('message', onReadyMessage); } catch(_){}
+              // If user queued another target while we were loading, jump there now.
+              if (navState.pendingTarget && navState.pendingTarget !== currentModule) {
+                const nextTarget = navState.pendingTarget;
+                navState.pendingTarget = null;
+                console.info('[PD2_NAV] dequeue-after-ready', nextTarget);
+                setTimeout(() => navigateTo(nextTarget), 0);
+              }
             }
           } catch(_){}
         };
-        window.addEventListener('message', onReadyMessage);
-        // Kick off navigation
-  PD2Log('navigateTo.setSrc', withVer(pathFor(target)));
-  frame.src = withVer(pathFor(target));
+  window.addEventListener('message', onReadyMessage);
+    // Kick off navigation (instrumentation: record start time for switch latency)
+  try {
+    var __pd2_nav_token = (window.__pd2_nav_token || 0) + 1;
+    window.__pd2_nav_token = __pd2_nav_token;
+    window.__pd2_nav_start = Date.now();
+    PD2Log('navigateTo.setSrc', withVer(pathFor(target)), { token: __pd2_nav_token, start: window.__pd2_nav_start });
+    console.info('[PD2_NAV] start', target, { token: __pd2_nav_token, start: window.__pd2_nav_start });
+  } catch (_) {}
+  targetFrame.src = withVer(pathFor(target));
         // Watchdog timeout to recover UI even if load doesn't fire
   navState.timer = setTimeout(onErrorTimeout, 10000);
       }
@@ -495,6 +719,67 @@
       btnB.addEventListener('click', () => navigateTo('B'));
       if (btnCut) btnCut.addEventListener('click', () => navigateTo('CUT'));
   if (btnReport) btnReport.addEventListener('click', () => navigateTo('REPORT'));
+      // System Reset Button (Deep Clean & Reload)
+      (function(){
+        const wrap = document.getElementById('pd2ResetWrap');
+        const btn = document.getElementById('pd2ResetBtn');
+        const menu = document.getElementById('pd2ResetMenu');
+        if(!btn || !menu) return;
+
+        function toggleMenu(force){
+          const show = force !== undefined ? force : menu.classList.contains('hidden');
+          menu.classList.toggle('hidden', !show);
+        }
+        btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+        document.addEventListener('click', (e) => { if(!wrap.contains(e.target)) toggleMenu(false); });
+
+        async function performReset(mode){
+          if (navState.busy) { showToast('กำลังโหลดอยู่ รอสักครู่...'); return; }
+          const modeLabel = mode === 'partial' ? 'บางส่วน' : 'ทั้งหมด';
+          console.info('[PD2_RESET] start', { mode });
+          showToast('รีเซ็ต'+modeLabel+'...');
+          // 1. Always clear iframe cache
+          try {
+            Object.keys(frameCache).forEach(k => { try { frameCache[k].remove(); } catch(_){}; delete frameCache[k]; });
+            console.info('[PD2_RESET] iframe cache cleared');
+          } catch(err){ console.warn('[PD2_RESET] iframe cache error', err); }
+          // 2. localStorage: partial keeps user form data (values) but clears meta caches; full clears PD2 keys
+          try {
+            const keys = []; for (let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k) keys.push(k); }
+            const PD2_KEYS = keys.filter(k => /pd2|shift|wage|machine|fabric|employee|errorLog|productionData/i.test(k));
+            if (mode === 'full') {
+              PD2_KEYS.forEach(k => { try { localStorage.removeItem(k); } catch(_){ } });
+              console.info('[PD2_RESET] localStorage removed (full)', PD2_KEYS);
+            } else {
+              // partial: เก็บข้อมูลทุกอย่างที่ผู้ใช้กรอก (shift, wage, machine, fabric, employee, productionData ฯลฯ)
+              // ลบเฉพาะ key ที่เป็น log / error / debug / cache เพื่อลดสิ่งค้าง
+              const REMOVE_PAT = /(errorlog|_log|logs?|cache|_cache|debug)/i;
+              const toRemove = PD2_KEYS.filter(k => REMOVE_PAT.test(k));
+              toRemove.forEach(k => { try { localStorage.removeItem(k); } catch(_){ } });
+              console.info('[PD2_RESET] localStorage removed (partial, only log/cache keys)', toRemove);
+            }
+          } catch(err){ console.warn('[PD2_RESET] ls error', err); }
+          // 3. CacheStorage & SW always cleared (both modes) → ลดความสับสนเรื่องไฟล์เก่า
+          try { if (window.caches && caches.keys) { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); console.info('[PD2_RESET] CacheStorage cleared', names); } } catch(err){ console.warn('[PD2_RESET] cacheStorage error', err); }
+          try { if (navigator.serviceWorker) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); console.info('[PD2_RESET] service workers unregistered'); } } catch(err){ console.warn('[PD2_RESET] sw unregister error', err); }
+          // 4. Reset nav state
+          try { navState.pendingTarget = null; navState.busy = false; navState.token += 1; } catch(_){ }
+          // 5. Reload (full: add resetts; partial: add softts param)
+          setTimeout(() => {
+            const u = new URL(location.href);
+            u.searchParams.set(mode === 'full' ? 'resetts' : 'softts', Date.now());
+            location.replace(u.toString());
+          }, 120);
+        }
+
+        menu.querySelectorAll('.pd2-reset-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            const mode = item.getAttribute('data-mode');
+            toggleMenu(false);
+            performReset(mode);
+          });
+        });
+      })();
 
       // CTA buttons on overview cards
   // (no hero CTA handlers)
@@ -514,6 +799,7 @@
 
       // Prefetch / warm-up module HTML in idle time to reduce perceived load delay
       function prefetchModules() {
+        if (NO_CACHE_MODE) return; // skip prefetching in single-frame mode
         try {
           const targets = ['A','B','CUT','REPORT'];
           const run = () => {
@@ -537,6 +823,37 @@
 
       // Trigger prefetch after initial navigation settled
       setTimeout(prefetchModules, 800);
+      // Idle preload: instantiate hidden iframes for modules not yet visited so first switch is instant
+      function idlePreloadFrames(){
+        if (NO_CACHE_MODE) return; // no multi-frame preload
+        try {
+          const modules = ['A','B','CUT','REPORT'];
+          const needed = modules.filter(m => !frameCache[m]);
+          if (!needed.length) return;
+          needed.forEach(m => {
+            // Skip currently active (already created by navigate)
+            if (m === currentModule) return;
+            const ifr = getOrCreateFrame(m);
+            // Mark as preloading
+            ifr.dataset.preloading = '1';
+            const url = withVer(pathFor(m));
+            ifr.addEventListener('load', () => {
+              ifr.dataset.loaded = '1';
+              delete ifr.dataset.preloading;
+              console.info('[PD2_NAV] preload.loaded', m);
+              // Broadcast shared state so that when user switches it's already populated
+              try { broadcastShared(ifr.contentWindow); } catch(_){ }
+            }, { once: true });
+            ifr.src = url;
+            console.info('[PD2_NAV] preload.start', m, url);
+          });
+        } catch(err) { console.debug('[PD2_NAV] preload.error', err); }
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => idlePreloadFrames(), { timeout: 4000 });
+      } else {
+        setTimeout(idlePreloadFrames, 1800);
+      }
       // Respond to manual hash changes to keep iframe in sync
       window.addEventListener('hashchange', () => {
         try {
@@ -552,6 +869,56 @@
       const cleanupNav = () => { try { clearTimeout(navState.timer); } catch(_){} };
       window.addEventListener('pagehide', cleanupNav);
       window.addEventListener('beforeunload', cleanupNav);
+      // Watchdog: prevent permanent freeze if iframe load events never fire (e.g., network stall, blocked resource)
+      setInterval(() => {
+        try {
+          if (!navState.busy) return;
+          const elapsed = Date.now() - (navState.startedAt || Date.now());
+          if (elapsed > 12000) { // 12s hard timeout
+            console.warn('[PD2_NAV] watchdog-hard-timeout', { elapsed, token: navState.token, pending: navState.pendingTarget });
+            try { clearTimeout(navState.timer); } catch(_){}
+            navState.busy = false; setNavDisabled(false); hideLoading();
+            // If we have a pending target, try that next
+            if (navState.pendingTarget) {
+              const tgt = navState.pendingTarget; navState.pendingTarget = null;
+              setTimeout(() => navigateTo(tgt, { force: true }), 0);
+            }
+            return;
+          }
+          if (elapsed > 6500) { // soft recovery attempt
+            // If current target frame actually loaded DOM (readyState) but events missed, finalize manually
+            const activeFrame = frame;
+            if (activeFrame && activeFrame.contentDocument && activeFrame.contentDocument.readyState !== 'loading') {
+              console.warn('[PD2_NAV] watchdog-soft-complete', { elapsed, token: navState.token });
+              navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
+              try { activeFrame.dataset.loaded = '1'; } catch(_){}
+              if (navState.pendingTarget) {
+                const tgt2 = navState.pendingT
+                arget; navState.pendingTarget = null; setTimeout(() => navigateTo(tgt2), 0);
+              }
+            }
+          }
+        } catch(_){}
+      }, 1500);
+      // Auto recovery scheduler: if navigation gave up, try a limited number of background reloads unless user interacted
+      function scheduleAutoRecovery(target){
+        try {
+          if (navState.autoRecoveryAttempts >= 3) return;
+          navState.autoRecoveryAttempts++;
+          const attemptNo = navState.autoRecoveryAttempts;
+          const delay = attemptNo * 2500; // 2.5s, 5s, 7.5s
+          console.info('[PD2_NAV] auto-recover-scheduled', target, { attempt: attemptNo, delay });
+          setTimeout(() => {
+            // If user already switched or module loaded, abort
+            if (currentModule === target || (frameCache[target] && frameCache[target].dataset.loaded === '1')) {
+              console.info('[PD2_NAV] auto-recover-abort', target, { attempt: attemptNo });
+              return;
+            }
+            console.info('[PD2_NAV] auto-recover-attempt', target, { attempt: attemptNo });
+            navigateTo(target, { force: true });
+          }, delay);
+        } catch(_){}
+      }
       
         // Fancy shine effect: track mouse to set --x hotspot for pills
   pills.forEach(btn => {
