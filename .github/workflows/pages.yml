@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -45,6 +48,8 @@ jobs:
           cp -r assets public/assets 2>/dev/null || true
           cp -r icon public/icon 2>/dev/null || true
           # (ไม่ copy โฟลเดอร์ server/ และ scripts/ เพื่อไม่ให้สับสนบน Pages)
+          touch public/.nojekyll
+          echo "Deployed at $(date -u)" > public/DEPLOY_INFO.txt
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -58,6 +63,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: ./public
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_path: ./public
