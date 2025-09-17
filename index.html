@@ -486,12 +486,20 @@
       function hideLoading() {
         if (loadingEl) loadingEl.classList.add('loading-hidden');
       }
+      const LEGACY_PATHS = {
+        A: './ปรับ script PD2_Shift-A_V4.0/index.html',
+        B: './ปรับ script PD2_Shift-B_V4.0/index.html',
+        CUT: './ตัดม้วน PD2/index.html',
+        REPORT: './link google sheet/index.html'
+      };
+      const NORMALIZED_PATHS = {
+        A: './modules/shift-a/index.html',
+        B: './modules/shift-b/index.html',
+        CUT: './modules/cut/index.html',
+        REPORT: './modules/report/index.html'
+      };
       function pathFor(target) {
-        if (target === 'A') return './ปรับ script PD2_Shift-A_V4.0/index.html';
-        if (target === 'B') return './ปรับ script PD2_Shift-B_V4.0/index.html';
-        if (target === 'CUT') return './ตัดม้วน PD2/index.html';
-        if (target === 'REPORT') return './link google sheet/index.html';
-        return './ปรับ script PD2_Shift-A_V4.0/index.html';
+        return NORMALIZED_PATHS[target] || NORMALIZED_PATHS.A;
       }
       function buttonFor(target) {
         return target === 'A' ? btnA : target === 'B' ? btnB : target === 'CUT' ? btnCut : btnReport;
@@ -721,7 +729,23 @@
     PD2Log('navigateTo.setSrc', withVer(pathFor(target)), { token: __pd2_nav_token, start: window.__pd2_nav_start });
     console.info('[PD2_NAV] start', target, { token: __pd2_nav_token, start: window.__pd2_nav_start });
   } catch (_) {}
+  // Attempt normalized path first; if it fails (blank or 404) we'll fallback automatically
   targetFrame.src = withVer(pathFor(target));
+  try {
+    // Fallback watchdog: after 1.6s if iframe still blank (no body children) -> load legacy path
+    setTimeout(() => {
+      if (myToken !== navState.token) return;
+      try {
+        const doc = targetFrame.contentDocument || targetFrame.contentWindow?.document;
+        const blank = !doc || !doc.body || doc.body.children.length < 2;
+        if (blank && !targetFrame.dataset.fallbackTried) {
+          console.warn('[PD2_NAV] normalized path may have failed; trying legacy path for', target);
+          targetFrame.dataset.fallbackTried = '1';
+          targetFrame.src = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
+        }
+      } catch(_) {}
+    }, 1600);
+  } catch(_) {}
         // Watchdog timeout to recover UI even if load doesn't fire
   navState.timer = setTimeout(onErrorTimeout, 10000);
       }
