@@ -423,6 +423,7 @@
   // Multi-iframe cache (can be disabled via ?nocache=1 for fallback safety or debugging)
   const searchParams = (() => { try { return new URL(location.href).searchParams; } catch(_) { return new URLSearchParams(); } })();
   const NO_CACHE_MODE = searchParams.get('nocache') === '1';
+  const DEBUG_NAV = searchParams.get('debugnav') === '1';
   if (NO_CACHE_MODE) { console.info('[PD2_NAV] NO_CACHE_MODE active - using single iframe navigation'); }
   const frameCache = {}; // { A: HTMLIFrameElement, ... } (suppressed if NO_CACHE_MODE)
   const FRAME_CACHE_LIMIT = 3; // ถ้าเกินจะลบตัวที่ไม่ใช้งานนานสุด
@@ -729,33 +730,82 @@
     PD2Log('navigateTo.setSrc', withVer(pathFor(target)), { token: __pd2_nav_token, start: window.__pd2_nav_start });
     console.info('[PD2_NAV] start', target, { token: __pd2_nav_token, start: window.__pd2_nav_start });
   } catch (_) {}
-  // Preflight check: verify normalized path actually exists before committing iframe navigation.
-  (function preflightLoad(){
-    const primary = withVer(pathFor(target));
-    try {
-      fetch(primary, { method: 'GET', cache: 'no-store' })
-        .then(resp => {
-          if (myToken !== navState.token) return; // stale navigation
-          if (resp.ok) {
-            console.info('[PD2_NAV] preflight OK', target, primary, resp.status);
-            targetFrame.src = primary;
-          } else {
-            const legacy = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
-            console.warn('[PD2_NAV] preflight NOT OK fallback to legacy', target, resp.status);
-            targetFrame.src = legacy;
-          }
-        })
-        .catch(err => {
-          if (myToken !== navState.token) return;
-          const legacy = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
-          console.warn('[PD2_NAV] preflight error, trying legacy', target, err && err.message);
-          targetFrame.src = legacy;
-        });
-    } catch (err) {
-      // If fetch itself throws synchronously (very old browser), skip preflight and go straight to primary
-      try { targetFrame.src = primary; } catch(_) {}
+  // Diagnostic helpers
+  let diagEl = null;
+  function ensureDiag(){
+    if (!DEBUG_NAV) return;
+    if (!diagEl) {
+      diagEl = document.createElement('div');
+      diagEl.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:99999;background:#111827cc;color:#fff;padding:8px 10px;font:12px/1.3 monospace;max-width:340px;border:1px solid #334155;border-radius:6px;box-shadow:0 4px 16px #0008;backdrop-filter:blur(4px);';
+      diagEl.innerHTML = '<strong>PD2 NAV DEBUG</strong><div id="pd2NavLog" style="margin-top:4px;max-height:200px;overflow:auto"></div><button id="pd2DiagClose" style="margin-top:6px;background:#dc2626;padding:2px 6px;border-radius:4px;color:#fff;border:none;cursor:pointer">ปิด</button>';
+      document.body.appendChild(diagEl);
+      diagEl.querySelector('#pd2DiagClose').onclick = () => { diagEl.remove(); diagEl=null; };
     }
-  })();
+    return diagEl.querySelector('#pd2NavLog');
+  }
+  function logDiag(msg){ if (!DEBUG_NAV) return; const box = ensureDiag(); if (!box) return; const line = document.createElement('div'); line.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; box.appendChild(line); box.scrollTop = box.scrollHeight; }
+
+  function evaluateIframe(ifr, attemptCtx){
+    try {
+      const doc = ifr.contentDocument || ifr.contentWindow?.document;
+      if (!doc) { return { status:'no-doc' }; }
+      const ready = doc.readyState;
+      const body = doc.body;
+      const childCount = body ? body.children.length : 0;
+      const textLen = body ? (body.innerText || '').trim().length : 0;
+      // Heuristic thresholds for a "real" page
+      const looksBlank = childCount < 3 && textLen < 120;
+      return { status:'ok', ready, childCount, textLen, looksBlank, attempt: attemptCtx };
+    } catch (err) {
+      return { status:'error', error: err.message };
+    }
+  }
+
+  function attemptChain(){
+    // Attempts sequence:
+    // 1. normalized primary
+    // 2. legacy Thai path
+    // 3. normalized WITHOUT cache-bust
+    // 4. final give up (show diagnostic hint)
+    const seq = [];
+    const primaryRaw = pathFor(target);
+    seq.push({ kind:'primary', url: withVer(primaryRaw) });
+    seq.push({ kind:'legacy', url: withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A) });
+    seq.push({ kind:'primary-nocb', url: primaryRaw });
+    let idx = 0;
+    function tryNext(){
+      if (myToken !== navState.token) return; // stale
+      if (idx >= seq.length) {
+        logDiag('All attempts exhausted for '+target+' – still blank.');
+        showToast('ไม่สามารถโหลดโมดูล A ได้ ตรวจ network');
+        return;
+      }
+      const attempt = seq[idx++];
+      logDiag('Attempt '+idx+' -> '+attempt.kind+' : '+attempt.url);
+      fetch(attempt.url, { method:'GET', cache:'no-store' })
+        .then(r => {
+          if (myToken !== navState.token) return;
+            if (!r.ok) { logDiag('HTTP '+r.status+' for '+attempt.kind); tryNext(); return; }
+            // Got 200 -> set src and then validate after load
+            targetFrame.src = attempt.url;
+            const validateDelay = attempt.kind === 'primary' ? 2000 : 2500;
+            setTimeout(() => {
+              if (myToken !== navState.token) return;
+              const evalRes = evaluateIframe(targetFrame, attempt.kind+'-delayCheck');
+              logDiag('Validate '+attempt.kind+' => '+JSON.stringify(evalRes));
+              if (evalRes.looksBlank) {
+                // proceed to next attempt
+                tryNext();
+              }
+            }, validateDelay);
+        })
+        .catch(err => { if (myToken !== navState.token) return; logDiag('Fetch error '+attempt.kind+': '+(err && err.message)); tryNext(); });
+    }
+    tryNext();
+  }
+
+  // Kick off attempt chain (replaces earlier single preflight)
+  attemptChain();
         // Watchdog timeout to recover UI even if load doesn't fire
   navState.timer = setTimeout(onErrorTimeout, 10000);
       }
