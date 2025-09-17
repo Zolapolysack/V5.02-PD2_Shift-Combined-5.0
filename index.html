@@ -729,23 +729,33 @@
     PD2Log('navigateTo.setSrc', withVer(pathFor(target)), { token: __pd2_nav_token, start: window.__pd2_nav_start });
     console.info('[PD2_NAV] start', target, { token: __pd2_nav_token, start: window.__pd2_nav_start });
   } catch (_) {}
-  // Attempt normalized path first; if it fails (blank or 404) we'll fallback automatically
-  targetFrame.src = withVer(pathFor(target));
-  try {
-    // Fallback watchdog: after 1.6s if iframe still blank (no body children) -> load legacy path
-    setTimeout(() => {
-      if (myToken !== navState.token) return;
-      try {
-        const doc = targetFrame.contentDocument || targetFrame.contentWindow?.document;
-        const blank = !doc || !doc.body || doc.body.children.length < 2;
-        if (blank && !targetFrame.dataset.fallbackTried) {
-          console.warn('[PD2_NAV] normalized path may have failed; trying legacy path for', target);
-          targetFrame.dataset.fallbackTried = '1';
-          targetFrame.src = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
-        }
-      } catch(_) {}
-    }, 1600);
-  } catch(_) {}
+  // Preflight check: verify normalized path actually exists before committing iframe navigation.
+  (function preflightLoad(){
+    const primary = withVer(pathFor(target));
+    try {
+      fetch(primary, { method: 'GET', cache: 'no-store' })
+        .then(resp => {
+          if (myToken !== navState.token) return; // stale navigation
+          if (resp.ok) {
+            console.info('[PD2_NAV] preflight OK', target, primary, resp.status);
+            targetFrame.src = primary;
+          } else {
+            const legacy = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
+            console.warn('[PD2_NAV] preflight NOT OK fallback to legacy', target, resp.status);
+            targetFrame.src = legacy;
+          }
+        })
+        .catch(err => {
+          if (myToken !== navState.token) return;
+          const legacy = withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A);
+          console.warn('[PD2_NAV] preflight error, trying legacy', target, err && err.message);
+          targetFrame.src = legacy;
+        });
+    } catch (err) {
+      // If fetch itself throws synchronously (very old browser), skip preflight and go straight to primary
+      try { targetFrame.src = primary; } catch(_) {}
+    }
+  })();
         // Watchdog timeout to recover UI even if load doesn't fire
   navState.timer = setTimeout(onErrorTimeout, 10000);
       }
