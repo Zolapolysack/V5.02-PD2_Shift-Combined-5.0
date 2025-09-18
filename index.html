@@ -418,7 +418,7 @@
   let NO_CACHE_OVERRIDE = null; // null=use base; true=force single; false=force multi
   function isNoCacheMode(){ return NO_CACHE_OVERRIDE === null ? BASE_NO_CACHE_MODE : NO_CACHE_OVERRIDE; }
   if (isNoCacheMode()) { console.info('[PD2_NAV] NO_CACHE_MODE active - using single iframe navigation'); }
-  const frameCache = {}; // { A: HTMLIFrameElement, ... } (suppressed if NO_CACHE_MODE)
+  const frameCache = {}; // { A: HTMLIFrameElement, ... } (suppressed when isNoCacheMode() is true)
   const FRAME_CACHE_LIMIT = 3; // ถ้าเกินจะลบตัวที่ไม่ใช้งานนานสุด
   const frameUseOrder = []; // LRU tracking
 
@@ -546,7 +546,7 @@
 
   // If we already have a cached loaded iframe for this module, switch instantly (no network / reload)
   const cached = (!isNoCacheMode()) ? frameCache[target] : null;
-  if (!NO_CACHE_MODE && cached && cached.dataset.loaded === '1' && !options.force) {
+  if (!isNoCacheMode() && cached && cached.dataset.loaded === '1' && !options.force) {
     const start = Date.now();
     showFrame(target);
     currentModule = target;
