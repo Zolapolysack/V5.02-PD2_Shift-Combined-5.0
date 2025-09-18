@@ -1,5 +1,5 @@
 // Minimal service worker to make the site installable and provide basic offline shell
-const CACHE_NAME = 'pd2-shell-v1';
+const CACHE_NAME = 'pd2-shell-v3-20250918';
 const FILES_TO_CACHE = [
   './',
   './index.html',

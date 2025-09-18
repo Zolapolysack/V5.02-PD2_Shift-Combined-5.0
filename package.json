@@ -13,8 +13,8 @@
   "test:watch": "jest --watch",
   "make-icons": "node ./scripts/make-icons.js",
   "smoke": "node ./scripts/smoke.js",
-  "health:full": "node ./scripts/full-health.js"
-  ,"sheets:validate": "node ./scripts/validate-google-creds.js"
+  "health:full": "node ./scripts/full-health.js",
+  "sheets:validate": "node ./scripts/validate-google-creds.js"
   },
   "keywords": [
     "pd2",
@@ -28,8 +28,8 @@
     "jest": "^30.1.3",
     "jsdom": "^26.1.0",
     "http-server": "^14.1.1",
-  "ws": "^8.13.0",
-  "jimp": "^0.16.1"
+    "ws": "^8.13.0",
+    "jimp": "^0.16.1"
   },
   "dependencies": {
     "googleapis": "^144.0.0",

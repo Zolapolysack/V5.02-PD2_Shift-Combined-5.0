@@ -371,6 +371,40 @@
             }
         }
     </style>
+        <script>
+            // Notify parent frame that content is ready for faster navigation (hardened)
+            (function(){
+                function trySendReady(){
+                    try {
+                        if (window.parent && window.parent !== window) {
+                            // Use '*' to avoid strict origin mismatch breaking readiness in embedded contexts
+                            window.parent.postMessage({ type: 'PD2_READY' }, '*');
+                            if (window.console && console.debug) console.debug('[PD2_MODULE] Sent PD2_READY');
+                            return true;
+                        }
+                    } catch(e){
+                        if (window.console && console.warn) console.warn('[PD2_MODULE] Failed to send PD2_READY', e);
+                    }
+                    return false;
+                }
+                try {
+                    // Fire as soon as DOM is interactive or complete
+                    const fire = () => { trySendReady(); };
+                    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                        setTimeout(fire, 0);
+                    } else {
+                        window.addEventListener('DOMContentLoaded', fire, { once: true });
+                    }
+                    // Absolute fallback: on full load, ensure a final PD2_READY is sent
+                    window.addEventListener('load', function onLoadOnce(){
+                        trySendReady();
+                        try { window.removeEventListener('load', onLoadOnce); } catch(_) {}
+                    });
+                } catch(e){
+                    if (window.console && console.debug) console.debug('[PD2_MODULE] PD2_READY sender setup failed', e);
+                }
+            })();
+        </script>
 </head>
 <!-- mobile responsive fix: add bottom safe-area padding for Android navbar avoidance -->
 <body class="min-h-screen pb-[env(safe-area-inset-bottom,0)]" style="overflow-x:hidden;">
@@ -513,7 +547,7 @@
             </button>
             <button onclick="exportPNG()" class="btn-glow text-white px-6 py-3 rounded-lg font-normal text-base flex items-center w-full sm:w-auto" style="background-color: #f50494;">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2 2.5 3-4 4.5 6H6l2.5-4.5zM8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                    <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7c0-1.1-.9-2-2-2zm-13 4h10v14H8V7zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>
                 บันทึกเป็นรูปภาพ
             </button>
@@ -1136,6 +1170,7 @@
             autoSaveInterval = setInterval(() => {
                 try {
                     saveToLocalStorage();
+
                 } catch (error) {
                     ERROR_LOG.log(error, 'Auto-save failed');
                 }
@@ -1691,7 +1726,7 @@
             
             // ติดตั้งระบบแนะนำแบบทันที (instant suggestions) ให้กับฟิลด์กรอกเอง
             try {
-                // สำหรับพนักงาน (รูปแบบ: "ID - Name")
+                // สำหรับพนักงาน (รูปแบบ: "ID - ชื่อ")
                 document.querySelectorAll('input[name^="employeeAManual_"]').forEach(inp => {
                     attachInstantSuggestions(inp, () => employees.map(e => ({
                         label: `${e.id} - ${e.name}`,
@@ -2079,14 +2114,12 @@
     function saveModalData(type) {
             let newValue = '';
             let isValid = false;
-            
+
             if (type === 'employee') {
                 const id = document.getElementById('newEmployeeId').value.trim();
                 const name = document.getElementById('newEmployeeName').value.trim();
-                
                 if (id && name) {
                     newValue = id;
-                    // de-duplicate by id
                     if (!employees.some(e => e.id === id)) {
                         employees.push({ id: id, name: name });
                     }
@@ -2109,9 +2142,8 @@
                     isValid = true;
                 }
             }
-            
+
             if (isValid) {
-                // notify parent to share across iframes (session-only)
                 try {
                     if (window.parent && window.parent !== window) {
                         if (type === 'employee') {
@@ -2125,7 +2157,6 @@
                     }
                 } catch(_) {}
 
-                // Only auto-select on the originating select
                 const originName = (addNewContext && addNewContext.type === type) ? addNewContext.selectName : null;
                 updateAllSelects(type, newValue, originName);
                 addNewContext = null;
@@ -2136,41 +2167,39 @@
             }
         }
 
-        // Update All Selects
         function updateAllSelects(type, newValue, originSelectName) {
-            const selects = document.querySelectorAll(`select[name*="${type === 'employee' ? 'employee' : type === 'fabric' ? 'fabricSize' : 'machine'}"]`);
-            
+            const query = `select[name*="${type === 'employee' ? 'employee' : type === 'fabric' ? 'fabricSize' : 'machine'}"]`;
+            const selects = document.querySelectorAll(query);
+
             selects.forEach(select => {
                 const isOrigin = (originSelectName && select.name === originSelectName);
                 const prevValue = select.value;
                 // Remove old ADD_NEW option
                 const addNewOption = select.querySelector('option[value="ADD_NEW"]');
-                if (addNewOption) {
-                    addNewOption.remove();
-                }
-                
-                // Add new option if missing
+                if (addNewOption) addNewOption.remove();
+
+                // Add new option only if not exists
                 let exists = Array.from(select.options).some(o => o.value === newValue);
                 if (!exists) {
-                    const newOption = document.createElement('option');
+                    const opt = document.createElement('option');
                     if (type === 'employee') {
                         const emp = employees.find(e => e.id === newValue);
-                        newOption.value = newValue;
-                        newOption.textContent = emp ? `${emp.id} - ${emp.name}` : newValue;
+                        opt.value = newValue;
+                        opt.textContent = emp ? `${emp.id} - ${emp.name}` : newValue;
                     } else {
-                        newOption.value = newValue;
-                        newOption.textContent = newValue;
+                        opt.value = newValue;
+                        opt.textContent = newValue;
                     }
-                    select.appendChild(newOption);
+                    select.appendChild(opt);
                 }
-                
+
                 // Re-add ADD_NEW option
-                const addNewOptionNew = document.createElement('option');
-                addNewOptionNew.value = 'ADD_NEW';
-                addNewOptionNew.textContent = 'คีย์ข้อมูลใหม่';
-                select.appendChild(addNewOptionNew);
-                
-                // Restore selection for others; select new only for origin
+                const addOpt = document.createElement('option');
+                addOpt.value = 'ADD_NEW';
+                addOpt.textContent = 'คีย์ข้อมูลใหม่';
+                select.appendChild(addOpt);
+
+                // Restore selection; select new only for origin
                 if (isOrigin) {
                     select.value = newValue;
                     if (type === 'fabric') {
@@ -2183,7 +2212,7 @@
                 }
             });
 
-            // อัปเดต datalist ของทุกชุดข้อมูลเพื่อให้คำแนะนำใหม่แสดงด้วย
+            // Update datalists to reflect new options
             refreshAllDatalists();
         }
 
@@ -3198,4 +3227,43 @@ ${healthData.recentErrors.length > 0 ? `\n⚠️ ข้อผิดพลาด�
         } catch(_){}
     </script>
 </body>
+</html>
+<!-- PD2: Safe fallback to ensure at least one form renders even if earlier scripts were interrupted -->
+<script>
+    (function(){
+        function ensureFormVisible(){
+            try {
+                var container = document.getElementById('dataContainer');
+                if (!container) return;
+                // If nothing rendered yet (no dataset blocks), inject one
+                var hasSet = false;
+                try {
+                    hasSet = !!container.querySelector('.data-set');
+                } catch(_) {}
+                if (!hasSet) {
+                    var wrapper = document.createElement('div');
+                    try {
+                        if (typeof generateDataSet === 'function') {
+                            wrapper.innerHTML = generateDataSet(1);
+                        } else {
+                            wrapper.innerHTML = '<div class="data-set glass rounded-lg p-6 mb-6" data-set="1"><div class="text-white">กำลังเตรียมแบบฟอร์ม...</div></div>';
+                        }
+                    } catch(_) {
+                        wrapper.innerHTML = '<div class="data-set glass rounded-lg p-6 mb-6" data-set="1"><div class="text-white">กำลังเตรียมแบบฟอร์ม...</div></div>';
+                    }
+                    var el = wrapper.firstElementChild;
+                    if (el) { container.appendChild(el); }
+                }
+            } catch(e){ /* swallow */ }
+        }
+        // Try after DOM ready and after full load
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(ensureFormVisible, 0);
+            setTimeout(ensureFormVisible, 400);
+        } else {
+            document.addEventListener('DOMContentLoaded', function(){ ensureFormVisible(); setTimeout(ensureFormVisible, 400); }, { once: true });
+        }
+        window.addEventListener('load', function(){ setTimeout(ensureFormVisible, 0); setTimeout(ensureFormVisible, 600); }, { once: true });
+    })();
+</script>
 </html>

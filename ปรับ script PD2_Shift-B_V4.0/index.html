@@ -1481,8 +1481,7 @@
                 try { newElement.style.display = ''; newElement.classList.remove('hidden','invisible'); newElement.removeAttribute('hidden'); } catch(_){ }
                 requestAnimationFrame(() => {
                     try {
-                        newElement.style.visibility = 'visible'; void newElement.offsetWidth; newElement.style.opacity = '1';
-                        newElement.classList.remove('data-set'); void newElement.offsetWidth; newElement.classList.add('data-set'); newElement.style.transform = 'none'; newElement.style.zIndex = '10';
+                        newElement.style.visibility = 'visible'; void newElement.offsetWidth; newElement.style.opacity = '1'; newElement.classList.remove('data-set'); void newElement.offsetWidth; newElement.classList.add('data-set'); newElement.style.transform = 'none'; newElement.style.zIndex = '10';
                         try { const prev = container.style.overflow; container.style.overflow = 'visible'; setTimeout(() => { container.style.overflow = prev || ''; }, 300); } catch(_){ }
                     } catch(_){ }
                 });
@@ -2140,6 +2139,7 @@
 
         const PD2_SUBMIT_CFG = {
             minStep5VisibleMs: 90,
+            preSendPaintMs: 50,
             preSendPaintMs: 50,
             attemptTimeoutMs: 10000,
             baseBackoffMs: 450,

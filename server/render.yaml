@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: pd2-sheets-proxy
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ALLOW_ORIGINS
+        value: https://<your-pages-domain>,http://localhost,http://127.0.0.1
+      # Add these in the Render dashboard securely (do not commit real secrets)
+      - key: API_TOKEN
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false

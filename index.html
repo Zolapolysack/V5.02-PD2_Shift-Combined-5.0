@@ -9,6 +9,8 @@
   <meta name="theme-color" content="#0a0a0a" />
   <meta name="color-scheme" content="light dark" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Runtime API binding for production: replace content with your deployed API URL -->
+  <meta name="pd2-api" content="https://YOUR_DEPLOYED_API_SERVER_URL_HERE" />
   <title>ระบบบันทึกข้อมูลรายงานแผนกผลิต 2</title>
   <script src="https://cdn.tailwindcss.com/3.4.10"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,19 +82,7 @@
         <div class="relative">
           <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 shadow-inner"></div>
           <!-- Brand image points to images.png (placed at workspace root) -->
-          <link rel="preload" as="image" href="images.png" />
-          <img id="brandImg" src="images.png" alt="Brand" class="absolute inset-0 z-10 w-10 h-10 rounded-lg object-cover ring-1 ring-white/40" onerror="(function(img){
-              // Attempt fallback chain inside GH Pages if root image missing
-              const fallbacks = ['icon/icon_preview.png','icon/images.png','icon/icon_preview_sharp.png'];
-              for (let i=0;i<fallbacks.length;i++) {
-                const testSrc = fallbacks[i];
-                const probe = new Image();
-                probe.onload = function(){ img.onerror=null; img.src=testSrc; };
-                probe.src = testSrc + '?v='+Date.now();
-              }
-              // If all fail after short delay, remove element
-              setTimeout(()=>{ if(!img.complete || img.naturalWidth===0){ try{img.remove();}catch(_){}} }, 1400);
-            })(this)" />
+          <img id="brandImg" src="images.png" alt="Brand" class="absolute inset-0 z-10 w-10 h-10 rounded-lg object-cover ring-1 ring-white/40" onerror="this.remove()" />
         </div>
         <div class="leading-tight">
           <div class="text-white text-lg font-semibold">Production Dept. 2</div>
@@ -268,7 +258,7 @@
   // Hero buttons removed per request
       const toast = document.getElementById('toast');
   // Simple cache-busting token so GH Pages picks up latest subpages
-  const CACHE_VER = '20250903a1';
+  const CACHE_VER = '20250918b1';
   const withVer = (p) => `${encodeURI(p)}${p.includes('?') ? '&' : '?'}v=${CACHE_VER}`;
 
   // Lightweight debug logger for troubleshooting. Non-invasive.
@@ -422,15 +412,18 @@
   let currentModule = null; // 'A' | 'B' | 'CUT' | 'REPORT'
   // Multi-iframe cache (can be disabled via ?nocache=1 for fallback safety or debugging)
   const searchParams = (() => { try { return new URL(location.href).searchParams; } catch(_) { return new URLSearchParams(); } })();
-  const NO_CACHE_MODE = searchParams.get('nocache') === '1';
-  const DEBUG_NAV = searchParams.get('debugnav') === '1';
-  if (NO_CACHE_MODE) { console.info('[PD2_NAV] NO_CACHE_MODE active - using single iframe navigation'); }
+  // Default to single-iframe (most stable). Enable multi-iframe explicitly with ?multiframe=1
+  const MULTIFRAME = searchParams.get('multiframe') === '1';
+  const BASE_NO_CACHE_MODE = !MULTIFRAME; // true => single iframe mode by default
+  let NO_CACHE_OVERRIDE = null; // null=use base; true=force single; false=force multi
+  function isNoCacheMode(){ return NO_CACHE_OVERRIDE === null ? BASE_NO_CACHE_MODE : NO_CACHE_OVERRIDE; }
+  if (isNoCacheMode()) { console.info('[PD2_NAV] NO_CACHE_MODE active - using single iframe navigation'); }
   const frameCache = {}; // { A: HTMLIFrameElement, ... } (suppressed if NO_CACHE_MODE)
   const FRAME_CACHE_LIMIT = 3; // ถ้าเกินจะลบตัวที่ไม่ใช้งานนานสุด
   const frameUseOrder = []; // LRU tracking
 
   function touchFrameOrder(key){
-    if (NO_CACHE_MODE) return; // skip LRU in no-cache mode
+    if (isNoCacheMode()) return; // skip LRU in no-cache mode
     const idx = frameUseOrder.indexOf(key);
     if (idx !== -1) frameUseOrder.splice(idx,1);
     frameUseOrder.push(key);
@@ -446,7 +439,7 @@
   const baseFrame = frame; // original placeholder iframe
 
   function getOrCreateFrame(target) {
-    if (NO_CACHE_MODE) {
+    if (isNoCacheMode()) {
       // Always reuse single base frame
       return baseFrame;
     }
@@ -466,11 +459,11 @@
   }
 
   function showFrame(target) {
-    if (!NO_CACHE_MODE) {
+    if (!isNoCacheMode()) {
       Object.values(frameCache).forEach(f => { f.style.display = 'none'; });
     }
     const f = getOrCreateFrame(target);
-    if (!NO_CACHE_MODE) {
+    if (!isNoCacheMode()) {
       f.style.display = 'block';
     }
     frame = f;
@@ -487,20 +480,12 @@
       function hideLoading() {
         if (loadingEl) loadingEl.classList.add('loading-hidden');
       }
-      const LEGACY_PATHS = {
-        A: './ปรับ script PD2_Shift-A_V4.0/index.html',
-        B: './ปรับ script PD2_Shift-B_V4.0/index.html',
-        CUT: './ตัดม้วน PD2/index.html',
-        REPORT: './link google sheet/index.html'
-      };
-      const NORMALIZED_PATHS = {
-        A: './modules/shift-a/index.html',
-        B: './modules/shift-b/index.html',
-        CUT: './modules/cut/index.html',
-        REPORT: './modules/report/index.html'
-      };
       function pathFor(target) {
-        return NORMALIZED_PATHS[target] || NORMALIZED_PATHS.A;
+        if (target === 'A') return './ปรับ script PD2_Shift-A_V4.0/index.html';
+        if (target === 'B') return './ปรับ script PD2_Shift-B_V4.0/index.html';
+        if (target === 'CUT') return './ตัดม้วน PD2/index.html';
+        if (target === 'REPORT') return './link google sheet/index.html';
+        return './ปรับ script PD2_Shift-A_V4.0/index.html';
       }
       function buttonFor(target) {
         return target === 'A' ? btnA : target === 'B' ? btnB : target === 'CUT' ? btnCut : btnReport;
@@ -560,7 +545,7 @@
   PD2Log('navigateTo.start', target, opts);
 
   // If we already have a cached loaded iframe for this module, switch instantly (no network / reload)
-  const cached = (!NO_CACHE_MODE) ? frameCache[target] : null;
+  const cached = (!isNoCacheMode()) ? frameCache[target] : null;
   if (!NO_CACHE_MODE && cached && cached.dataset.loaded === '1' && !options.force) {
     const start = Date.now();
     showFrame(target);
@@ -594,15 +579,18 @@
         // Early readiness polling: if onload/PD2_READY lost but DOM becomes interactive/complete, finalize quickly
         (function earlyPoll(tok, mod, ifr){
           let attempts = 0;
-          const max = 40; // ~4s @100ms
+          const max = 80; // ~8s @100ms (give heavy module A more room)
           function tick(){
             if (tok !== navState.token) return; // stale
             if (!navState.busy) return; // already finished
             try {
               const doc = ifr.contentDocument || ifr.contentWindow && ifr.contentWindow.document;
               if (doc && (doc.readyState === 'interactive' || doc.readyState === 'complete')) {
-                // Basic heuristic: ensure some body content exists
-                if (doc.body && doc.body.children && doc.body.children.length > 5) {
+                // Basic heuristic: ensure some body content exists (even minimal) or substantial HTML rendered
+                const hasBody = !!doc.body;
+                const childCount = hasBody && doc.body.children ? doc.body.children.length : 0;
+                const htmlLen = hasBody ? (doc.body.innerHTML || '').length : 0;
+                if (hasBody && (childCount >= 1 || htmlLen > 200)) {
                   console.info('[PD2_NAV] early-poll-finalize', mod, { token: tok, readyState: doc.readyState });
                   try { ifr.dataset.loaded = '1'; } catch(_){ }
                   navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
@@ -682,7 +670,9 @@
           try {
             const m = ev && ev.data;
             if (!m || typeof m !== 'object') return;
-            if (m.type === 'PD2_READY' && ev.source === frame.contentWindow) {
+            // Compare message source to the specific targetFrame for this navigation (not the mutable global 'frame')
+            const expectedWin = (function(){ try { return targetFrame && targetFrame.contentWindow; } catch(_) { return null; } })();
+            if (m.type === 'PD2_READY' && expectedWin && ev.source === expectedWin) {
               // make sure it's for the current navigation token
               if (myToken !== navState.token) return;
               if (targetFrame.dataset.navToken && targetFrame.dataset.navToken !== String(myToken)) return;
@@ -695,17 +685,15 @@
               } catch(_){}
               try { targetFrame.dataset.loaded = '1'; } catch(_){}
               try { clearTimeout(navState.timer); } catch(_){ }
-              navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
+              navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0; navState.autoRecoveryAttempts = 0;
+                navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0; navState.autoRecoveryAttempts = 0;
               currentModule = target;
               try { setTimeout(() => broadcastShared(frame.contentWindow), 0); } catch(_){ }
               // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
               try { setTimeout(() => { applyMobileScrollLockToIframe(frame?.contentDocument || frame?.contentWindow?.document); }, 0); } catch(_){ }
-                try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
-                // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
-                try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
-                try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
-                // Apply mobile-only scroll lock inside iframe to prevent horizontal panning
-                try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
+              // (deduped repeated broadcast & scroll-lock injections that were previously triplicated)
+              try { setTimeout(() => broadcastShared(targetFrame.contentWindow), 0); } catch(_){ }
+              try { setTimeout(() => { applyMobileScrollLockToIframe(targetFrame?.contentDocument || targetFrame?.contentWindow?.document); }, 0); } catch(_){ }
               if (!options.initial) {
                 try { showToast(target === 'A' ? 'สลับไปยังกะ A แล้ว' : target === 'B' ? 'สลับไปยังกะ B แล้ว' : target === 'CUT' ? 'เปิดหน้าตัดม้วน PD2 แล้ว' : 'เปิดหน้ารายงานแล้ว'); } catch(_){}
               }
@@ -730,91 +718,27 @@
     PD2Log('navigateTo.setSrc', withVer(pathFor(target)), { token: __pd2_nav_token, start: window.__pd2_nav_start });
     console.info('[PD2_NAV] start', target, { token: __pd2_nav_token, start: window.__pd2_nav_start });
   } catch (_) {}
-  // Diagnostic helpers
-  let diagEl = null;
-  function ensureDiag(){
-    if (!DEBUG_NAV) return;
-    if (!diagEl) {
-      diagEl = document.createElement('div');
-      diagEl.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:99999;background:#111827cc;color:#fff;padding:8px 10px;font:12px/1.3 monospace;max-width:340px;border:1px solid #334155;border-radius:6px;box-shadow:0 4px 16px #0008;backdrop-filter:blur(4px);';
-      diagEl.innerHTML = '<strong>PD2 NAV DEBUG</strong><div id="pd2NavLog" style="margin-top:4px;max-height:200px;overflow:auto"></div><button id="pd2DiagClose" style="margin-top:6px;background:#dc2626;padding:2px 6px;border-radius:4px;color:#fff;border:none;cursor:pointer">ปิด</button>';
-      document.body.appendChild(diagEl);
-      diagEl.querySelector('#pd2DiagClose').onclick = () => { diagEl.remove(); diagEl=null; };
-    }
-    return diagEl.querySelector('#pd2NavLog');
-  }
-  function logDiag(msg){ if (!DEBUG_NAV) return; const box = ensureDiag(); if (!box) return; const line = document.createElement('div'); line.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; box.appendChild(line); box.scrollTop = box.scrollHeight; }
-
-  function evaluateIframe(ifr, attemptCtx){
-    try {
-      const doc = ifr.contentDocument || ifr.contentWindow?.document;
-      if (!doc) { return { status:'no-doc' }; }
-      const ready = doc.readyState;
-      const body = doc.body;
-      const childCount = body ? body.children.length : 0;
-      const textLen = body ? (body.innerText || '').trim().length : 0;
-      // Heuristic thresholds for a "real" page
-      const looksBlank = childCount < 3 && textLen < 120;
-      return { status:'ok', ready, childCount, textLen, looksBlank, attempt: attemptCtx };
-    } catch (err) {
-      return { status:'error', error: err.message };
-    }
-  }
-
-  function attemptChain(){
-    // Attempts sequence:
-    // 1. normalized primary
-    // 2. legacy Thai path
-    // 3. normalized WITHOUT cache-bust
-    // 4. final give up (show diagnostic hint)
-    const seq = [];
-    const primaryRaw = pathFor(target);
-    seq.push({ kind:'primary', url: withVer(primaryRaw) });
-    seq.push({ kind:'legacy', url: withVer(LEGACY_PATHS[target] || LEGACY_PATHS.A) });
-    seq.push({ kind:'primary-nocb', url: primaryRaw });
-    let idx = 0;
-    function tryNext(){
-      if (myToken !== navState.token) return; // stale
-      if (idx >= seq.length) {
-        logDiag('All attempts exhausted for '+target+' – still blank.');
-        showToast('ไม่สามารถโหลดโมดูล A ได้ ตรวจ network');
-        return;
-      }
-      const attempt = seq[idx++];
-      logDiag('Attempt '+idx+' -> '+attempt.kind+' : '+attempt.url);
-      fetch(attempt.url, { method:'GET', cache:'no-store' })
-        .then(r => {
-          if (myToken !== navState.token) return;
-            if (!r.ok) { logDiag('HTTP '+r.status+' for '+attempt.kind); tryNext(); return; }
-            // Got 200 -> set src and then validate after load
-            targetFrame.src = attempt.url;
-            const validateDelay = attempt.kind === 'primary' ? 2000 : 2500;
-            setTimeout(() => {
-              if (myToken !== navState.token) return;
-              const evalRes = evaluateIframe(targetFrame, attempt.kind+'-delayCheck');
-              logDiag('Validate '+attempt.kind+' => '+JSON.stringify(evalRes));
-              if (evalRes.looksBlank) {
-                // proceed to next attempt
-                tryNext();
-              }
-            }, validateDelay);
-        })
-        .catch(err => { if (myToken !== navState.token) return; logDiag('Fetch error '+attempt.kind+': '+(err && err.message)); tryNext(); });
-    }
-    tryNext();
-  }
-
-  // Kick off attempt chain (replaces earlier single preflight)
-  attemptChain();
+  targetFrame.src = withVer(pathFor(target));
         // Watchdog timeout to recover UI even if load doesn't fire
   navState.timer = setTimeout(onErrorTimeout, 10000);
       }
 
       // Wire buttons to new navigator
-      btnA.addEventListener('click', () => navigateTo('A'));
-      btnB.addEventListener('click', () => navigateTo('B'));
-      if (btnCut) btnCut.addEventListener('click', () => navigateTo('CUT'));
-  if (btnReport) btnReport.addEventListener('click', () => navigateTo('REPORT'));
+        // Wire buttons to new navigator with lightweight debounce to avoid rapid-fire races
+        const __pd2_clickGate = { last: 0 };
+        function withDebounce(handler, waitMs) {
+          const wait = typeof waitMs === 'number' ? waitMs : 220;
+          return (...args) => {
+            const now = Date.now();
+            if (now - __pd2_clickGate.last < wait) return;
+            __pd2_clickGate.last = now;
+            handler(...args);
+          };
+        }
+        btnA.addEventListener('click', withDebounce(() => navigateTo('A')));
+        btnB.addEventListener('click', withDebounce(() => navigateTo('B')));
+        if (btnCut) btnCut.addEventListener('click', withDebounce(() => navigateTo('CUT')));
+        if (btnReport) btnReport.addEventListener('click', withDebounce(() => navigateTo('REPORT')));
       // System Reset Button (Deep Clean & Reload)
       (function(){
         const wrap = document.getElementById('pd2ResetWrap');
@@ -891,15 +815,11 @@
       } else if (hash.includes('report')) {
         PD2Log('initialHash', 'REPORT');
         navigateTo('REPORT', { initial: true });
-      } else {
-        // Default: auto-load module A so that page is not blank on first visit
-        PD2Log('initialHash', 'A (default)');
-        navigateTo('A', { initial: true });
       }
 
       // Prefetch / warm-up module HTML in idle time to reduce perceived load delay
       function prefetchModules() {
-        if (NO_CACHE_MODE) return; // skip prefetching in single-frame mode
+        if (isNoCacheMode()) return; // skip prefetching in single-frame mode
         try {
           const targets = ['A','B','CUT','REPORT'];
           const run = () => {
@@ -925,7 +845,7 @@
       setTimeout(prefetchModules, 800);
       // Idle preload: instantiate hidden iframes for modules not yet visited so first switch is instant
       function idlePreloadFrames(){
-        if (NO_CACHE_MODE) return; // no multi-frame preload
+        if (isNoCacheMode()) return; // no multi-frame preload
         try {
           const modules = ['A','B','CUT','REPORT'];
           const needed = modules.filter(m => !frameCache[m]);
@@ -978,6 +898,32 @@
             console.warn('[PD2_NAV] watchdog-hard-timeout', { elapsed, token: navState.token, pending: navState.pendingTarget });
             try { clearTimeout(navState.timer); } catch(_){}
             navState.busy = false; setNavDisabled(false); hideLoading();
+            // Auto-degrade session to single-iframe mode for maximum stability
+            try {
+              if (!isNoCacheMode()) {
+                NO_CACHE_OVERRIDE = true;
+                // Drop extra iframes and keep base frame only
+                try {
+                  Object.keys(frameCache).forEach(k => {
+                    const ifr = frameCache[k];
+                    if (ifr !== baseFrame) { try { ifr.remove(); } catch(_){} }
+                    delete frameCache[k];
+                  });
+                  frameCache[currentModule || 'A'] = baseFrame;
+                } catch(_){}
+                // Ensure base frame is visible and reload current target for a clean state
+                try {
+                  baseFrame.className = 'w-full h-full border-0 absolute inset-0';
+                  baseFrame.style.display = 'block';
+                  frame = baseFrame;
+                  const tgt = currentModule || 'A';
+                  const url = withVer(pathFor(tgt));
+                  setTimeout(() => { try { baseFrame.src = url; } catch(_){} }, 50);
+                  showToast('สลับเป็นโหมดเสถียร (Single iframe)');
+                  console.info('[PD2_NAV] degraded-to-single-iframe');
+                } catch(_){}
+              }
+            } catch(_){}
             // If we have a pending target, try that next
             if (navState.pendingTarget) {
               const tgt = navState.pendingTarget; navState.pendingTarget = null;
@@ -993,8 +939,9 @@
               navState.busy = false; setNavDisabled(false); hideLoading(); navState.retry = 0;
               try { activeFrame.dataset.loaded = '1'; } catch(_){}
               if (navState.pendingTarget) {
-                const tgt2 = navState.pendingT
-                arget; navState.pendingTarget = null; setTimeout(() => navigateTo(tgt2), 0);
+                const tgt2 = navState.pendingTarget; // fixed previously broken identifier split across lines
+                navState.pendingTarget = null;
+                setTimeout(() => navigateTo(tgt2), 0);
               }
             }
           }
@@ -1209,7 +1156,7 @@
       <script>
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').then(reg => {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
               console.debug('PD2: service worker registered', reg.scope);
             }).catch(err => { console.debug('PD2: sw registration failed', err); });
           });

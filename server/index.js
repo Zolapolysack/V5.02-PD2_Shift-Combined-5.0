@@ -71,8 +71,20 @@ app.use(rateLimit({ windowMs: 60 * 1000, max: 60 }));
 // Health endpoint
 
 app.get('/api/health', (req, res) => {
+  const started = Date.now();
   logger.info('Health check', { ip: req.ip });
-  res.json({ ok: true, service: 'pd2-sheets-proxy', time: new Date().toISOString(), version: '0.1.0' });
+  // Lightweight diagnostics – do NOT leak secrets
+  let sheetsConfigured = false;
+  try { sheetsConfigured = isSheetsConfigured(); } catch(_) {}
+  const hasToken = Boolean(process.env.API_TOKEN && process.env.API_TOKEN !== 'REPLACE_WITH_SECURE_RANDOM');
+  res.json({
+    ok: true,
+    service: 'pd2-sheets-proxy',
+    time: new Date().toISOString(),
+    version: '0.1.0',
+    configured: { sheets: sheetsConfigured, authToken: hasToken },
+    perf: { ms: Date.now() - started }
+  });
 });
 
 // Auth helper: optional API token for sensitive routes

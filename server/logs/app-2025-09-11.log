@@ -1,0 +1,17 @@
+2025-09-11T06:20:35.102Z [info] Health check {"ip":"::ffff:127.0.0.1"}
+2025-09-11T06:20:35.113Z [info] ::ffff:127.0.0.1 - - [11/Sep/2025:06:20:35 +0000] "GET /api/health HTTP/1.1" 200 92 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" 
+2025-09-11T06:20:35.241Z [warn] 404 Not Found: GET /favicon.ico {"ip":"::ffff:127.0.0.1"}
+2025-09-11T06:20:35.244Z [info] ::ffff:127.0.0.1 - - [11/Sep/2025:06:20:35 +0000] "GET /favicon.ico HTTP/1.1" 404 32 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" 
+2025-09-11T06:29:10.645Z [info] ทดสอบ log จาก powershell {"user":"demo","password":"1234","token":"abcd"}
+2025-09-11T06:32:29.575Z [info] test meta masking {"user":"admin","password":"1234","token":"abcd","profile":{"secret":"[MASKED]","email":"a@b.com"}}
+2025-09-11T06:32:29.578Z [info] [object Object] 
+2025-09-11T06:32:41.697Z [info] meta masking deep {"user":"admin","password":"1234","token":"abcd","profile":{"secret":"[MASKED]","email":"a@b.com","arr":[{"token":"[MASKED]"},{"secret":"[MASKED]"}]}}
+2025-09-11T06:32:41.700Z [info] [object Object] 
+2025-09-11T06:33:19.250Z [info] ทดสอบ logger {"user":"test","password":"mysecret","token":"tok123","nested":{"secret":"[MASKED]","arr":[{"password":"[MASKED]"},{"token":"[MASKED]"}]}}
+2025-09-11T06:33:19.253Z [info] [object Object] 
+2025-09-11T06:54:06.281Z [info] Health check {"ip":"::ffff:127.0.0.1"}
+2025-09-11T06:54:06.288Z [info] ::ffff:127.0.0.1 - - [11/Sep/2025:06:54:06 +0000] "GET /api/health HTTP/1.1" 200 92 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.5074" 
+2025-09-11T06:54:46.203Z [info] Health check {"ip":"::ffff:127.0.0.1"}
+2025-09-11T06:54:46.206Z [info] ::ffff:127.0.0.1 - - [11/Sep/2025:06:54:46 +0000] "GET /api/health HTTP/1.1" 200 92 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" 
+2025-09-11T06:54:46.293Z [warn] 404 Not Found: GET /favicon.ico {"ip":"::ffff:127.0.0.1"}
+2025-09-11T06:54:46.298Z [info] ::ffff:127.0.0.1 - - [11/Sep/2025:06:54:46 +0000] "GET /favicon.ico HTTP/1.1" 404 32 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" 
