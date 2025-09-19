@@ -3034,6 +3034,14 @@ ${healthData.recentErrors.length > 0 ? `\n⚠️ ข้อผิดพลาด�
             if (!inputEl || inputEl.dataset.suggestBound) return;
             inputEl.dataset.suggestBound = '1';
 
+            // Guard: ensure any native <select> dropdown gets closed before interacting with our suggestions
+            function ensureClosedNativeDropdown() {
+                const ae = document.activeElement;
+                if (ae && ae.tagName === 'SELECT') {
+                    try { ae.blur(); } catch (_) {}
+                }
+            }
+
             const panel = document.createElement('div');
             panel.className = 'instant-suggestions hidden';
             Object.assign(panel.style, {
@@ -3131,7 +3139,9 @@ ${healthData.recentErrors.length > 0 ? `\n⚠️ ข้อผิดพลาด�
                 }
             }
 
+            inputEl.addEventListener('pointerdown', ensureClosedNativeDropdown, { capture: true });
             inputEl.addEventListener('input', updateList);
+            inputEl.addEventListener('focus', ensureClosedNativeDropdown, { capture: true });
             inputEl.addEventListener('focus', updateList);
             inputEl.addEventListener('blur', () => setTimeout(hidePanel, 120));
             inputEl.addEventListener('keydown', onKeyDown);

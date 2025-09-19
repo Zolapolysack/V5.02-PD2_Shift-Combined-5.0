@@ -1757,6 +1757,14 @@
             if (!inputEl || inputEl.dataset.suggestBound) return;
             inputEl.dataset.suggestBound = '1';
 
+            // Guard: ensure any native <select> dropdown gets closed before interacting with our suggestions
+            function ensureClosedNativeDropdown() {
+                const ae = document.activeElement;
+                if (ae && ae.tagName === 'SELECT') {
+                    try { ae.blur(); } catch (_) {}
+                }
+            }
+
             const panel = document.createElement('div');
             panel.className = 'instant-suggestions hidden';
             Object.assign(panel.style, {
@@ -1855,7 +1863,11 @@
                 }
             }
 
+            // Close native select overlay as early as possible when user starts interacting with this input
+            inputEl.addEventListener('pointerdown', ensureClosedNativeDropdown, { capture: true });
             inputEl.addEventListener('input', updateList);
+            // Keep existing focus behavior; add a separate guard to close any open native select first
+            inputEl.addEventListener('focus', ensureClosedNativeDropdown, { capture: true });
             inputEl.addEventListener('focus', updateList);
             inputEl.addEventListener('blur', () => setTimeout(hidePanel, 120));
             inputEl.addEventListener('keydown', onKeyDown);

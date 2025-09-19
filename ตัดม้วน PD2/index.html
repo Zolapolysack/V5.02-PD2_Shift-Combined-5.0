@@ -1768,6 +1768,13 @@
         // Lightweight instant suggestions overlay (click + arrow keys + enter)
         function attachInstantSuggestions(inputEl, optionsProvider, onSelect) {
             if (!inputEl) return;
+            // Guard: ensure any native <select> dropdown gets closed before interacting with our suggestions
+            function ensureClosedNativeDropdown() {
+                const ae = document.activeElement;
+                if (ae && ae.tagName === 'SELECT') {
+                    try { ae.blur(); } catch (_) {}
+                }
+            }
             let dropdown = null; let activeIndex = -1; let items = [];
 
             const close = () => { if (dropdown) { dropdown.remove(); dropdown = null; activeIndex = -1; items = []; } };
@@ -1827,7 +1834,9 @@
                 close();
             };
 
+            inputEl.addEventListener('pointerdown', ensureClosedNativeDropdown, { capture: true });
             inputEl.addEventListener('focus', () => {
+                ensureClosedNativeDropdown();
                 const currentValue = inputEl.value || '';
                 if (currentValue.trim() !== '') {
                     const opts = optionsProvider(currentValue);
