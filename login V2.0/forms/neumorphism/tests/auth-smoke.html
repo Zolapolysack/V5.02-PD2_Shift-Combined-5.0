@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth Smoke Test</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;padding:16px;background:#f6f7fb;color:#222}
+    h1{font-size:18px;margin:0 0 12px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    button{padding:8px 12px;border:0;border-radius:8px;background:#1f7aec;color:#fff;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    pre{background:#fff;border-radius:10px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);white-space:pre-wrap}
+    .ok{color:#0a7a2b}
+    .fail{color:#b00020}
+    .warn{color:#a35f00}
+  </style>
+</head>
+<body>
+  <h1>Auth Smoke Test</h1>
+  <p>ทดสอบการทำงานของ client-side auth: บัญชีถูกต้อง/ผิดพลาด และ lockout.</p>
+  <div class="actions">
+    <button id="run">Run tests</button>
+    <button id="clear">Clear output</button>
+    <button id="reset">Reset attempts/session</button>
+  </div>
+  <pre id="out"></pre>
+
+  <script src="../auth.js"></script>
+  <script src="auth-smoke.js"></script>
+</body>
+</html>

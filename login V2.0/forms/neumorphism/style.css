@@ -1,0 +1,655 @@
+/* Neumorphism Login Form - Complete & Self-Contained */
+:root{
+    /* Theming variables */
+    --surface:#e0e5ec;
+    --text:#3d4468;
+    --muted:#9499b7;
+    --muted-strong:#6c7293;
+    --shadow-dark:#bec3cf;
+    --shadow-light:#ffffff;
+    --btn-bg: var(--surface);
+    --btn-text: var(--text);
+    --btn-hover-bg:#00ff37; /* green hover per current design */
+    --btn-hover-text:#ffffff;
+    --error:#ff3b5c;
+    --overlay-blur:6px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--surface);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.6;
+    position: relative;
+    /* Use requested background image (vivo gradient) */
+    background-image: url('../../assets/images/android-10-stock-vivo-nex-gradients-4680x2160-472 (1).jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Subtle overlay to keep text and card readable on busy backgrounds */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.12));
+    -webkit-backdrop-filter: blur(var(--overlay-blur));
+    backdrop-filter: blur(var(--overlay-blur));
+    pointer-events: none;
+    z-index: 0;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1; /* above overlay */
+}
+
+.login-card {
+    background: rgba(224, 229, 236, 0.92);
+    border-radius: 30px;
+    padding: 50px 40px;
+    /* Softer outer glow */
+    box-shadow:
+        12px 12px 32px rgba(190,195,207,0.45),
+        -10px -10px 28px rgba(255,255,255,0.85);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        16px 16px 40px rgba(182,188,201,0.46),
+        -12px -12px 34px rgba(255,255,255,0.88);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.neu-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(180deg, #f5f7fb 0%, #e6eaf0 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* needed for pseudo shadow */
+    perspective: 700px; /* give a sense of depth for children */
+    transform-style: preserve-3d;
+    /* stronger outer shadows for raised effect */
+    box-shadow:
+        18px 18px 38px rgba(129,140,156,0.36),
+        -12px -12px 36px rgba(255,255,255,0.95),
+        inset 3px 3px 8px rgba(255,255,255,0.66),
+        inset -3px -3px 8px rgba(190,195,207,0.28);
+    transition: transform 0.22s cubic-bezier(.2,.9,.3,1), box-shadow 0.22s ease;
+}
+
+.neu-icon:hover {
+    transform: translateY(-8px) rotateX(2deg) scale(1.02);
+    box-shadow:
+        26px 26px 58px rgba(120,130,148,0.42),
+        -16px -16px 48px rgba(255,255,255,0.96),
+        inset 4px 4px 12px rgba(255,255,255,0.75),
+        inset -4px -4px 12px rgba(190,195,207,0.30);
+}
+
+.icon-inner {
+    /* make the inner container fill the neumorphic circle so avatar can cover it */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c7293;
+    position: relative; /* keep above pseudo shadow */
+    z-index: 2;
+    transform: translateZ(10px); /* lift the content slightly in 3D */
+    transition: transform 0.22s cubic-bezier(.2,.9,.3,1);
+}
+
+/* SVG icons inside the inner container should be slightly smaller than the full circle
+   so they look balanced; the avatar image itself will fill the container. */
+.icon-inner svg {
+    width: 60%;
+    height: 60%;
+}
+
+/* inner rim to add separation and subtle 3D ring */
+.neu-icon::after{
+    content: '';
+    position: absolute;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    border-radius: 50%;
+    box-shadow: inset 0 2px 6px rgba(255,255,255,0.6), inset 0 -2px 6px rgba(0,0,0,0.02);
+    pointer-events: none;
+}
+
+/* make the avatar image feel slightly inset with a hairline ring */
+.neu-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: inset 0 2px 6px rgba(255,255,255,0.6), inset 0 -2px 6px rgba(0,0,0,0.06);
+}
+
+/* soft cast shadow beneath the whole neumorphic icon to anchor it to the page */
+.neu-icon::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -8px;
+    width: 78%;
+    height: 22%;
+    background: rgba(24,30,44,0.12);
+    filter: blur(12px);
+    border-radius: 50%;
+    z-index: 1;
+    transition: all 0.22s ease;
+}
+
+.neu-icon:hover::before{ bottom: -12px; filter: blur(18px); width: 82%; opacity: 0.95; }
+
+.neu-icon:hover .icon-inner{ transform: translateZ(18px); }
+
+/* small focus/active state */
+.neu-icon:active { transform: translateY(-2px) scale(0.996); }
+
+/* Avatar image inside neumorphic circle */
+.neu-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Avatar fallback SVG (hidden by default) */
+.avatar-fallback { display: none; width: 100%; height: 100%; color: #6c7293; }
+
+/* When image fails, hide the img and show the SVG fallback via classes toggled in JS */
+.neu-avatar.hidden { display: none !important; }
+.avatar-fallback.visible { display: block !important; }
+
+.login-header h2 {
+    color: #3d4468;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: #9499b7;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* Neumorphic Input Styles */
+.form-group {
+    margin-bottom: 28px;
+    position: relative;
+}
+
+.neu-input {
+    position: relative;
+    background: var(--surface);
+    border-radius: 15px;
+    box-shadow: 
+        inset 8px 8px 16px #bec3cf,
+        inset -8px -8px 16px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.neu-input:focus-within {
+    box-shadow: 
+        inset 4px 4px 8px #bec3cf,
+        inset -4px -4px 8px #ffffff;
+}
+
+.neu-input input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 20px 24px;
+    padding-left: 55px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.neu-input input::placeholder {
+    color: transparent;
+}
+
+.neu-input label {
+    position: absolute;
+    left: 55px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 400;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* Hide label completely when input has content */
+.neu-input input:not(:placeholder-shown) + label,
+.neu-input input:valid + label {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px); /* small lift before hiding */
+}
+
+.neu-input input:focus + label,
+.neu-input input:not(:placeholder-shown) + label,
+.neu-input input:valid + label {
+    top: 8px;
+    font-size: 12px;
+    color: var(--muted-strong);
+    transform: translateY(0);
+}
+
+/* For browsers that support :placeholder-shown poorly (e.g., when placeholder is an empty string),
+   also move the label when the input has content using :not(:placeholder-shown) and :valid.
+   Ensure inputs that are required have some non-empty value to trigger :valid. */
+
+.input-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--muted);
+    transition: all 0.3s ease;
+}
+
+.input-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.neu-input:focus-within .input-icon {
+    color: var(--muted-strong);
+}
+
+/* Password Toggle */
+.password-group {
+    padding-right: 50px;
+}
+
+.neu-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    box-shadow: 
+        4px 4px 10px #bec3cf,
+        -4px -4px 10px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.neu-toggle:hover {
+    color: var(--muted); /* keep same color on hover */
+}
+
+.neu-toggle:active {
+    box-shadow: 4px 4px 10px #bec3cf, -4px -4px 10px #ffffff; /* keep same box-shadow when active */
+}
+
+.neu-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.eye-closed {
+    display: none;
+}
+
+.neu-toggle.show-password .eye-open {
+    display: none;
+}
+
+.neu-toggle.show-password .eye-closed {
+    display: block;
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Remember-me styles removed per customization */
+
+/* .forgot-link removed per project customization */
+
+/* Neumorphic Button */
+.neu-button {
+    width: 100%;
+    background: var(--btn-bg);
+    border: none;
+    border-radius: 15px;
+    padding: 18px 32px;
+    color: var(--btn-text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 30px;
+    box-shadow: 
+        8px 8px 20px #bec3cf,
+        -8px -8px 20px #ffffff;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.neu-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.neu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        12px 12px 30px #9fd8b8,
+        -12px -12px 30px #ffffff;
+    background: var(--btn-hover-bg);
+    color: var(--btn-hover-text);
+}
+
+.neu-button:hover::before {
+    left: 100%;
+}
+
+.neu-button:active {
+    transform: translateY(0);
+    box-shadow: 
+        inset 4px 4px 10px #7fcf99,
+        inset -4px -4px 10px #ffffff;
+}
+
+/* Ensure text and spinner contrast when button is green */
+.neu-button:hover .btn-text,
+.neu-button:focus .btn-text,
+.neu-button:active .btn-text {
+    color: #ffffff;
+}
+
+.neu-button:hover .neu-spinner,
+.neu-button:focus .neu-spinner,
+.neu-button:active .neu-spinner {
+    border-top-color: #ffffff;
+}
+
+.btn-text {
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.neu-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #bec3cf;
+    border-top: 3px solid #6c7293;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.neu-button.loading .btn-text {
+    opacity: 0;
+}
+
+.neu-button.loading .btn-loader {
+    opacity: 1;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 30px 0;
+    gap: 16px;
+}
+
+.divider-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #bec3cf, transparent);
+}
+
+.divider span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Social login styles removed (project customization) */
+
+/* Signup link removed per project customization */
+
+/* Error Messages */
+.error-message {
+    color: var(--error);
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 8px;
+    margin-left: 20px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.error-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.form-group.error .neu-input {
+    box-shadow: 
+        inset 8px 8px 16px #ffb8c4,
+        inset -8px -8px 16px #ffffff,
+        0 0 0 2px #ff3b5c;
+}
+
+/* Success Message */
+.success-message {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.success-message.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.success-message .neu-icon {
+    background: #d5d6d6;
+    color: #03ef2b;
+    margin-bottom: 20px;
+}
+
+.success-message h3 {
+    color: var(--text);
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.success-message p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    body {
+        padding: 16px;
+    }
+    
+    .login-card {
+        padding: 35px 25px;
+        border-radius: 20px;
+    }
+    
+    .login-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .neu-input input {
+        padding: 18px 20px;
+        padding-left: 50px;
+    }
+    
+    .neu-input label {
+        left: 50px;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+}
+
+/* Tighter breakpoints for small phones */
+@media (max-width: 420px) {
+    .login-container { max-width: 380px; }
+    .login-card { padding: 28px 20px; }
+    .neu-icon { width: 68px; height: 68px; margin-bottom: 18px; }
+    .icon-inner svg { width: 58%; height: 58%; }
+    .login-header h2 { font-size: 1.5rem; }
+    .login-header p { font-size: 13px; }
+    .neu-input input { padding: 16px 18px; padding-left: 48px; font-size: 15px; }
+    .neu-input label { left: 48px; font-size: 15px; }
+    .neu-toggle { width: 40px; height: 40px; right: 12px; border-radius: 10px; }
+    .neu-button { padding: 16px 24px; font-size: 15px; }
+}
+
+@media (max-width: 375px) {
+    .login-container { max-width: 360px; }
+    .login-card { padding: 22px 18px; border-radius: 18px; }
+    .neu-icon { width: 60px; height: 60px; }
+    .icon-inner svg { width: 56%; height: 56%; }
+    .login-header h2 { font-size: 1.35rem; }
+    .neu-input input { padding: 14px 16px; padding-left: 46px; font-size: 15px; }
+    .neu-input label { left: 46px; font-size: 14px; }
+    .neu-button { padding: 14px 20px; font-size: 15px; }
+    .btn-text { font-size: 15px; }
+}
+
+@media (max-width: 320px) {
+    /* Minimal layout for very small phones */
+    .login-container { max-width: 300px; }
+    .login-card { padding: 18px 14px; }
+    .neu-icon { width: 52px; height: 52px; }
+    .icon-inner svg { width: 52%; height: 52%; }
+    .neu-input input { padding: 12px 12px; padding-left: 42px; font-size: 14px; }
+    .neu-input label { left: 42px; font-size: 13px; }
+    .neu-toggle { width: 36px; height: 36px; right: 10px; }
+    .neu-button { padding: 12px 14px; font-size: 14px; }
+}
+
+/* Dev: JS error panel (moved from inline styles) */
+#errorPanel{
+    display:none;
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:9999;
+    max-width:360px;
+    background:#fff8f8;
+    border:1px solid #f5c6c6;
+    padding:10px;
+    border-radius:8px;
+    color:#7a1a1a;
+    box-shadow:0 8px 24px rgba(0,0,0,0.08);
+    font-family:system-ui, 'Segoe UI', Roboto, Arial;
+    font-size:13px;
+}
+#errorPanel strong{ display:block; margin-bottom:6px; }
+#errorPanel #errorList{ margin:0; padding-left:18px; max-height:220px; overflow:auto }
+#errorPanel #clearErrors{ background:#fff; border:1px solid #e5bcbc; padding:6px 8px; border-radius:6px; cursor:pointer; color:#7a1a1a }
+#errorPanel .footer{ text-align:right; margin-top:8px; }
+
+/* Screen-reader only utility */
+.sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,1px,1px); white-space:nowrap; border:0; }
+
+/* Focus visible outline for keyboard users */
+:focus-visible{ outline:2px solid rgba(0, 200, 150, 0.6); outline-offset:3px; border-radius:6px; }
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce){
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+/* Background attachment fallback for devices where fixed causes jank */
+@supports not (background-attachment: fixed){
+    body{ background-attachment: scroll; }
+}

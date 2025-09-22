@@ -1,0 +1,4 @@
+2025-09-18T06:24:48.468Z [info] Health check {"ip":"::ffff:127.0.0.1"}
+2025-09-18T06:24:48.474Z [info] ::ffff:127.0.0.1 - - [18/Sep/2025:06:24:48 +0000] "GET /api/health HTTP/1.1" 200 156 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584" 
+2025-09-18T06:26:37.766Z [info] Health check {"ip":"::ffff:127.0.0.1"}
+2025-09-18T06:26:37.768Z [info] ::ffff:127.0.0.1 - - [18/Sep/2025:06:26:37 +0000] "GET /api/health HTTP/1.1" 200 156 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584" 

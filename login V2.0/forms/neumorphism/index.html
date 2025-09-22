@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neumorphism Login Form</title>
+    <!-- Preload critical images for faster first paint -->
+    <link rel="preload" as="image" href="../../assets/images/1048.png">
+    <link rel="preload" as="image" href="../../assets/images/android-10-stock-vivo-nex-gradients-4680x2160-472 (1).jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="neu-icon">
+                    <div class="icon-inner">
+                        <img id="neuAvatar" src="../../assets/images/1048.png" alt="avatar" class="neu-avatar" decoding="async">
+                        <!-- SVG fallback (hidden until image fails to load) -->
+                        <svg class="avatar-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2>User Login</h2>
+                <p>Please sign in to continue</p>
+            </div>
+            <!-- Screen-reader live region for announcing form status/errors -->
+            <div id="formAnnouncer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+            
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="form-group">
+                    <div class="input-group neu-input">
+                        <input type="text" id="username" name="username" required autocomplete="username" placeholder=" " aria-describedby="usernameError" inputmode="text" spellcheck="false" maxlength="128">
+                        <label for="username">Username</label>
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="error-message" id="usernameError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group neu-input password-group">
+                        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder=" " aria-describedby="passwordError" maxlength="128">
+                        <label for="password">Password</label>
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <button type="button" class="password-toggle neu-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false">
+                            <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-options">
+                    <!-- Remember me removed per project customization -->
+                </div>
+
+                <button type="submit" class="neu-button login-btn">
+                    <span class="btn-text">Sign In</span>
+                    <div class="btn-loader">
+                        <div class="neu-spinner"></div>
+                    </div>
+                </button>
+            </form>
+
+            <!-- social login removed per project customization -->
+
+            <!-- signup link removed per request -->
+
+            <div class="success-message" id="successMessage">
+                <div class="success-icon neu-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <h3>Success!</h3>
+                <p>Redirecting to your dashboard...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev helper: show JS runtime errors on-page so we can detect issues without opening DevTools -->
+    <div id="errorPanel" aria-hidden="true">
+        <strong>JS Errors</strong>
+        <ul id="errorList"></ul>
+    <div class="footer"><button id="clearErrors">Clear</button></div>
+    </div>
+    <noscript>
+        <div class="noscript-warning">This page requires JavaScript enabled for full functionality.</div>
+    </noscript>
+    <script>
+    (function(){
+        const panel = document.getElementById('errorPanel');
+        const list = document.getElementById('errorList');
+        const clearBtn = document.getElementById('clearErrors');
+        function showPanel(){ panel.style.display = 'block'; }
+
+        window.addEventListener('error', function(ev){
+            try{
+                showPanel();
+                const li = document.createElement('li');
+                li.textContent = (ev && ev.message ? ev.message : 'Error') + ' — ' + (ev.filename || '') + ':' + (ev.lineno || '');
+                list.appendChild(li);
+            }catch(e){console.log('errorPanel add fail', e)}
+        });
+
+        const origConsoleError = console.error.bind(console);
+        console.error = function(...args){
+            try{
+                showPanel();
+                const li = document.createElement('li');
+                li.textContent = args.map(a=>{
+                    try{ return (typeof a === 'object') ? JSON.stringify(a) : String(a); }catch(e){ return String(a); }
+                }).join(' ');
+                list.appendChild(li);
+            }catch(e){ origConsoleError('errorPanel console.error shim failed', e); }
+            origConsoleError(...args);
+        };
+
+        clearBtn.addEventListener('click', function(){ list.innerHTML = ''; panel.style.display = 'none'; });
+    })();
+    </script>
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+        <script>
+        // If embedded in parent and a valid session exists already, notify immediately
+        try {
+            (function(){
+                const raw = sessionStorage.getItem('neuroAuth');
+                if (!raw) return;
+                const obj = JSON.parse(raw);
+                if (obj && obj.exp && Date.now() < obj.exp) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'PD2_AUTH_OK', user: obj.user, ts: Date.now() }, window.location.origin);
+                    }
+                }
+            })();
+        } catch(_){}
+        </script>
+    <script>
+    // Smoke test: verify essential DOM elements load and script initializes
+    (function(){
+        try{
+            const required = ['loginForm','username','password','passwordToggle','successMessage'];
+            const missing = required.filter(id => !document.getElementById(id));
+            if(missing.length){
+                missing.forEach(m=>{
+                    const ev = { message: `Missing element: ${m}`, filename: location.pathname, lineno: 0 };
+                    window.dispatchEvent(new ErrorEvent('error', ev));
+                });
+            } else {
+                // Attempt to initialize script if available
+                setTimeout(()=>{
+                    try{
+                        if(typeof NeumorphismLoginForm !== 'function'){
+                            throw new Error('NeumorphismLoginForm is not defined');
+                        }
+                        // Instance is created by script.js on DOMContentLoaded; check that it exists indirectly
+                        const form = document.getElementById('loginForm');
+                        if(!form) throw new Error('loginForm not present after init');
+                    }catch(err){
+                        window.dispatchEvent(new ErrorEvent('error', { message: err.message, filename: location.pathname, lineno: 0 }));
+                    }
+                }, 500);
+            }
+        }catch(e){
+            window.dispatchEvent(new ErrorEvent('error', { message: e.message, filename: location.pathname, lineno: 0 }));
+        }
+    })();
+    </script>
+</body>
+</html>

@@ -20,6 +20,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <!-- Load shared PD2 notification module once at the parent level -->
   <script src="./pd2-notify.js" defer></script>
+  <!-- Lightweight auth bridge (overlay login gate) -->
+  <script src="./assets/js/pd2-auth-bridge.js" defer></script>
   <!-- PWA: manifest + icons -->
   <link rel="manifest" href="./manifest.json">
   <!-- Use root images.png as a single source icon; browsers will scale as needed. Replace with proper sizes if available. -->
@@ -93,6 +95,9 @@
   <a href="#overview" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">ภาพรวม</a>
   <a href="#shift" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">เลือกกะ</a>
   <a href="#workbench" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">หน้าทำงาน</a>
+  <button id="pd2LogoutBtn" type="button" class="px-3 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:bg-white/10 hover:border-white/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" title="ออกจากระบบ">
+    ออกจากระบบ
+  </button>
   <div class="relative" id="pd2ResetWrap">
     <button id="pd2ResetBtn" type="button" class="px-3 py-2 rounded-md border border-rose-400/60 text-rose-200 hover:text-white hover:bg-rose-500/20 hover:border-rose-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70 relative" title="รีเซ็ตระบบ">
       <span class="select-none">รีเซ็ตระบบ ▾</span>
@@ -258,7 +263,7 @@
   // Hero buttons removed per request
       const toast = document.getElementById('toast');
   // Simple cache-busting token so GH Pages picks up latest subpages
-  const CACHE_VER = '20250918b1';
+  const CACHE_VER = '20250922a1';
   const withVer = (p) => `${encodeURI(p)}${p.includes('?') ? '&' : '?'}v=${CACHE_VER}`;
 
   // Lightweight debug logger for troubleshooting. Non-invasive.
@@ -276,6 +281,27 @@
         } catch (_) { /* no-op */ }
       })();
 
+      // Launch auth gate early (non-invasive) — blocks UI until session exists
+      // Maintainer note:
+      // - The login overlay (PD2Auth) appears automatically on first visit because there is no
+      //   sessionStorage['neuroAuth'] yet. After a successful login it is stored with a TTL.
+      // - To force login again, click "ออกจากระบบ" (logout) or clear site data.
+      // - Session TTL is defined inside login V2.0's auth.js (SESSION_TTL_MS); adjust there as needed.
+      try {
+        const mount = () => {
+          try {
+            if (window.PD2Auth && typeof PD2Auth.mountLoginGate === 'function' && !PD2Auth.isAuthed()) {
+              PD2Auth.mountLoginGate({ loginPath: './login V2.0/forms/neumorphism/index.html' });
+            }
+          } catch(_) {}
+        };
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          setTimeout(mount, 0);
+        } else {
+          document.addEventListener('DOMContentLoaded', mount, { once: true });
+        }
+      } catch (_) {}
+
       // group for shared effects/helpers
   const pills = [btnA, btnB, btnCut, btnReport].filter(Boolean);
 
@@ -290,6 +316,22 @@
           toast.classList.remove('opacity-100');
         }, 1800);
       }
+
+      // Logout: clear session and require fresh login via overlay gate
+      (function(){
+        const btn = document.getElementById('pd2LogoutBtn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          try { if (window.PD2Auth && typeof PD2Auth.logout === 'function') PD2Auth.logout(); } catch(_){}
+          showToast('ออกจากระบบแล้ว');
+          // Mount login overlay immediately so user must login again
+          try {
+            if (window.PD2Auth && typeof PD2Auth.mountLoginGate === 'function') {
+              PD2Auth.mountLoginGate({ loginPath: './login V2.0/forms/neumorphism/index.html' });
+            }
+          } catch(_){}
+        });
+      })();
 
   function setActive(btnActive /*, ..._restIgnored */) {
         // Toggle state exclusively among all pills (A, B, Cut)
