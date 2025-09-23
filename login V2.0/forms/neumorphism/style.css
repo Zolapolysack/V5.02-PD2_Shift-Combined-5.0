@@ -12,7 +12,7 @@
     --btn-hover-bg:#00ff37; /* green hover per current design */
     --btn-hover-text:#ffffff;
     --error:#ff3b5c;
-    --overlay-blur:6px;
+    --overlay-blur:4.2px; /* reduced ~30% from 6px */
 }
 
 * {
